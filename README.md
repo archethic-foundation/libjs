@@ -87,3 +87,7 @@ It supports the Uniris Cryptography rules which are:
 ```bash
 npm test
 ```
+
+## Licence
+
+AGPL3
