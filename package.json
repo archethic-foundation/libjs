@@ -1,0 +1,25 @@
+{
+  "name": "uniris",
+  "version": "1.0.0",
+  "description": "Uniris Javascript SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "uniris",
+    "transaction-chain",
+    "blockchain"
+  ],
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "devDependencies": {
+    "mocha": "^8.0.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "elliptic": "^6.5.3",
+    "libsodium-wrappers": "^0.7.6"
+  }
+}
