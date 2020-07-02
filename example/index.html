@@ -1,0 +1,188 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniris Javascript SDK Example</title>
+</head>
+<body>
+    <h1>Uniris Transaction Builder <button type="button" onclick="generate_transaction()">Generate</button></h1>
+
+    <div style="display: flex; flex-direction: row; max-width: 100%;">
+        <form>
+            <label for="seed">Enter your seed/passphrase</label>
+            <input type="password" id="seed" placeholder="TransactionChain seed" style="width: 500px"/>
+            <br />
+            <br />
+            <label for="index">Enter an index</label>
+            <input type="number" min=0 id="index" value="0"/>
+            <br />
+            <br />
+            <label for="type">Select a type of transaction</label>
+            <select id="type">
+                <option value="identity">Identity</option>
+                <option value="keychain">Keychain</option>
+                <option value="transfer">Transfer</option>
+                <option value="hosting">Hosting</option>
+            </select>
+            </br />
+            <br />
+            <label for="code">Enter your smart contract code</label>
+            <br />
+            <textarea id="code" cols="40" rows="5" placeholder="Smart contract code"></textarea>
+            <br />
+            </br />
+            <label for="code">Enter your content</label>
+            <br />
+            <textarea id="content" cols="40" rows="5" placeholder="Content to host"></textarea>
+            <br />
+            <br />
+            <label for="code">Enter a secret</label>
+            <br />
+            <textarea id="secret" cols="40" rows="5" placeholder="Secret to host"></textarea>
+            <br />
+            <br />
+            <label for="auth_public_key">Add a public key to read the secret</label>
+            <br />
+            <input type="text" id="auth_public_key" placeholder="Enter the public key to authorize" style="width: 400px" />
+            <button type="button" onClick="onClickAddAuthPubKey()">Add Authorized Public Key</button>
+            <br />
+            <select id="authorized_public_keys" style="width: 500px;" size="0" multiple="true"></select>
+            <br />
+            <br />
+            <label for="amount_address">Add a UCO transfer</label>
+            <br />
+            <input type="text" id="amount_address" placeholder="Enter the address of the recipient" style="width: 400px" />
+            <input type="text" id="uco_amount" placeholder="Enter the amount to send" style="width: 200px" />
+            <button type="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
+            <br />
+            <select id="uco_transfers" multiple="true" size="0" style="width: 500px;"></select>
+        </form>
+        <div id="transactionOutput" style="overflow: auto; visibility: hidden;" >
+            <pre id="json" style="padding: 10px; background-color: #f5f5f5; overflow: auto"></pre>
+            <br />
+            <button type="button" onclick="sendTransaction()">Send</button>
+            <div id="results">
+                <pre id="#errors"></pre>
+                <p id="success" style="display:none">Your transaction is in pending validation</p>
+            </div>
+        </div>
+    </div>
+    <script src="../dist/index.js"></script>
+    <script>
+
+        const originPrivateKey = Uint8Array.from(toByteArray("0068656C6C6F000000000000000000000000000000000000000000000000000000"))
+
+        async function generate_transaction() {
+
+            txBuilder = Uniris.newTransactionBuilder(document.querySelector("#type").value)
+                .setCode(document.querySelector("#code").value)
+                .setContent(document.querySelector("#content").value)
+
+            secret = document.querySelector("#secret").value
+            if (secret != "") {
+
+                secretKey = await window.crypto.subtle.generateKey(
+                    {
+                        name: "AES-GCM",
+                        length: 256
+                    },
+                    true,
+                    ["encrypt", "decrypt"]
+                )
+                
+                cipher = await encryptSecret(secretKey, new TextEncoder().encode(secret))
+                txBuilder.setSecret(cipher)
+
+                rawKey = await crypto.subtle.exportKey('raw', secretKey)
+
+                document.querySelectorAll("#authorized_public_keys option").forEach(function (option) {
+                    publicKey = Uint8Array.from(toByteArray(option.value))
+                    encryptedSecretKey = Uniris.ecEncrypt(rawKey, publicKey)
+                    txBuilder.addAuthorizedKey(option.value, Uint8Array.from(encryptedSecretKey))
+                })
+            }
+
+            document.querySelectorAll("#uco_transfers option").forEach(function (option) {
+                val_splitted = option.value.split(":")
+                txBuilder.addUCOTransfer(val_splitted[0], parseFloat(val_splitted[1]))
+            })
+
+            seed = document.querySelector("#seed").value
+            index = document.querySelector("#index").value
+            document.querySelector("#transactionOutput").style.visibility = "visible";
+            document.querySelector("#transactionOutput #json").innerText = JSON.stringify(txBuilder.build(seed, parseInt(index), originPrivateKey), undefined, 2)
+        }
+
+        function onClickAddAuthPubKey() {
+            auth_key = document.querySelector("#auth_public_key").value
+            if (auth_key == "") {
+                return
+            }
+
+            var option = document.createElement("option");
+            option.text = auth_key;
+            option.value = auth_key;
+            var select = document.querySelector("#authorized_public_keys");
+            select.appendChild(option);
+
+            select.size += 1;
+        }
+
+        function onClickAddTransfer() {
+            transfer_to = document.querySelector("#amount_address").value
+            transfer_amount = document.querySelector("#uco_amount").value
+
+            amount = parseFloat(transfer_amount)
+            if (transfer_amount == "" || amount == NaN || amount < 0.0) {
+                return
+            }
+
+            if (transfer_to == "") {
+                return
+            }
+
+            var option = document.createElement("option");
+            option.text = transfer_to + ": " + transfer_amount;
+            option.value = transfer_to + ":" + transfer_amount;
+            var select = document.querySelector("#uco_transfers");
+            select.appendChild(option);
+
+            select.size += 1;
+        }
+
+        function encryptSecret(secretKey, secret) {
+            var initializationVector = new Uint8Array(16);
+            crypto.getRandomValues(initializationVector)
+
+            var encoder = new TextEncoder()
+            encodedSecret = encoder.encode(secret)
+
+            return crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv: initializationVector },
+                secretKey,
+                encodedSecret
+            )
+        }
+
+        function toByteArray(hexString) {
+            var result = [];
+            for (var i = 0; i < hexString.length; i += 2) {
+                result.push(parseInt(hexString.substr(i, 2), 16));
+            }
+            return result;
+        }
+
+        function sendTransaction() {
+            tx = JSON.parse(document.querySelector("#transactionOutput #json").innerText)
+            Uniris.sendTransaction(tx, "http://localhost:4000").then((data) => {
+                if (data.errors) {
+                    document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
+                    return
+                }
+
+                document.querySelector("#success").style.display = "block"
+            })
+        }
+    </script>
+</body>
+</html>
