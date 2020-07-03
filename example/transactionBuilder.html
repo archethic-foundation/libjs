@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uniris Javascript SDK Example</title>
+    <title>Uniris - TransactionBuilder</title>
 </head>
 <body>
     <h1>Uniris Transaction Builder <button type="button" onclick="generate_transaction()">Generate</button></h1>
@@ -70,7 +70,7 @@
     <script src="../dist/index.js"></script>
     <script>
 
-        const originPrivateKey = Uint8Array.from(toByteArray("0068656C6C6F000000000000000000000000000000000000000000000000000000"))
+        const originPrivateKey = "0068656C6C6F000000000000000000000000000000000000000000000000000000"
 
         async function generate_transaction() {
 

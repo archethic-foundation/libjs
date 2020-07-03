@@ -26,8 +26,8 @@ describe("Crypto", () => {
             assert.equal(Crypto.hash("myfakedata", "sha3-512").toString('hex'), "03f64fe5d472619d235212f843c1ed8ae43598c3a5973eead66d70f88f147a0aaabcbcdc6aed160b0ae5cdf5d48871602827b242c479f999647c377698cb8b7d4f")
         })
 
-        it ("should generate a blake2b512 hash with an algo id at the begining", () => {
-            assert.equal(Crypto.hash("myfakedata", "blake2b512").toString('hex'), "04f4101890104371a4d673ed717e824c80634edf3cb39e3eeff555049c0a025e5f13a6aa938c7501a98471cad9c13870c13e8691e97229e4a4b4e1930221c02ab8")
+        it ("should generate a blake2b hash with an algo id at the begining", () => {
+            assert.equal(Crypto.hash("myfakedata", "blake2b").toString('hex'), "04f4101890104371a4d673ed717e824c80634edf3cb39e3eeff555049c0a025e5f13a6aa938c7501a98471cad9c13870c13e8691e97229e4a4b4e1930221c02ab8")
         })
     })
 

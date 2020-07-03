@@ -30,28 +30,32 @@ describe("Transaction builder", () => {
     describe("setSecret", () => {
         it("should insert the secret into the transaction data", () => {
             tx = new TransactionBuilder("transfer")
-                .setSecret("mysecret")
+                .setSecret("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
 
-            assert.equal(tx.data.keys.secret, "mysecret")
+            assert.deepEqual(tx.data.keys.secret, Buffer.from("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", 'hex'))
         })
     })
 
     describe("addAuthorizedKey", () => {
         it("should add an authorized key to the transaction data", () => {
-            tx = new TransactionBuilder("transfer")
-                .addAuthorizedKey("mypublickey", "myencryptedsecretkey")
 
-            assert.equal(tx.data.keys.authorizedKeys["mypublickey"], "myencryptedsecretkey")
+            publicKey = "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
+            encryptedKey = "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+
+            tx = new TransactionBuilder("transfer")
+                .addAuthorizedKey(publicKey, encryptedKey)
+
+            assert.deepEqual(tx.data.keys.authorizedKeys[Buffer.from(publicKey, 'hex')], Buffer.from(encryptedKey, 'hex'))
         })
     })
 
     describe("addUCOTransfer", () => {
         it("should add an uco transfer to the transaction data", () => {
             tx = new TransactionBuilder("transfer")
-                .addUCOTransfer("@Alice1", 10.03)
+                .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.03)
 
             assert.equal(tx.data.ledger.uco.transfers.length, 1)
-            assert.equal(tx.data.ledger.uco.transfers[0].to, "@Alice1")
+            assert.deepEqual(tx.data.ledger.uco.transfers[0].to, Buffer.from("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "hex"))
             assert.equal(tx.data.ledger.uco.transfers[0].amount, 10.03)
         })
     })

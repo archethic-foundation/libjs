@@ -61,6 +61,45 @@ It supports the Uniris Cryptography rules which are:
    
 ## API
 
+  ### derivatePublicKey(seed, index, curve)
+
+  It creates a new keypair and extract the public key into hexadecimial format
+
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
+
+  ```json
+  const uniris = require("uniris")
+  uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  // Public key: 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
+  ```
+
+  ### derivateAddress(seed, index, curve, hashAlgo)
+
+  It creates a transaction address by extract the public key from the key derivation and hash it into a hexadecimial format
+
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
+
+  ```json
+  const uniris = require("uniris")
+  uniris.derivateAddress("mysuperpassphraseorseed", 0)
+  // Address: 0092ffdc550ec8d4e4e10506d27229a8d4327d975a6037055e7a563a4783dbe1e8
+  ```
+
+  It creates a new keypair and extract the public key into hexadicemial format
+
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
+
+  ```json
+  const uniris = require("uniris")
+  uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  ```
+
   ### newTransactionBuilder(type)
   
   It creates a new instance of the transaction builder
@@ -71,39 +110,45 @@ It supports the Uniris Cryptography rules which are:
   
   - #### setCode(code)
   Add the code in the `data.code` section of the transaction
-  `code` is the string defining the smart contract
+  `code` is a string defining the smart contract
   
   - #### setContent(content)
   Add the content in the `data.content` section of the transaction
-  `content` is the string defining the smart contract
+  `content` is a string defining the smart contract
   
   - #### setSecret(secret)
   Add the secret in the `data.keys.secret` section of the transaction
-  `secret` is the hexadecimal encoding for the encrypted secret
+  `secret` is the hexadecimal encoding or ArrayBuffer representing the encrypted secret
   
   - #### addAuthorizedKey(publicKey, encryptedSecretKey)
   Add an authorized public key to decrypt the secret to the `data.keys.authorizedKeys` section of the transaction
-  - `publicKey` is the hexadecimal encoding of the public key
-  - `encryptedSecretKey` is the hexadecimal encoding of the secret key encrypted with the public key (see `ecEncrypt`)
+  - `publicKey` is the hexadecimal encoding or ArrayBuffer representing the public key
+  - `encryptedSecretKey` is the hexadecimal encoding or ArrayBuffer representing the secret key encrypted with the public key (see `ecEncrypt`)
   
   - #### addUCOTransfer(to, amount)
   Add a UCO transfer to the `data.ledger.uco.transfers` section of the transaction
-  - `to` is the hexadecimal encoding of the transaction address (recipient) to receive the funds
+  - `to` is hexadecimal encoding or ArrayBuffer representing the transaction address (recipient) to receive the funds
   - `amount` is the number of uco to send (float)
+
+  - #### addRecipient(to)
+  Add a recipient (for non UCO transfers, ie. smart contract interaction) to the `data.recipient` section of the transaction
+  - `to` is hexadecimal encoding or ArrayBuffer representing the transaction address (recipient)
   
-  - #### build(seed, index, originPrivateKey)
+  - #### build(seed, index, originPrivateKey, curve, hashAlgo)
   Generate `address`, `timestamp`, `previousPublicKey`, `previousSignature`, `originSignature` of the transaction and 
   serialize it using a custom binary protocol.
   
-  - `seed` is the transaction chain seed to be able to derivate and generate the keys
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
-  - `originPrivateKey` is the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
+  - `originPrivateKey` is hexadecimal encoding or ArrayBuffer representing the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
+  - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
   
   ```js
   const uniris = require('uniris')
   tx = uniris.newTransactionBuilder("transfer")
     .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
-    .build(seed, 0, originPrivateKey) 
+    .build("mysuperpassphraseorseed", 0, originPrivateKey) 
   ```
   
   ### sendTransaction(tx, endpoint)
