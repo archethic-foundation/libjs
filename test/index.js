@@ -7,8 +7,8 @@ describe ("derivateAddress", () => {
     })
 })
 
-describe ("derivatePublicKey", () => {
-    it("should derivate a address by using a seed and index", () => {
-        assert.equal(uniris.derivatePublicKey("mysuperseed", 0), "0068a1f2b00f0e2a174020ca7b66d9685b182a40ce33fec0fe779c6047facb485a")
+describe ("derivateKeyPair", () => {
+    it("should derivate a keypair by using a seed and index", () => {
+        assert.equal(uniris.derivateKeyPair("mysuperseed", 0).publicKey, "0068a1f2b00f0e2a174020ca7b66d9685b182a40ce33fec0fe779c6047facb485a")
     })
 })

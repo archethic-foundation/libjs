@@ -64,9 +64,9 @@ It supports the Uniris Cryptography rules which are:
    
 ## API
 
-  ### derivatePublicKey(seed, index, curve)
+  ### derivateKeyPair(seed, index, curve)
 
-  It creates a new keypair and extract the public key into hexadecimial format
+  It creates a new keypair into hexadecimial format
 
   - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
@@ -74,8 +74,8 @@ It supports the Uniris Cryptography rules which are:
 
   ```json
   const uniris = require("uniris")
-  uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
-  // Public key: 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
+  keypair.uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  // keypair.publicKey => 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
   ```
 
   ### derivateAddress(seed, index, curve, hashAlgo)

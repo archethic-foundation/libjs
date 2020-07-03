@@ -22,14 +22,17 @@ module.exports = {
     },
 
     /**
-     * Derivate a public key
+     * Derivate a keypair
      * @param {String} seed TransactionChain seed
      * @param {Integer} index Number of transaction in the chain
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      */
-    derivatePublicKey(seed, index, curve = "ed25519") {
+    derivateKeyPair(seed, index, curve = "ed25519") {
         keypair = Crypto.derivateKeyPair(seed, index, curve)
-        return keypair.publicKey.toString('hex')
+        return {
+            privateKey: keypair.privateKey.toString('hex'),
+            publicKey: keypair.publicKey.toString('hex')
+        }
     },
 
     /**
