@@ -120,7 +120,7 @@ It supports the Uniris Cryptography rules which are:
   ### ecEncrypt(data, publicKey)
   Perform an ECIES encryption using a public key and a data
   
-  - `data` Data to encrypt in Buffer/Uint8Array
+  - `data` Data to encrypt
   - `publicKey` Public key to derivate a shared secret and for whom the content must be encrypted
   
   ```js
