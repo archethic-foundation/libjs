@@ -1,3 +1,5 @@
+![Node.js CI](https://github.com/UNIRIS/uniris-libjs/workflows/Node.js%20CI/badge.svg?branch=master)
+
 # Uniris SDK Javascript
 
 Offical Uniris Javascript library for Node and Browser.
