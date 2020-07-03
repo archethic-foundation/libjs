@@ -100,7 +100,7 @@ It supports the Uniris Cryptography rules which are:
   - `originPrivateKey` is the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
   
   ```js
-  const uniris = require('uniris-libjs')
+  const uniris = require('uniris')
   tx = uniris.newTransactionBuilder("transfer")
     .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build(seed, 0, originPrivateKey) 
@@ -113,7 +113,7 @@ It supports the Uniris Cryptography rules which are:
   - `endpoint` is the HTTP URL to a Uniris node (acting as welcome node)
   
   ```js
-  const uniris = require('uniris-libjs')
+  const uniris = require('uniris')
   tx = ...
   uniris.sendTransaction(tx, "https://blockchain.uniris.io")
   ```
@@ -126,7 +126,7 @@ It supports the Uniris Cryptography rules which are:
   - `publicKey` Public key to derivate a shared secret and for whom the content must be encrypted
   
   ```js
-  const uniris = require('uniris-libjs')
+  const uniris = require('uniris')
   uniris.ecEncrypt("dataToEncrypt", "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
