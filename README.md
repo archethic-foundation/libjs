@@ -54,9 +54,12 @@ It supports the Uniris Cryptography rules which are:
 
     ```
     
- This libary is used some third party library to support multiple elliptic curves:
+ This library is using some third party dependencies to support multiple elliptic curves:
    - `libsodium-wrappers`
    - `elliptic`
+ This library is using some third party dependencies to support additional hash algorithms:
+   - `blake2b`
+   - `sha3`
    
    
 ## API
