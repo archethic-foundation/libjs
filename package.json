@@ -7,6 +7,10 @@
     "test": "mocha",
     "build": "webpack"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UNIRIS/uniris-libjs.git"
+  },
   "keywords": [
     "uniris",
     "transaction-chain",
@@ -14,6 +18,10 @@
   ],
   "author": "",
   "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/UNIRIS/uniris-libjs/issues"
+  },
+  "homepage": "https://github.com/UNIRIS/uniris-libjs#readme",
   "devDependencies": {
     "mocha": "^8.0.1",
     "webpack": "^4.43.0",
