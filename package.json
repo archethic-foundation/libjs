@@ -1,6 +1,6 @@
 {
   "name": "uniris",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Uniris Javascript SDK",
   "main": "index.js",
   "scripts": {
