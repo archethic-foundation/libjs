@@ -52,15 +52,7 @@ It supports the Uniris Cryptography rules which are:
                         \
                          (256 bytes) Master entropy
 
-    ```
-    
- This library is using some third party dependencies to support multiple elliptic curves:
-   - `libsodium-wrappers`
-   - `elliptic`
- This library is using some third party dependencies to support additional hash algorithms:
-   - `blake2b`
-   - `sha3`
-   
+    ```  
    
 ## API
 

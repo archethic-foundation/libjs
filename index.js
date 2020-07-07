@@ -54,5 +54,14 @@ module.exports = {
      */
     ecEncrypt: function (data, publicKey) {
         return Crypto.encrypt(Buffer.from(data, "hex"), Buffer.from(publicKey, 'hex')).toString('hex')
+    },
+
+    /**
+     * Retrieve the index of transaction in a specific chain. (aka. the number of transaction on the chain)
+     * @param {String} address Transaction address
+     * @param {String} endpoint Node endpoint
+     */
+    getTransactionIndex: function (address, endpoint) {
+        return API.getTransactionIndex(address, endpoint)
     }
 }

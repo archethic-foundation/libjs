@@ -10,10 +10,10 @@
     <div style="display: flex; flex-direction: row; max-width: 100%;">
         <form>
             <label for="seed">Enter your seed/passphrase</label>
-            <input type="password" id="seed" placeholder="TransactionChain seed" style="width: 500px"/>
+            <input type="password" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
             <br />
             <br />
-            <label for="index">Enter an index</label>
+            <label for="index">Transaction index</label>
             <input type="number" min=0 id="index" value="0"/>
             <br />
             <br />
@@ -62,7 +62,7 @@
             <br />
             <button type="button" onclick="sendTransaction()">Send</button>
             <div id="results">
-                <pre id="#errors"></pre>
+                <pre id="errors"></pre>
                 <p id="success" style="display:none">Your transaction is in pending validation</p>
             </div>
         </div>
@@ -70,7 +70,7 @@
     <script src="../dist/index.js"></script>
     <script>
 
-        const originPrivateKey = "0068656C6C6F000000000000000000000000000000000000000000000000000000"
+        const originPrivateKey = "00DC03A2D9BDB073B6A2F3E3C78CA481AD7D68A16BF85F1638D1BEFAFB5794AAE7"
 
         async function generate_transaction() {
 
@@ -181,6 +181,14 @@
                 }
 
                 document.querySelector("#success").style.display = "block"
+            })
+        }
+
+        function getTransactionIndex() {
+            seed = document.querySelector("#seed").value
+            address = Uniris.derivateAddress(seed, 0)
+            Uniris.getTransactionIndex(address, "http://localhost:4000").then((nb) => {
+                document.querySelector("#index").value = nb
             })
         }
     </script>
