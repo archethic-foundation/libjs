@@ -170,6 +170,18 @@ It supports the Uniris Cryptography rules which are:
   uniris.ecEncrypt("dataToEncrypt", "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
+  ### getTransactionIndex(address, endpoint)
+  Query a node to find the length of the chain to retrieve the transaction index
+  
+  - `address` Transaction address (in hexadecimal)
+  - `endpoint` Node endpoint
+
+  ```js
+  const uniris = require('uniris')
+  uniris.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://blockchain.uniris.io")
+  // 0
+  ```
+
 ## Running the tests
 
 ```bash
