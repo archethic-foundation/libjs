@@ -68,8 +68,8 @@ describe("Transaction builder", () => {
             tx = new TransactionBuilder("transfer")
                 .build("seed", 0, originKeypair.privateKey)
 
-            assert.equal(tx.address, "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
-            assert.equal(tx.previousPublicKey, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+            assert.equal(tx.address.toString('hex'), "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+            assert.equal(tx.previousPublicKey.toString('hex'), "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         })
     })
 
