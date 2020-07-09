@@ -9,6 +9,15 @@
 
     <div style="display: flex; flex-direction: row; max-width: 100%;">
         <form>
+            <label for="endpoint">Node endpoint</label> <br /><br />
+            <input type="text" value="http://localhost:4000" id="endpoint"/>
+            <br />
+            <br />
+            <label for="originSeed">Origin Private Key Seed</label>
+            <br /><br />
+            <input type="password" id="originSeed" style="width: 500px"/>
+            <br />
+            <br />
             <label for="seed">Enter your seed/passphrase</label>
             <input type="password" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
             <br />
@@ -70,10 +79,12 @@
     <script src="../dist/index.js"></script>
     <script>
 
-        const originPrivateKey = "00DC03A2D9BDB073B6A2F3E3C78CA481AD7D68A16BF85F1638D1BEFAFB5794AAE7"
         let transaction
 
         async function generate_transaction() {
+
+            const originSeed = document.querySelector("#originSeed").value
+            const { privateKey: originPrivateKey } = Uniris.derivateKeyPair(originSeed, 0)
 
             txBuilder = Uniris.newTransactionBuilder(document.querySelector("#type").value)
                 .setCode(document.querySelector("#code").value)
@@ -177,7 +188,8 @@
         }
 
         function sendTransaction() {
-            Uniris.sendTransaction(transaction, "http://localhost:4000").then((data) => {
+            endpoint = document.querySelector("#endpoint").value
+            Uniris.sendTransaction(transaction, endpoint).then((data) => {
                 if (data.errors) {
                     document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
                     return
@@ -188,9 +200,10 @@
         }
 
         function getTransactionIndex() {
+            endpoint = document.querySelector("#endpoint").value
             seed = document.querySelector("#seed").value
             address = Uniris.derivateAddress(seed, 0)
-            Uniris.getTransactionIndex(address, "http://localhost:4000").then((nb) => {
+            Uniris.getTransactionIndex(address, endpoint).then((nb) => {
                 document.querySelector("#index").value = nb
             })
         }
