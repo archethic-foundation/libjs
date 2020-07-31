@@ -32,6 +32,8 @@
                 <option value="keychain">Keychain</option>
                 <option value="transfer">Transfer</option>
                 <option value="hosting">Hosting</option>
+                <option value="code_proposal">Code Proposal</option>
+                <option value="code_approval">Code Approval</option>
             </select>
             </br />
             <br />
@@ -67,7 +69,7 @@
             <select id="uco_transfers" multiple="true" size="0" style="width: 500px;"></select>
         </form>
         <div id="transactionOutput" style="overflow: auto; visibility: hidden;" >
-            <pre id="json" style="padding: 10px; background-color: #f5f5f5; overflow: auto"></pre>
+            <pre id="address" style="padding: 10px; background-color: #f5f5f5; overflow: auto"></pre>
             <br />
             <button type="button" onclick="sendTransaction()">Send</button>
             <div id="results">
@@ -82,6 +84,8 @@
         let transaction
 
         async function generate_transaction() {
+            transaction = null
+            document.querySelector("#transactionOutput").style.visibility = "hidden";
 
             const originSeed = document.querySelector("#originSeed").value
             const { privateKey: originPrivateKey } = Uniris.derivateKeyPair(originSeed, 0)
@@ -121,11 +125,13 @@
 
             seed = document.querySelector("#seed").value
             index = document.querySelector("#index").value
+
+            transaction = txBuilder
+                .build(seed, parseInt(index))
+                .originSign(originPrivateKey)
+
+            document.querySelector("#transactionOutput #address").innerText = transaction.address.toString('hex')
             document.querySelector("#transactionOutput").style.visibility = "visible";
-
-            transaction = txBuilder.build(seed, parseInt(index), originPrivateKey)
-
-            document.querySelector("#transactionOutput #json").innerText = transaction.address.toString('hex')
         }
 
         function onClickAddAuthPubKey() {

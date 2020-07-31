@@ -3,7 +3,6 @@ const UnirisCrypto = require("../lib/crypto")
 const assert = require("assert")
 
 describe("Transaction builder", () => {
-
     it ("should assign type when create a new transaction instance", () => {
         tx = new TransactionBuilder("transfer")
         assert.equal(tx.type, "transfer")
@@ -62,14 +61,42 @@ describe("Transaction builder", () => {
 
     describe("build", () => {
         it("should build the transaction and the related signature", () => {
-            
-            const originKeypair = UnirisCrypto.derivateKeyPair("origin_seed", 0)
-
             tx = new TransactionBuilder("transfer")
-                .build("seed", 0, originKeypair.privateKey)
+                .build("seed", 0)
 
             assert.equal(tx.address.toString('hex'), "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
             assert.equal(tx.previousPublicKey.toString('hex'), "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+        })
+    })
+
+    describe("toJSON", () => {
+        it("should return a JSON from the transaction", () => {
+            txJSON = new TransactionBuilder("transfer")
+                .build("seed", 0)
+                .toJSON()
+
+            tx = JSON.parse(txJSON)
+            
+            assert.equal(tx.address, "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+            assert.equal(tx.type, "transfer")
+            assert.equal(tx.previousPublicKey, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+            assert.notEqual(tx.previousSignature, undefined)
+            assert.equal(tx.originSignature, undefined)
+        })
+    })
+
+    describe("originSign", () => {
+        it ("should sign the transaction with a origin private key", () => {
+            const originKeypair = UnirisCrypto.derivateKeyPair("origin_seed", 0)
+
+            tx = new TransactionBuilder("transfer")
+                .build("seed", 0)
+                .originSign(originKeypair.privateKey)
+
+            assert.notEqual(tx.originSignature, undefined)
+
+            tx = JSON.parse(tx.toJSON())
+            assert.notEqual(tx.originSignature, undefined)
         })
     })
 
