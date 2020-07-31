@@ -64,9 +64,9 @@ It supports the Uniris Cryptography rules which are:
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
-  ```json
+  ```js
   const uniris = require("uniris")
-  keypair.uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  const { publicKey: publicKey, privateKey: privateKey} = keypair.uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
   // keypair.publicKey => 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
   ```
 
@@ -78,9 +78,9 @@ It supports the Uniris Cryptography rules which are:
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
-  ```json
+  ```js
   const uniris = require("uniris")
-  uniris.derivateAddress("mysuperpassphraseorseed", 0)
+  const address = uniris.derivateAddress("mysuperpassphraseorseed", 0)
   // Address: 0092ffdc550ec8d4e4e10506d27229a8d4327d975a6037055e7a563a4783dbe1e8
   ```
 
@@ -90,9 +90,9 @@ It supports the Uniris Cryptography rules which are:
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
-  ```json
+  ```js
   const uniris = require("uniris")
-  uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  const publicKey = uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
   ```
 
   ### newTransactionBuilder(type)
@@ -129,21 +129,44 @@ It supports the Uniris Cryptography rules which are:
   Add a recipient (for non UCO transfers, ie. smart contract interaction) to the `data.recipient` section of the transaction
   - `to` is hexadecimal encoding or ArrayBuffer representing the transaction address (recipient)
   
-  - #### build(seed, index, originPrivateKey, curve, hashAlgo)
+  - #### build(seed, index, curve, hashAlgo)
   Generate `address`, `timestamp`, `previousPublicKey`, `previousSignature`, `originSignature` of the transaction and 
   serialize it using a custom binary protocol.
   
   - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
-  - `originPrivateKey` is hexadecimal encoding or ArrayBuffer representing the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
   - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
   
   ```js
   const uniris = require('uniris')
-  tx = uniris.newTransactionBuilder("transfer")
+  const tx = uniris.newTransactionBuilder("transfer")
     .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
-    .build("mysuperpassphraseorseed", 0, originPrivateKey) 
+    .build("mysuperpassphraseorseed", 0) 
+  ```
+
+  #### originSign(privateKey)
+  Sign the transaction with an origin device private key
+
+   - `privateKey` is hexadecimal encoding or ArrayBuffer representing the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
+
+  ```js
+  const uniris = require('uniris')
+  const tx = uniris.newTransactionBuilder("transfer")
+    .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .build("mysuperpassphraseorseed", 0) 
+    .originSign(originPrivateKey)
+  ```
+
+  #### toJSON()
+  Export the transaction generated into JSON
+
+   ```js
+  const uniris = require('uniris')
+  const txJSON = uniris.newTransactionBuilder("transfer")
+    .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .build("mysuperpassphraseorseed", 0) 
+    .toJSON()
   ```
   
   ### sendTransaction(tx, endpoint)
@@ -167,7 +190,7 @@ It supports the Uniris Cryptography rules which are:
   
   ```js
   const uniris = require('uniris')
-  uniris.ecEncrypt("dataToEncrypt", "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+  const cipher = uniris.ecEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
   ### getTransactionIndex(address, endpoint)
@@ -178,7 +201,7 @@ It supports the Uniris Cryptography rules which are:
 
   ```js
   const uniris = require('uniris')
-  uniris.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://blockchain.uniris.io")
+  const index = uniris.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://blockchain.uniris.io")
   // 0
   ```
 
