@@ -67,6 +67,14 @@
             <button type="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
             <br />
             <select id="uco_transfers" multiple="true" size="0" style="width: 500px;"></select>
+            <br />
+            <br />
+            <label for="amount_address">Add recipient</label>
+            <br />
+            <input type="text" id="recipient" placeholder="Enter the address of the recipient" style="width: 400px" />
+            <button type="button" onclick="onClickAddRecipient()">Add recipient</button>
+            <br />
+            <select id="recipients" multiple="true" size="0" style="width: 500px;"></select>
         </form>
         <div id="transactionOutput" style="overflow: auto; visibility: hidden;" >
             <pre id="address" style="padding: 10px; background-color: #f5f5f5; overflow: auto"></pre>
@@ -123,6 +131,10 @@
                 txBuilder.addUCOTransfer(val_splitted[0], parseFloat(val_splitted[1]))
             })
 
+            document.querySelectorAll("#recipients option").forEach(function (option) {
+                txBuilder.addRecipient(option.value)
+            })
+
             seed = document.querySelector("#seed").value
             index = document.querySelector("#index").value
 
@@ -166,6 +178,17 @@
             option.text = transfer_to + ": " + transfer_amount;
             option.value = transfer_to + ":" + transfer_amount;
             var select = document.querySelector("#uco_transfers");
+            select.appendChild(option);
+
+            select.size += 1;
+        }
+
+        function onClickAddRecipient() {
+            var recipient = document.querySelector("#recipient").value
+            var option = document.createElement("option");
+            option.text = recipient;
+            option.value = recipient;
+            var select = document.querySelector("#recipients");
             select.appendChild(option);
 
             select.size += 1;
