@@ -5,7 +5,7 @@ const assert = require("assert")
 describe("Transaction builder", () => {
     it ("should assign type when create a new transaction instance", () => {
         tx = new TransactionBuilder("transfer")
-        assert.equal(tx.type, "transfer")
+        assert.strictEqual(tx.type, "transfer")
     })
 
     describe("set_code", () => {
@@ -13,7 +13,7 @@ describe("Transaction builder", () => {
             tx = new TransactionBuilder("transfer")
                 .setCode("my smart contract code")
 
-            assert.equal(tx.data.code, "my smart contract code")
+            assert.strictEqual(tx.data.code, "my smart contract code")
         })
     })
 
@@ -22,7 +22,7 @@ describe("Transaction builder", () => {
             tx = new TransactionBuilder("transfer")
                 .setContent("my super content")
 
-            assert.equal(tx.data.content, "my super content")
+            assert.deepStrictEqual(tx.data.content, Buffer.from("my super content"))
         })
     })
 
@@ -31,7 +31,7 @@ describe("Transaction builder", () => {
             tx = new TransactionBuilder("transfer")
                 .setSecret("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
 
-            assert.deepEqual(tx.data.keys.secret, Buffer.from("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", 'hex'))
+            assert.deepStrictEqual(tx.data.keys.secret, Buffer.from("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", 'hex'))
         })
     })
 
@@ -53,9 +53,9 @@ describe("Transaction builder", () => {
             tx = new TransactionBuilder("transfer")
                 .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.03)
 
-            assert.equal(tx.data.ledger.uco.transfers.length, 1)
+            assert.strictEqual(tx.data.ledger.uco.transfers.length, 1)
             assert.deepEqual(tx.data.ledger.uco.transfers[0].to, Buffer.from("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "hex"))
-            assert.equal(tx.data.ledger.uco.transfers[0].amount, 10.03)
+            assert.strictEqual(tx.data.ledger.uco.transfers[0].amount, 10.03)
         })
     })
 
@@ -64,8 +64,8 @@ describe("Transaction builder", () => {
             tx = new TransactionBuilder("transfer")
                 .build("seed", 0)
 
-            assert.equal(tx.address.toString('hex'), "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
-            assert.equal(tx.previousPublicKey.toString('hex'), "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+            assert.strictEqual(tx.address.toString('hex'), "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+            assert.strictEqual(tx.previousPublicKey.toString('hex'), "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         })
     })
 
@@ -77,26 +77,26 @@ describe("Transaction builder", () => {
 
             tx = JSON.parse(txJSON)
             
-            assert.equal(tx.address, "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
-            assert.equal(tx.type, "transfer")
-            assert.equal(tx.previousPublicKey, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+            assert.strictEqual(tx.address, "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+            assert.strictEqual(tx.type, "transfer")
+            assert.strictEqual(tx.previousPublicKey, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
             assert.notEqual(tx.previousSignature, undefined)
-            assert.equal(tx.originSignature, undefined)
+            assert.strictEqual(tx.originSignature, undefined)
         })
     })
 
     describe("originSign", () => {
         it ("should sign the transaction with a origin private key", () => {
-            const originKeypair = UnirisCrypto.derivateKeyPair("origin_seed", 0)
+            const originKeypair = UnirisCrypto.deriveKeyPair("origin_seed", 0)
 
             tx = new TransactionBuilder("transfer")
                 .build("seed", 0)
                 .originSign(originKeypair.privateKey)
 
-            assert.notEqual(tx.originSignature, undefined)
+            assert.notStrictEqual(tx.originSignature, undefined)
 
             tx = JSON.parse(tx.toJSON())
-            assert.notEqual(tx.originSignature, undefined)
+            assert.notStrictEqual(tx.originSignature, undefined)
         })
     })
 

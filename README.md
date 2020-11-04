@@ -56,43 +56,43 @@ It supports the Uniris Cryptography rules which are:
    
 ## API
 
-  ### derivateKeyPair(seed, index, curve)
+  ### deriveKeyPair(seed, index, curve)
 
   It creates a new keypair into hexadecimial format
 
-  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
   ```js
   const uniris = require("uniris")
-  const { publicKey: publicKey, privateKey: privateKey} = keypair.uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  const { publicKey: publicKey, privateKey: privateKey} = keypair.uniris.derivePublicKey("mysuperpassphraseorseed", 0)
   // keypair.publicKey => 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
   ```
 
-  ### derivateAddress(seed, index, curve, hashAlgo)
+  ### deriveAddress(seed, index, curve, hashAlgo)
 
   It creates a transaction address by extract the public key from the key derivation and hash it into a hexadecimial format
 
-  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
   ```js
   const uniris = require("uniris")
-  const address = uniris.derivateAddress("mysuperpassphraseorseed", 0)
+  const address = uniris.deriveAddress("mysuperpassphraseorseed", 0)
   // Address: 0092ffdc550ec8d4e4e10506d27229a8d4327d975a6037055e7a563a4783dbe1e8
   ```
 
   It creates a new keypair and extract the public key into hexadicemial format
 
-  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
   ```js
   const uniris = require("uniris")
-  const publicKey = uniris.derivatePublicKey("mysuperpassphraseorseed", 0)
+  const publicKey = uniris.derivePublicKey("mysuperpassphraseorseed", 0)
   ```
 
   ### newTransactionBuilder(type)
@@ -133,7 +133,7 @@ It supports the Uniris Cryptography rules which are:
   Generate `address`, `timestamp`, `previousPublicKey`, `previousSignature`, `originSignature` of the transaction and 
   serialize it using a custom binary protocol.
   
-  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derivate and generate the keys
+  - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
   - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
@@ -186,7 +186,7 @@ It supports the Uniris Cryptography rules which are:
   Perform an ECIES encryption using a public key and a data
   
   - `data` Data to encrypt
-  - `publicKey` Public key to derivate a shared secret and for whom the content must be encrypted
+  - `publicKey` Public key to derive a shared secret and for whom the content must be encrypted
   
   ```js
   const uniris = require('uniris')

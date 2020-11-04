@@ -37,7 +37,7 @@
                 return
             }
 
-            const { publicKey } = Uniris.derivateKeyPair(seed, index, curve)
+            const { publicKey } = Uniris.deriveKeyPair(seed, index, curve)
             document.querySelector("#publicKey").innerText = publicKey
         }
     </script>

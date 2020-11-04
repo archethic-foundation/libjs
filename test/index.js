@@ -1,14 +1,14 @@
 const uniris = require('../index')
 const assert = require('assert')
 
-describe ("derivateAddress", () => {
-    it("should derivate a address by using a seed and index", () => {
-        assert.equal(uniris.derivateAddress("mysuperseed", 0), "006263c4a701fd46494abd72dd81235e7a8b53c9cc20e367cd4a016207e248b655")
+describe ("deriveAddress", () => {
+    it("should derive a address by using a seed and index", () => {
+        assert.strictEqual(uniris.deriveAddress("mysuperseed", 0), "006263c4a701fd46494abd72dd81235e7a8b53c9cc20e367cd4a016207e248b655")
     })
 })
 
-describe ("derivateKeyPair", () => {
-    it("should derivate a keypair by using a seed and index", () => {
-        assert.equal(uniris.derivateKeyPair("mysuperseed", 0).publicKey, "0068a1f2b00f0e2a174020ca7b66d9685b182a40ce33fec0fe779c6047facb485a")
+describe ("deriveKeyPair", () => {
+    it("should derive a keypair by using a seed and index", () => {
+        assert.strictEqual(uniris.deriveKeyPair("mysuperseed", 0).publicKey, "0068a1f2b00f0e2a174020ca7b66d9685b182a40ce33fec0fe779c6047facb485a")
     })
 })

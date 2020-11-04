@@ -96,7 +96,7 @@
             document.querySelector("#transactionOutput").style.visibility = "hidden";
 
             const originSeed = document.querySelector("#originSeed").value
-            const { privateKey: originPrivateKey } = Uniris.derivateKeyPair(originSeed, 0)
+            const { privateKey: originPrivateKey } = Uniris.deriveKeyPair(originSeed, 0)
 
             txBuilder = Uniris.newTransactionBuilder(document.querySelector("#type").value)
                 .setCode(document.querySelector("#code").value)
@@ -231,7 +231,7 @@
         function getTransactionIndex() {
             endpoint = document.querySelector("#endpoint").value
             seed = document.querySelector("#seed").value
-            address = Uniris.derivateAddress(seed, 0)
+            address = Uniris.deriveAddress(seed, 0)
             Uniris.getTransactionIndex(address, endpoint).then((nb) => {
                 document.querySelector("#index").value = nb
             })
