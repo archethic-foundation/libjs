@@ -2,7 +2,7 @@
 
 # Uniris SDK Javascript
 
-Offical Uniris Javascript library for Node and Browser.
+Official Uniris Javascript library for Node and Browser.
 
 ## Installing
 
@@ -58,7 +58,7 @@ It supports the Uniris Cryptography rules which are:
 
   ### deriveKeyPair(seed, index, curve)
 
-  It creates a new keypair into hexadecimial format
+  It creates a new keypair into hexadecimal format
 
   - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
@@ -72,7 +72,7 @@ It supports the Uniris Cryptography rules which are:
 
   ### deriveAddress(seed, index, curve, hashAlgo)
 
-  It creates a transaction address by extract the public key from the key derivation and hash it into a hexadecimial format
+  It creates a transaction address by extract the public key from the key derivation and hash it into a hexadecimal format
 
   - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
@@ -84,7 +84,7 @@ It supports the Uniris Cryptography rules which are:
   // Address: 0092ffdc550ec8d4e4e10506d27229a8d4327d975a6037055e7a563a4783dbe1e8
   ```
 
-  It creates a new keypair and extract the public key into hexadicemial format
+  It creates a new keypair and extract the public key into hexadecimal format
 
   - `seed` is hexadecimal encoding or ArrayBuffer representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
@@ -99,7 +99,7 @@ It supports the Uniris Cryptography rules which are:
   
   It creates a new instance of the transaction builder
   
-  `type` is the string defining the type of transaction to generate ("keychain", "identity", "transfer", "hosting")
+  `type` is the string defining the type of transaction to generate ("keychain", "identity", "transfer", "hosting", "code_proposal", "code_approval", "nft")
   
   returns a **TransactionBuilder** object containins the following methods:
   
@@ -170,7 +170,7 @@ It supports the Uniris Cryptography rules which are:
   ```
   
   ### sendTransaction(tx, endpoint)
-  Dispatch  the transaction to a node by serialiazing a GraphQL request
+  Dispatch  the transaction to a node by serializing a GraphQL request
   
   - `tx` represent the built transaction from the **transactionBuilder**
   - `endpoint` is the HTTP URL to a Uniris node (acting as welcome node)

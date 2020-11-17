@@ -6,7 +6,7 @@ module.exports = {
     
     /**
      * Create a new TransactionBuilder instance to forge transaction
-     * @param {String} type Transaction type ("identity", "keychain", "transfer", "hosting", "code_proposal", "code_approval")
+     * @param {String} type Transaction type ("identity", "keychain", "transfer", "hosting", "code_proposal", "code_approval", "nft")
      */
     newTransactionBuilder: function (type) {
         return new TxBuilder(type)

@@ -34,6 +34,7 @@
                 <option value="hosting">Hosting</option>
                 <option value="code_proposal">Code Proposal</option>
                 <option value="code_approval">Code Approval</option>
+                <option value="nft">NFT</option>
             </select>
             </br />
             <br />
@@ -69,7 +70,17 @@
             <select id="uco_transfers" multiple="true" size="0" style="width: 500px;"></select>
             <br />
             <br />
-            <label for="amount_address">Add recipient</label>
+            <label for="nft_amount_address">Add a NFT transfer</label>
+            <br />
+            <input type="text" id="nft_recipient_address" placeholder="Enter the address of the recipient" style="width: 400px" />
+            <input type="text" id="nft_amount" placeholder="Enter the amount to send" style="width: 200px" />
+            <input type="text" id="nft_address" placeholder="Enter the NFT address to send" style="width: 200px" />
+            <button type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
+            <br />
+            <select id="nft_transfers" multiple="true" size="0" style="width: 500px;"></select>
+            <br />
+            <br />
+            <label for="recipient">Add recipient</label>
             <br />
             <input type="text" id="recipient" placeholder="Enter the address of the recipient" style="width: 400px" />
             <button type="button" onclick="onClickAddRecipient()">Add recipient</button>
@@ -131,6 +142,11 @@
                 txBuilder.addUCOTransfer(val_splitted[0], parseFloat(val_splitted[1]))
             })
 
+            document.querySelectorAll("#nft_transfers option").forEach(function (option) {
+                val_splitted = option.value.split(":")
+                txBuilder.addNFTTransfer(val_splitted[0], parseFloat(val_splitted[1]), val_splitted[2])
+            })
+
             document.querySelectorAll("#recipients option").forEach(function (option) {
                 txBuilder.addRecipient(option.value)
             })
@@ -178,6 +194,33 @@
             option.text = transfer_to + ": " + transfer_amount;
             option.value = transfer_to + ":" + transfer_amount;
             var select = document.querySelector("#uco_transfers");
+            select.appendChild(option);
+
+            select.size += 1;
+        }
+
+        function onClickAddNFTTransfer() {
+            transfer_to = document.querySelector("#nft_recipient_address").value
+            transfer_amount = document.querySelector("#nft_amount").value
+            transfer_nft = document.querySelector("#nft_address").value
+
+            amount = parseFloat(transfer_amount)
+            if (transfer_amount == "" || amount == NaN || amount < 0.0) {
+                return
+            }
+
+            if (transfer_to == "") {
+                return
+            }
+
+            if (transfer_nft == "") {
+                return
+            }
+
+            var option = document.createElement("option");
+            option.text = transfer_to + ": " + transfer_amount + ": " + transfer_nft;
+            option.value = transfer_to + ":" + transfer_amount + ":" + transfer_nft;
+            var select = document.querySelector("#nft_transfers");
             select.appendChild(option);
 
             select.size += 1;

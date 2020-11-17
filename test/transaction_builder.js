@@ -54,8 +54,20 @@ describe("Transaction builder", () => {
                 .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.03)
 
             assert.strictEqual(tx.data.ledger.uco.transfers.length, 1)
-            assert.deepEqual(tx.data.ledger.uco.transfers[0].to, Buffer.from("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "hex"))
+            assert.deepStrictEqual(tx.data.ledger.uco.transfers[0].to, Buffer.from("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "hex"))
             assert.strictEqual(tx.data.ledger.uco.transfers[0].amount, 10.03)
+        })
+    })
+
+    describe("addNFTTransfer", () => {
+        it("should add an nft transfer to the transaction data", () => {
+            tx = new TransactionBuilder("transfer")
+                .addNFTTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.03, "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+
+            assert.strictEqual(tx.data.ledger.nft.transfers.length, 1)
+            assert.deepStrictEqual(tx.data.ledger.nft.transfers[0].to, Buffer.from("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "hex"))
+            assert.strictEqual(tx.data.ledger.nft.transfers[0].amount, 10.03)
+            assert.deepStrictEqual(tx.data.ledger.nft.transfers[0].nft,  Buffer.from("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "hex"))
         })
     })
 
@@ -80,7 +92,7 @@ describe("Transaction builder", () => {
             assert.strictEqual(tx.address, "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
             assert.strictEqual(tx.type, "transfer")
             assert.strictEqual(tx.previousPublicKey, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
-            assert.notEqual(tx.previousSignature, undefined)
+            assert.notStrictEqual(tx.previousSignature, undefined)
             assert.strictEqual(tx.originSignature, undefined)
         })
     })
