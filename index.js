@@ -76,5 +76,12 @@ module.exports = {
      */
     getTransactionIndex: function (address, endpoint) {
         return API.getTransactionIndex(address, endpoint)
+    },
+
+    /**
+     * Generate a random secret key of 32 bytes
+     */
+    randomSecretKey: function() {
+        return new Uint8Array(randomBytes(32))
     }
 }
