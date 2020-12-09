@@ -1,12 +1,12 @@
 {
   "name": "uniris",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Uniris Javascript SDK",
   "main": "index.js",
   "scripts": {
     "start": "http-server -o example",
     "test": "mocha",
-    "build": "webpack"
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
