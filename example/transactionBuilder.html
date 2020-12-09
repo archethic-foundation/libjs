@@ -116,24 +116,14 @@
             secret = document.querySelector("#secret").value
             if (secret != "") {
 
-                secretKey = await window.crypto.subtle.generateKey(
-                    {
-                        name: "AES-GCM",
-                        length: 256
-                    },
-                    true,
-                    ["encrypt", "decrypt"]
-                )
-                
-                cipher = await encryptSecret(secretKey, new TextEncoder().encode(secret))
+                secretKey = Uniris.randomSecretKey()
+                cipher = Uniris.aesEncrypt(secret, secretKey)
                 txBuilder.setSecret(cipher)
 
-                rawKey = await crypto.subtle.exportKey('raw', secretKey)
-
                 document.querySelectorAll("#authorized_public_keys option").forEach(function (option) {
-                    publicKey = Uint8Array.from(toByteArray(option.value))
-                    encryptedSecretKey = Uniris.ecEncrypt(rawKey, publicKey)
-                    txBuilder.addAuthorizedKey(option.value, Uint8Array.from(encryptedSecretKey))
+                    publicKey = toByteArray(option.value)
+                    encryptedSecretKey = Uniris.ecEncrypt(secretKey, publicKey)
+                    txBuilder.addAuthorizedKey(option.value, encryptedSecretKey)
                 })
             }
 
@@ -158,7 +148,7 @@
                 .build(seed, parseInt(index))
                 .originSign(originPrivateKey)
 
-            document.querySelector("#transactionOutput #address").innerText = transaction.address.toString('hex')
+            document.querySelector("#transactionOutput #address").innerText = toHex(transaction.address)
             document.querySelector("#transactionOutput").style.visibility = "visible";
         }
 
@@ -237,26 +227,12 @@
             select.size += 1;
         }
 
-        function encryptSecret(secretKey, secret) {
-            var initializationVector = new Uint8Array(16);
-            crypto.getRandomValues(initializationVector)
-
-            var encoder = new TextEncoder()
-            encodedSecret = encoder.encode(secret)
-
-            return crypto.subtle.encrypt(
-                { name: 'AES-GCM', iv: initializationVector },
-                secretKey,
-                encodedSecret
-            )
+        function toHex(bytes) {
+          return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
         }
 
         function toByteArray(hexString) {
-            var result = [];
-            for (var i = 0; i < hexString.length; i += 2) {
-                result.push(parseInt(hexString.substr(i, 2), 16));
-            }
-            return result;
+            return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
         }
 
         function sendTransaction() {
