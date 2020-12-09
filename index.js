@@ -55,7 +55,18 @@ module.exports = {
      * @param {String | Uint8Array} publicKey Public key for the shared secret encryption
      */
     ecEncrypt: function (data, publicKey) {
-        return Crypto.encrypt(Buffer.from(data, "hex"), Buffer.from(publicKey, 'hex')).toString('hex')
+        const ciphertext = Crypto.ecEncrypt(data, publicKey)
+        return uint8ArrayToHex(ciphertext)
+    },
+
+    /**
+     * Encrypt a data for a given public key using AES algorithm
+     * @param {String | Uint8Array} data Data to encrypt
+     * @param {String | Uint8Array} key Symmetric key
+     */
+    aesEncrypt: function (data, key) {
+        const ciphertext = Crypto.aesEncrypt(data, key)
+        return uint8ArrayToHex(ciphertext)
     },
 
     /**

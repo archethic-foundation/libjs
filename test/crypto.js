@@ -143,4 +143,12 @@ describe("Crypto", () => {
             assert.strictEqual(decrypted, "hello")
         })
     })
+
+    describe ("aesEncrypt", () => {
+        it ("should encrypt and decrypt data with a key", () => {
+            const key = randomBytes(32)
+            const encrypted = Crypto.aesEncrypt("hello", key)
+            assert.deepStrictEqual(Crypto.aesDecrypt(encrypted, key), new TextEncoder().encode("hello"))
+        })
+    })
 })
