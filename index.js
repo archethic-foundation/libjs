@@ -1,6 +1,8 @@
 const TxBuilder = require('./lib/transaction_builder')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
+const { uint8ArrayToHex} = require('./lib/utils')
+const { randomBytes } = require("crypto")
 
 module.exports = {
     
@@ -28,10 +30,10 @@ module.exports = {
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      */
     deriveKeyPair(seed, index, curve = "ed25519") {
-        keypair = Crypto.deriveKeyPair(seed, index, curve)
+        const { privateKey, publicKey}  = Crypto.deriveKeyPair(seed, index, curve)
         return {
-            privateKey: keypair.privateKey.toString('hex'),
-            publicKey: keypair.publicKey.toString('hex')
+            privateKey: uint8ArrayToHex(privateKey),
+            publicKey: uint8ArrayToHex(publicKey)
         }
     },
 
@@ -43,14 +45,14 @@ module.exports = {
      * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
      */
     deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
-        keypair = Crypto.deriveKeyPair(seed, index, curve)
-        return Crypto.hash(keypair.publicKey, hashAlgo).toString('hex')
+        const { publicKey } = Crypto.deriveKeyPair(seed, index, curve)
+        return uint8ArrayToHex(Crypto.hash(publicKey, hashAlgo))
     },
 
     /**
-     * Encrypt data using the public key with an ECIES algorithm
-     * @param {String} data Data to encrypt (hexadecimal)
-     * @param {String} publicKey Public key (hexadecimal)
+     * Encrypt a data for a given public key using ECIES algorithm
+     * @param {String | Uint8Array} data Data to encrypt
+     * @param {String | Uint8Array} publicKey Public key for the shared secret encryption
      */
     ecEncrypt: function (data, publicKey) {
         return Crypto.encrypt(Buffer.from(data, "hex"), Buffer.from(publicKey, 'hex')).toString('hex')

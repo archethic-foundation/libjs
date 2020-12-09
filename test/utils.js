@@ -1,0 +1,54 @@
+const { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, encodeFloat64 } = require("../lib/utils")
+const assert = require("assert")
+
+describe("Utils", () => {
+    describe("isHex", () => {
+        it("should return true when the string is an hexadecimal", () => {
+            assert.strictEqual(isHex("0f2cb1a"), true)
+        })
+
+        it("should return false when the string is not an hexadecimal", () => {
+            assert.strictEqual(isHex("13z9=!ç"), false)
+        })
+    })
+
+    describe("hexToUint8Array", () => {
+        it ("should convert an hexadecimal to Uint8Array", () => {
+            assert.deepStrictEqual(hexToUint8Array("025381ef"), new Uint8Array([2, 83, 129, 239]))
+        })
+    })
+
+    describe("uint8ArrayToHex", () => {
+        it ("should convert a Uint8Array to hex", () => {
+            assert.deepStrictEqual(uint8ArrayToHex(new Uint8Array([2, 83, 129, 239])), "025381ef")
+        })
+    })
+
+    describe("concatUint8Arrays", () => {
+        it ("should concat Uint8 arrays", () => {
+            const a = new Uint8Array([1, 2, 3])
+            const b = new Uint8Array([4, 5, 6])
+
+            assert.deepStrictEqual(concatUint8Arrays([a, b]), new Uint8Array([1, 2, 3, 4, 5, 6]))
+        })
+    })
+
+    describe("encodeInt32", () => {
+        it ("should encode an integer", () => {
+            assert.deepStrictEqual(encodeInt32(212323839823), new Uint8Array([111, 124, 175, 79]))
+        })
+    })
+
+    describe("encodeInt64", () => {
+        it ("should encode an integer into a big integer on 8 bytes", () => {
+            assert.deepStrictEqual(encodeInt64(212323839821021), new Uint8Array([0, 0, 193, 27, 127, 12, 196, 221]))
+        })
+    })
+
+    describe("encodeFloat64", () => {
+        it ("should encode an double into a 8 bytes array", () => {
+            assert.deepStrictEqual(encodeFloat64(0.243829489482948), new Uint8Array([63, 207, 53, 206, 1, 144, 151, 247]))
+        })
+    })
+
+})
