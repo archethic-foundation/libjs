@@ -112,7 +112,7 @@ It supports the Uniris Cryptography rules which are:
   Perform an AES encryption using a key and a data
   
   - `data` Data to encrypt
-  - `publicKey` Public key to derive a shared secret and for whom the content must be encrypted
+  - `key` Symmetric key
   
   ```js
   const uniris = require('uniris')
