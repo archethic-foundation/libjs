@@ -225,6 +225,17 @@ It supports the Uniris Cryptography rules which are:
   // 0
   ```
 
+  #### getStorageNoncePublicKey(endpoint)
+  Query a node to find the public key of the shared storage node key
+  
+  - `endpoint` Node endpoint
+
+  ```js
+  const uniris = require('uniris')
+  const index = uniris.getStorageNoncePublicKey("https://blockchain.uniris.io")
+  // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
+  ```
+
 
 ## Running the tests
 

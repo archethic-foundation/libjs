@@ -83,5 +83,13 @@ module.exports = {
      */
     randomSecretKey: function() {
         return new Uint8Array(randomBytes(32))
+    },
+
+    /**
+     * Retrieve the storage nonce public key to encrypt data towards nodes
+     * @param {String} endpoint Node endpoint
+     */
+    getStorageNoncePublicKey: function (endpoint) {
+        return API.getStorageNoncePublicKey(endpoint)
     }
 }

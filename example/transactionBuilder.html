@@ -57,6 +57,7 @@
             <br />
             <input type="text" id="auth_public_key" placeholder="Enter the public key to authorize" style="width: 400px" />
             <button type="button" onClick="onClickAddAuthPubKey()">Add Authorized Public Key</button>
+            <button type="button" onClick="onClickAddStorageNoncePublicKey()">Add Storage Nonce Public Key</button>
             <br />
             <select id="authorized_public_keys" style="width: 500px;" size="0" multiple="true"></select>
             <br />
@@ -165,6 +166,17 @@
             select.appendChild(option);
 
             select.size += 1;
+        }
+
+        function onClickAddStorageNoncePublicKey() {
+            endpoint = document.querySelector("#endpoint").value
+            Uniris.getStorageNoncePublicKey(endpoint).then(function (storage_nonce) {
+                var option = document.createElement("option");
+                option.text = storage_nonce;
+                option.value = storage_nonce;
+                var select = document.querySelector("#authorized_public_keys");
+                select.appendChild(option);
+            })
         }
 
         function onClickAddTransfer() {
