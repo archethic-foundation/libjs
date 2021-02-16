@@ -138,8 +138,8 @@ describe("Transaction builder", () => {
                 .addAuthorizedKey("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
                 .build("seed", 0)
 
-            assert.deepStrictEqual(tx.address, hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
-            assert.deepStrictEqual(tx.previousPublicKey, hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"))
+            assert.deepStrictEqual(tx.address, hexToUint8Array("008bddf96c474c096b818386c9a515ad376cca38a19bfbcfafb802a4cd9753dea8"))
+            assert.deepStrictEqual(tx.previousPublicKey, hexToUint8Array("00462664092eea75241c889db84ab9732068d37c3d521e4890fecabe9c614a81fa"))
 
             assert.strictEqual(Crypto.verify(tx.previousSignature, tx.previousSignaturePayload(), tx.previousPublicKey), true)
         })

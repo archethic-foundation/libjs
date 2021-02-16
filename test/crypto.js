@@ -33,17 +33,17 @@ describe("Crypto", () => {
     describe("deriveKeyPair", () => {
         it ("should generate an EC keypair using Ed25519 curve", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0)
-            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "00462664092eea75241c889db84ab9732068d37c3d521e4890fecabe9c614a81fa")
         })
 
         it ("should generate an EC keypair using P256 curve", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "P256")
-            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "01049a3bc11b43b69232b442be17a1b19954a7528e0360c44a4c119e140ec5c7a7f21e7c55a7dccf0c75491aca484dbeffa5457e1dc26a4024f7f0fe6d30b78423d8")
+            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "010488f546d68919bf9caf0eb172586a42824c67c07bc29d31cba27839a21f194cee88b59bd36a55870ec0b26a2cd39c84ec2efbce7329e573c5fd7109260f0d84e8")
         })
 
         it ("should generate an EC keypair using secp256k1 curve", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "secp256k1")
-            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "0204a976171117da94fe6537754eac950692098fb6b878740b1fe33dccb5433fde2a968925da65cbdb83ce232524bba90e328f0e87f1a269a5af10003418e34f85e6")
+            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "0204350d90092eeaaba2607ee2d307ce4e2130b5d9d567e20764b742c7133b0e1ad9af1d1e5d4a2e831bde9cbecd14864f5dd3e08bdf6621f36600ff3beeb0fdda8d")
         })
 
         it ("should produce different key by changing the index", () => {
