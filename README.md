@@ -68,7 +68,7 @@ It supports the Uniris Cryptography rules which are:
 
   ```js
   const uniris = require("uniris")
-  const { publicKey: publicKey, privateKey: privateKey} = uniris.derivePublicKey("mysuperpassphraseorseed", 0)
+  const { publicKey: publicKey, privateKey: privateKey} = uniris.deriveKeyPair("mysuperpassphraseorseed", 0)
   // publicKey => 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
   ```
 
@@ -94,7 +94,7 @@ It supports the Uniris Cryptography rules which are:
 
   ```js
   const uniris = require("uniris")
-  const publicKey = uniris.derivePublicKey("mysuperpassphraseorseed", 0)
+  const publicKey = uniris.deriveKeyPair("mysuperpassphraseorseed", 0)
   ```
 
   #### ecEncrypt(data, publicKey)
