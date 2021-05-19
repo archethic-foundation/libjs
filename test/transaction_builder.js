@@ -90,14 +90,12 @@ describe("Transaction builder", () => {
 
             tx.address = address
             tx.previousPublicKey = keypair.publicKey
-            tx.timestamp = new Date().getTime()
 
             const payload = tx.previousSignaturePayload()
 
             const expected_binary = concatUint8Arrays([
                 tx.address,
                 Uint8Array.from([2]),
-                encodeInt64(tx.timestamp),
                 //Code size
                 encodeInt32(347),
                 new TextEncoder().encode(`
@@ -170,7 +168,6 @@ describe("Transaction builder", () => {
             const expected_binary = concatUint8Arrays([
                 tx.address,
                 Uint8Array.from([2]),
-                encodeInt64(tx.timestamp),
                 //Code size
                 encodeInt32(347),
                 new TextEncoder().encode(`

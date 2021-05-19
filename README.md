@@ -160,7 +160,7 @@ It supports the Uniris Cryptography rules which are:
   - `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient)
   
   #### build(seed, index, curve, hashAlgo)
-  Generate `address`, `timestamp`, `previousPublicKey`, `previousSignature`, `originSignature` of the transaction and 
+  Generate `address`, `previousPublicKey`, `previousSignature`, `originSignature` of the transaction and 
   serialize it using a custom binary protocol.
   
   - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
