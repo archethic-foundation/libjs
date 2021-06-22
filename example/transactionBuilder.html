@@ -2,10 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uniris - TransactionBuilder</title>
+    <title>ArchEthic - TransactionBuilder</title>
 </head>
 <body>
-    <h1>Uniris Transaction Builder <button type="button" onclick="generate_transaction()">Generate</button></h1>
+    <h1>ArchEthic Transaction Builder <button type="button" onclick="generate_transaction()">Generate</button></h1>
 
     <div style="display: flex; flex-direction: row; max-width: 100%;">
         <form>
@@ -108,22 +108,22 @@
             document.querySelector("#transactionOutput").style.visibility = "hidden";
 
             const originSeed = document.querySelector("#originSeed").value
-            const { privateKey: originPrivateKey } = Uniris.deriveKeyPair(originSeed, 0)
+            const { privateKey: originPrivateKey } = ArchEthic.deriveKeyPair(originSeed, 0)
 
-            txBuilder = Uniris.newTransactionBuilder(document.querySelector("#type").value)
+            txBuilder = ArchEthic.newTransactionBuilder(document.querySelector("#type").value)
                 .setCode(document.querySelector("#code").value)
                 .setContent(document.querySelector("#content").value)
 
             secret = document.querySelector("#secret").value
             if (secret != "") {
 
-                secretKey = Uniris.randomSecretKey()
-                cipher = Uniris.aesEncrypt(secret, secretKey)
+                secretKey = ArchEthic.randomSecretKey()
+                cipher = ArchEthic.aesEncrypt(secret, secretKey)
                 txBuilder.setSecret(cipher)
 
                 document.querySelectorAll("#authorized_public_keys option").forEach(function (option) {
                     publicKey = toByteArray(option.value)
-                    encryptedSecretKey = Uniris.ecEncrypt(secretKey, publicKey)
+                    encryptedSecretKey = ArchEthic.ecEncrypt(secretKey, publicKey)
                     txBuilder.addAuthorizedKey(option.value, encryptedSecretKey)
                 })
             }
@@ -170,7 +170,7 @@
 
         function onClickAddStorageNoncePublicKey() {
             endpoint = document.querySelector("#endpoint").value
-            Uniris.getStorageNoncePublicKey(endpoint).then(function (storage_nonce) {
+            ArchEthic.getStorageNoncePublicKey(endpoint).then(function (storage_nonce) {
                 var option = document.createElement("option");
                 option.text = storage_nonce;
                 option.value = storage_nonce;
@@ -249,7 +249,7 @@
 
         function sendTransaction() {
             endpoint = document.querySelector("#endpoint").value
-            Uniris.sendTransaction(transaction, endpoint).then((data) => {
+            ArchEthic.sendTransaction(transaction, endpoint).then((data) => {
                 if (data.errors) {
                     document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
                     return
@@ -262,8 +262,8 @@
         function getTransactionIndex() {
             endpoint = document.querySelector("#endpoint").value
             seed = document.querySelector("#seed").value
-            address = Uniris.deriveAddress(seed, 0)
-            Uniris.getTransactionIndex(address, endpoint).then((nb) => {
+            address = ArchEthic.deriveAddress(seed, 0)
+            ArchEthic.getTransactionIndex(address, endpoint).then((nb) => {
                 document.querySelector("#index").value = nb
             })
         }
