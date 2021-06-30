@@ -13,11 +13,6 @@
             <input type="text" value="http://localhost:4000" id="endpoint"/>
             <br />
             <br />
-            <label for="originSeed">Origin Private Key Seed</label>
-            <br /><br />
-            <input type="password" id="originSeed" style="width: 500px"/>
-            <br />
-            <br />
             <label for="seed">Enter your seed/passphrase</label>
             <input type="password" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
             <br />
@@ -28,12 +23,8 @@
             <br />
             <label for="type">Select a type of transaction</label>
             <select id="type">
-                <option value="identity">Identity</option>
-                <option value="keychain">Keychain</option>
                 <option value="transfer">Transfer</option>
                 <option value="hosting">Hosting</option>
-                <option value="code_proposal">Code Proposal</option>
-                <option value="code_approval">Code Approval</option>
                 <option value="nft">NFT</option>
             </select>
             </br />
@@ -91,7 +82,7 @@
         <div id="transactionOutput" style="overflow: auto; visibility: hidden;" >
             <pre id="address" style="padding: 10px; background-color: #f5f5f5; overflow: auto"></pre>
             <br />
-            <button type="button" onclick="sendTransaction()">Send</button>
+            <button type="button" onclick="sendTransaction()">Send</button
             <div id="results">
                 <pre id="errors"></pre>
                 <p id="success" style="display:none">Your transaction is in pending validation</p>
@@ -101,14 +92,13 @@
     <script src="../dist/index.js"></script>
     <script>
 
+        const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
+
         let transaction
 
         async function generate_transaction() {
             transaction = null
             document.querySelector("#transactionOutput").style.visibility = "hidden";
-
-            const originSeed = document.querySelector("#originSeed").value
-            const { privateKey: originPrivateKey } = Uniris.deriveKeyPair(originSeed, 0)
 
             txBuilder = Uniris.newTransactionBuilder(document.querySelector("#type").value)
                 .setCode(document.querySelector("#code").value)

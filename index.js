@@ -29,7 +29,7 @@ module.exports = {
      * @param {Integer} index Number of transaction in the chain
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      */
-    deriveKeyPair(seed, index, curve = "ed25519") {
+    deriveKeyPair(seed, index, curve = "P256") {
         const { privateKey, publicKey}  = Crypto.deriveKeyPair(seed, index, curve)
         return {
             privateKey: uint8ArrayToHex(privateKey),
@@ -44,7 +44,7 @@ module.exports = {
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
      */
-    deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
+    deriveAddress(seed, index, curve = "P256", hashAlgo = "sha256") {
         const { publicKey } = Crypto.deriveKeyPair(seed, index, curve)
         return uint8ArrayToHex(Crypto.hash(publicKey, hashAlgo))
     },
