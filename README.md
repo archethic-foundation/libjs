@@ -1,20 +1,20 @@
-![Node.js CI](https://github.com/UNIRIS/uniris-libjs/workflows/Node.js%20CI/badge.svg?branch=master)
+![Node.js CI](https://github.com/archethic-foundation/libjs/workflows/Node.js%20CI/badge.svg?branch=master)
 
-# Uniris SDK Javascript
+# ArchEthic SDK Javascript
 
-Official Uniris Javascript library for Node and Browser.
+Official ArchEthic Javascript library for Node and Browser.
 
 ## Installing
 
 ```bash
-npm install uniris
+npm install archethic
 ```
 
 ## Usage
 
-This library aims to provide a easy way to create Uniris transaction and to send them over the network.
+This library aims to provide a easy way to create ArchEthic transaction and to send them over the network.
 
-It supports the Uniris Cryptography rules which are:
+It supports the ArchEthic Cryptography rules which are:
 
 - Algorithm identification: the first byte of key and hashes identify the curve or the digest algorithm used to help determine which algorithm during
   verification.
@@ -38,7 +38,7 @@ It supports the Uniris Cryptography rules which are:
   
 - Key derivation:
   
-    To be able to retrieve previous public key, the Uniris network designs the key derivation through a seed (passphrase) and an index(number of
+    To be able to retrieve previous public key, the ArchEthic network designs the key derivation through a seed (passphrase) and an index(number of
      previous public keys/transactions).
     The procedure is described as follows:
     
@@ -67,8 +67,8 @@ It supports the Uniris Cryptography rules which are:
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
   ```js
-  const uniris = require("uniris")
-  const { publicKey: publicKey, privateKey: privateKey} = uniris.derivePublicKey("mysuperpassphraseorseed", 0)
+  const archethic = require("archethic")
+  const { publicKey: publicKey, privateKey: privateKey} = archethic.derivePublicKey("mysuperpassphraseorseed", 0)
   // publicKey => 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
   ```
 
@@ -81,8 +81,8 @@ It supports the Uniris Cryptography rules which are:
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
   ```js
-  const uniris = require("uniris")
-  const address = uniris.deriveAddress("mysuperpassphraseorseed", 0)
+  const archethic = require("archethic")
+  const address = archethic.deriveAddress("mysuperpassphraseorseed", 0)
   // Address: 0092ffdc550ec8d4e4e10506d27229a8d4327d975a6037055e7a563a4783dbe1e8
   ```
 
@@ -93,8 +93,8 @@ It supports the Uniris Cryptography rules which are:
   - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
   ```js
-  const uniris = require("uniris")
-  const publicKey = uniris.derivePublicKey("mysuperpassphraseorseed", 0)
+  const archethic = require("archethic")
+  const publicKey = archethic.derivePublicKey("mysuperpassphraseorseed", 0)
   ```
 
   #### ecEncrypt(data, publicKey)
@@ -104,8 +104,8 @@ It supports the Uniris Cryptography rules which are:
   - `publicKey` Public key to derive a shared secret and for whom the content must be encrypted
   
   ```js
-  const uniris = require('uniris')
-  const cipher = uniris.ecEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+  const archethic = require('archethic')
+  const cipher = archethic.ecEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
   #### aesEncrypt(data, publicKey)
@@ -115,15 +115,15 @@ It supports the Uniris Cryptography rules which are:
   - `key` Symmetric key
   
   ```js
-  const uniris = require('uniris')
-  const cipher = uniris.aesEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+  const archethic = require('archethic')
+  const cipher = archethic.aesEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
   ### TransactionBuilding
   
   `newTransactionBuilder(type)` creates a new instance of the transaction builder
   
-  `type` is the string defining the type of transaction to generate ("keychain", "identity", "transfer", "hosting", "code_proposal", "code_approval", "nft")
+  `type` is the string defining the type of transaction to generate ("keychain", "keychain_access", "transfer", "hosting", "code_proposal", "code_approval", "nft")
   
   The transaction builder instance contains the following methods:
   
@@ -169,8 +169,8 @@ It supports the Uniris Cryptography rules which are:
   - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
   
   ```js
-  const uniris = require('uniris')
-  const tx = uniris.newTransactionBuilder("transfer")
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
     .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
   ```
@@ -181,8 +181,8 @@ It supports the Uniris Cryptography rules which are:
    - `privateKey` is hexadecimal encoding or Uint8Array representing the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
 
   ```js
-  const uniris = require('uniris')
-  const tx = uniris.newTransactionBuilder("transfer")
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
     .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
     .originSign(originPrivateKey)
@@ -192,8 +192,8 @@ It supports the Uniris Cryptography rules which are:
   Export the transaction generated into JSON
 
    ```js
-  const uniris = require('uniris')
-  const txJSON = uniris.newTransactionBuilder("transfer")
+  const archethic = require('archethic')
+  const txJSON = archethic.newTransactionBuilder("transfer")
     .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
     .toJSON()
@@ -204,12 +204,12 @@ It supports the Uniris Cryptography rules which are:
   Dispatch  the transaction to a node by serializing a GraphQL request
   
   - `tx` represent the built transaction from the **transactionBuilder**
-  - `endpoint` is the HTTP URL to a Uniris node (acting as welcome node)
+  - `endpoint` is the HTTP URL to a ArchEthic node (acting as welcome node)
   
   ```js
-  const uniris = require('uniris')
+  const archethic = require('archethic')
   tx = ...
-  uniris.sendTransaction(tx, "https://blockchain.uniris.io")
+  archethic.sendTransaction(tx, "http://localhost:4000")
   ```
 
 
@@ -220,8 +220,8 @@ It supports the Uniris Cryptography rules which are:
   - `endpoint` Node endpoint
 
   ```js
-  const uniris = require('uniris')
-  const index = uniris.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://blockchain.uniris.io")
+  const archethic = require('archethic')
+  const index = archethic.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "http://localhost:4000")
   // 0
   ```
 
@@ -231,8 +231,8 @@ It supports the Uniris Cryptography rules which are:
   - `endpoint` Node endpoint
 
   ```js
-  const uniris = require('uniris')
-  const index = uniris.getStorageNoncePublicKey("https://blockchain.uniris.io")
+  const archethic = require('archethic')
+  const index = archethic.getStorageNoncePublicKey("http://localhost:4000")
   // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
   ```
 

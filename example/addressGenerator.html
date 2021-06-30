@@ -2,10 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uniris - Address Generator</title>
+    <title>ArchEthic - Address Generator</title>
 </head>
 <body>
-    <h1>Uniris Address generator</h1>
+    <h1>ArchEthic Address generator</h1>
 
     <label for="seed">Key generation seed</label> <br />
     <input type="password" id="seed" placeholder="Enter your transaction seed" style="width: 500px" />
@@ -50,7 +50,7 @@
                 return
             }
 
-            address = Uniris.deriveAddress(seed, index, curve, hash)
+            address = ArchEthic.deriveAddress(seed, index, curve, hash)
             document.querySelector("#address").innerText = address
         }
     </script>

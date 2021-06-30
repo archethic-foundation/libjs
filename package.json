@@ -1,7 +1,7 @@
 {
-  "name": "uniris",
-  "version": "1.4.2",
-  "description": "Uniris Javascript SDK",
+  "name": "archethic",
+  "version": "1.0.0",
+  "description": "ArchEthic Javascript SDK",
   "main": "index.js",
   "scripts": {
     "start": "http-server -o example",
@@ -10,19 +10,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/UNIRIS/uniris-libjs.git"
+    "url": "git+https://github.com/archethic-foundation/libjs.git"
   },
   "keywords": [
-    "uniris",
+    "archethic",
     "transaction-chain",
     "blockchain"
   ],
   "author": "",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/UNIRIS/uniris-libjs/issues"
+    "url": "https://github.com/archethic-foundation/libjs/issues"
   },
-  "homepage": "https://github.com/UNIRIS/uniris-libjs#readme",
+  "homepage": "https://github.com/archethic-foundation/libjs#readme",
   "devDependencies": {
     "http-server": "^0.12.3",
     "mocha": "^8.0.1",
