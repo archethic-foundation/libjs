@@ -16,21 +16,25 @@ This library aims to provide a easy way to create ArchEthic transaction and to s
 
 It supports the ArchEthic Cryptography rules which are:
 
-- Algorithm identification: the first byte of key and hashes identify the curve or the digest algorithm used to help determine which algorithm during
-  verification.
+- Algorithm identification: keys are prepared by metadata bytes to indicate the curve used and the origin of the generation, and hashes are prepended by a byte to indicate the hash algorithm used. 
+  Those information help during the verification
   
   ```
 
-      Ed25519    Public key
-        |           /
-        |          /
-      <<0, 106, 58, 193, 73, 144, 121, 104, 101, 53, 140, 125, 240, 52, 222, 35, 181,
+      Ed25519   Software Origin   Public key
+        |          |              |
+        |  |-------|              |
+        |  |   |------------------|        
+        |  |   |     
+      <<0, 0, 106, 58, 193, 73, 144, 121, 104, 101, 53, 140, 125, 240, 52, 222, 35, 181,
       13, 81, 241, 114, 227, 205, 51, 167, 139, 100, 176, 111, 68, 234, 206, 72>>
 
-       NIST P-256   Public key
-        |          /
-        |         /
-      <<1, 4, 7, 161, 46, 148, 183, 43, 175, 150, 13, 39, 6, 158, 100, 2, 46, 167,
+       NIST P-256  Software Origin   Public key
+        |            |              |
+        |  |---------|              |
+        |  |  |----------------------
+        |  |  |    
+      <<1, 0, 4, 7, 161, 46, 148, 183, 43, 175, 150, 13, 39, 6, 158, 100, 2, 46, 167,
        101, 222, 82, 108, 56, 71, 28, 192, 188, 104, 154, 182, 87, 11, 218, 58, 107,
       222, 154, 48, 222, 193, 176, 88, 174, 1, 6, 154, 72, 28, 217, 222, 147, 106,
       73, 150, 128, 209, 93, 99, 115, 17, 39, 96, 47, 203, 104, 34>>
@@ -48,7 +52,7 @@ It supports the ArchEthic Cryptography rules which are:
                                                                / (256 bytes) Next private key
                           (256 bytes) Master key  --> HMAC-512
                         /                              Key: Master entropy,
-      seed --> HMAC-512                                Data: Master key + index)
+      seed --> HASH-512                                Data: Master key + index)
                         \
                          (256 bytes) Master entropy
 
@@ -64,12 +68,12 @@ It supports the ArchEthic Cryptography rules which are:
 
   - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
-  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1") - default to: "P256"
 
   ```js
   const archethic = require("archethic")
   const { publicKey: publicKey, privateKey: privateKey} = archethic.derivePublicKey("mysuperpassphraseorseed", 0)
-  // publicKey => 00a6e144cdd34c608f88cc5a92d0962e7cfe9843b0bb62fefbdb60eb41814b7c92
+  // publicKey => 0100048cac473e46edd109c3ef59eec22b9ece9f99a2d0dce1c4ccb31ce0bacec4a9ad246744889fb7c98ea75c0f0ecd60002c07fae92f23382669ca9aff1339f44216 
   ```
 
   #### deriveAddress(seed, index, curve, hashAlgo)
@@ -78,12 +82,13 @@ It supports the ArchEthic Cryptography rules which are:
 
   - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
-  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1") - Default to "P256"
+  - `hashAlgo` is the hash algorithm to create the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b") - default to "sha256"
 
   ```js
   const archethic = require("archethic")
   const address = archethic.deriveAddress("mysuperpassphraseorseed", 0)
-  // Address: 0092ffdc550ec8d4e4e10506d27229a8d4327d975a6037055e7a563a4783dbe1e8
+  // Address: 004195d45987f33e5dcb71edfa63438d5e6add655b216acfdd31945d58210fe5d2
   ```
 
   It creates a new keypair and extract the public key into hexadecimal format
@@ -105,7 +110,7 @@ It supports the ArchEthic Cryptography rules which are:
   
   ```js
   const archethic = require('archethic')
-  const cipher = archethic.ecEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+  const cipher = archethic.ecEncrypt("dataToEncrypt","0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
   #### aesEncrypt(data, publicKey)
@@ -165,8 +170,8 @@ It supports the ArchEthic Cryptography rules which are:
   
   - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
-  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
-  - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1") - default o "P256"
+  - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "bake2b") - default to "sha256"
   
   ```js
   const archethic = require('archethic')
@@ -209,7 +214,7 @@ It supports the ArchEthic Cryptography rules which are:
   ```js
   const archethic = require('archethic')
   tx = ...
-  archethic.sendTransaction(tx, "http://localhost:4000")
+  archethic.sendTransaction(tx, "http://www.archethic.com")
   ```
 
 
@@ -221,7 +226,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "http://localhost:4000")
+  const index = archethic.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
   // 0
   ```
 
@@ -232,7 +237,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getStorageNoncePublicKey("http://localhost:4000")
+  const index = archethic.getStorageNoncePublicKey("http://www.archethic.net")
   // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
   ```
 
