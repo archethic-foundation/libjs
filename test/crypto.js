@@ -1,12 +1,12 @@
 const Crypto = require("../lib/crypto")
 const assert = require("assert")
-const _sodium = require('libsodium-wrappers');
 const { createECDH, createDecipheriv, randomBytes } = require('crypto')
 
 const { uint8ArrayToHex, concatUint8Arrays} = require('../lib/utils')
 
-describe("Crypto", () => {
+ describe("Crypto", () => {
 
+   
     describe("hash", () => {
 
         it ("should generate a sha256 hash with an algo id at the begining", () => {
@@ -32,26 +32,26 @@ describe("Crypto", () => {
 
     describe("deriveKeyPair", () => {
         it ("should generate an EC keypair using Ed25519 curve", () => {
-            const keypair = Crypto.deriveKeyPair("seed", 0)
-            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "00462664092eea75241c889db84ab9732068d37c3d521e4890fecabe9c614a81fa")
+            const keypair = Crypto.deriveKeyPair("seed", 0, "ed25519")
+            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "000061d6cd8da68207bd01198909c139c130a3df3a8bd20f4bacb123c46354ccd52c")
         })
 
-        it ("should generate an EC keypair using P256 curve", () => {
+      it ("should generate an EC keypair using P256 curve", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "P256")
-            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "010488f546d68919bf9caf0eb172586a42824c67c07bc29d31cba27839a21f194cee88b59bd36a55870ec0b26a2cd39c84ec2efbce7329e573c5fd7109260f0d84e8")
+            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "0100044d91a0a1a7cf06a2902d3842f82d2791bcbf3ee6f6dc8de0f90e53e9991c3cb33684b7b9e66f26e7c9f5302f73c69897be5f301de9a63521a08ac4ef34c18728")
         })
 
         it ("should generate an EC keypair using secp256k1 curve", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "secp256k1")
-            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "0204350d90092eeaaba2607ee2d307ce4e2130b5d9d567e20764b742c7133b0e1ad9af1d1e5d4a2e831bde9cbecd14864f5dd3e08bdf6621f36600ff3beeb0fdda8d")
+            assert.strictEqual(uint8ArrayToHex(keypair.publicKey), "0200044d02d071e7e24348fc24951bded20c08409b075c7956348fef89e118370f382cf99c064b17ad950aaeb1ae04971afdc6a44d68e731b8d0a01a8f56eade92875a")
         })
 
-        it ("should produce different key by changing the index", () => {
-            const keypair1 = Crypto.deriveKeyPair("seed", 0)
-            const keypair2 = Crypto.deriveKeyPair("seed", 1)
+      it ("should produce different key by changing the index", () => {
+          const keypair1 = Crypto.deriveKeyPair("seed", 0)
+          const keypair2 = Crypto.deriveKeyPair("seed", 1)
 
-            assert.notDeepStrictEqual(keypair1, keypair2)
-        })
+          assert.notDeepStrictEqual(keypair1, keypair2)
+      })
     })
 
     describe("sign/verify", () => {
@@ -80,67 +80,23 @@ describe("Crypto", () => {
 
         it("should encrypt a data using a ed25519 public key", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "ed25519")
-
-            const secret = Uint8Array.from([
-                10, 35, 17, 69, 75, 209, 215, 254, 93, 80, 136, 162, 3, 11, 92, 115, 73, 248,
-                11, 116, 237, 131, 153, 68, 241, 39, 161, 97, 1, 185, 253, 200
-            ]);
-
-            const ciphertext = Crypto.ecEncrypt(secret, keypair.publicKey)
-            assert.strictEqual(ciphertext.length, 80)
-
-            const pvBuf = keypair.privateKey.slice(1, 33)
-            const pubBuf = keypair.publicKey.slice(1, 33)
-
-            const curve25519_pub = _sodium.crypto_sign_ed25519_pk_to_curve25519(pubBuf)
-            const curve25519_pv = _sodium.crypto_sign_ed25519_sk_to_curve25519(concatUint8Arrays([pvBuf, pubBuf]))
-            assert.deepStrictEqual(_sodium.crypto_box_seal_open(ciphertext, curve25519_pub, curve25519_pv), secret)
+            const ciphertext = Crypto.ecEncrypt("hello", keypair.publicKey)
+            
+            assert.strictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), "hello")
         })
 
         it("should encrypt a data using a P256 public key", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "P256")
             const ciphertext = Crypto.ecEncrypt("hello", keypair.publicKey)
 
-            const ephemeralPubKey = ciphertext.slice(0, 65)
-            const tag = ciphertext.slice(65, 65+16)
-            const encrypted = ciphertext.slice(65+16, ciphertext.length)
-
-            let ecdh = createECDH("prime256v1")
-            ecdh.setPrivateKey(keypair.privateKey.slice(1, 33))
-            const sharedKey = ecdh.computeSecret(ephemeralPubKey)
-
-            const { aesKey, iv } = Crypto.deriveSecret(sharedKey)
-
-            let cipher = createDecipheriv("aes-256-gcm", aesKey, iv)
-            cipher.setAuthTag(tag)
-            let decrypted = cipher.update(encrypted)
-            
-            decrypted += cipher.final()
-
-            assert.strictEqual(decrypted, "hello")
+            assert.strictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), "hello")
         })
 
         it("should encrypt a data using a secp256k1 public key", () => {
             const keypair = Crypto.deriveKeyPair("seed", 0, "secp256k1")
             const ciphertext = Crypto.ecEncrypt("hello", keypair.publicKey)
-
-            const ephemeralPubKey = ciphertext.slice(0, 65)
-            const tag = ciphertext.slice(65, 65+16)
-            const encrypted = ciphertext.slice(65+16, ciphertext.length)
-
-            let ecdh = createECDH("secp256k1")
-            ecdh.setPrivateKey(keypair.privateKey.slice(1, 33))
-            const sharedKey = ecdh.computeSecret(ephemeralPubKey)
-
-            const { aesKey, iv } = Crypto.deriveSecret(sharedKey)
-
-            let cipher = createDecipheriv("aes-256-gcm", aesKey, iv)
-            cipher.setAuthTag(tag)
-            let decrypted = cipher.update(encrypted)
-            
-            decrypted += cipher.final()
-
-            assert.strictEqual(decrypted, "hello")
+   
+            assert.strictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), "hello")
         })
     })
 
@@ -151,4 +107,5 @@ describe("Crypto", () => {
             assert.deepStrictEqual(Crypto.aesDecrypt(encrypted, key), new TextEncoder().encode("hello"))
         })
     })
-})
+  
+}) 

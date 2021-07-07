@@ -3,96 +3,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArchEthic - TransactionBuilder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style> 
+    body {
+     background: linear-gradient(-30deg,#00a4db 30%,#006cd2 70%)
+    }
+    </style>
 </head>
 <body>
-    <h1>ArchEthic Transaction Builder <button type="button" onclick="generate_transaction()">Generate</button></h1>
+  <div class="container margin-top-6">
+  <div class="columns">
+    <div class="column">
+      <h1 class="is-size-2 has-text-white">ArchEthic</h1>
+    </div>
+  </div>
+  <div class="columns">
+    <div class="column">
+      <h1 class="is-size-5 has-text-white">Transaction Builder</h1>
+    </div>
+    <div class="column">
+      <button type="button" class="button is-warning" onclick="generate_transaction()">Generate</button>
+    </div>
+  </div>
 
-    <div style="display: flex; flex-direction: row; max-width: 100%;">
+    <div style="">
         <form>
-            <label for="endpoint">Node endpoint</label> <br /><br />
-            <input type="text" value="http://localhost:4000" id="endpoint"/>
-            <br />
-            <br />
-            <label for="seed">Enter your seed/passphrase</label>
-            <input type="password" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
-            <br />
-            <br />
-            <label for="index">Transaction index</label>
-            <input type="number" min=0 id="index" value="0"/>
-            <br />
-            <br />
-            <label for="type">Select a type of transaction</label>
-            <select id="type">
-                <option value="transfer">Transfer</option>
-                <option value="hosting">Hosting</option>
-                <option value="nft">NFT</option>
-            </select>
-            </br />
-            <br />
-            <label for="code">Enter your smart contract code</label>
-            <br />
-            <textarea id="code" cols="40" rows="5" placeholder="Smart contract code"></textarea>
-            <br />
-            </br />
-            <label for="code">Enter your content</label>
-            <br />
-            <textarea id="content" cols="40" rows="5" placeholder="Content to host"></textarea>
-            <br />
-            <br />
-            <label for="code">Enter a secret</label>
-            <br />
-            <textarea id="secret" cols="40" rows="5" placeholder="Secret to host"></textarea>
-            <br />
-            <br />
-            <label for="auth_public_key">Add a public key to read the secret</label>
-            <br />
-            <input type="text" id="auth_public_key" placeholder="Enter the public key to authorize" style="width: 400px" />
-            <button type="button" onClick="onClickAddAuthPubKey()">Add Authorized Public Key</button>
-            <button type="button" onClick="onClickAddStorageNoncePublicKey()">Add Storage Nonce Public Key</button>
-            <br />
-            <select id="authorized_public_keys" style="width: 500px;" size="0" multiple="true"></select>
-            <br />
-            <br />
-            <label for="amount_address">Add a UCO transfer</label>
-            <br />
-            <input type="text" id="amount_address" placeholder="Enter the address of the recipient" style="width: 400px" />
-            <input type="text" id="uco_amount" placeholder="Enter the amount to send" style="width: 200px" />
-            <button type="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
-            <br />
-            <select id="uco_transfers" multiple="true" size="0" style="width: 500px;"></select>
-            <br />
-            <br />
-            <label for="nft_amount_address">Add a NFT transfer</label>
-            <br />
-            <input type="text" id="nft_recipient_address" placeholder="Enter the address of the recipient" style="width: 400px" />
-            <input type="text" id="nft_amount" placeholder="Enter the amount to send" style="width: 200px" />
-            <input type="text" id="nft_address" placeholder="Enter the NFT address to send" style="width: 200px" />
-            <button type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
-            <br />
-            <select id="nft_transfers" multiple="true" size="0" style="width: 500px;"></select>
-            <br />
-            <br />
-            <label for="recipient">Add recipient</label>
-            <br />
-            <input type="text" id="recipient" placeholder="Enter the address of the recipient" style="width: 400px" />
-            <button type="button" onclick="onClickAddRecipient()">Add recipient</button>
-            <br />
-            <select id="recipients" multiple="true" size="0" style="width: 500px;"></select>
+            <div class="box">
+              <label for="endpoint">Node endpoint</label> <br /><br />
+              <input type="text" class="input" value="http://www.archethic.net" id="endpoint"/>
+            </div>
+            <div class="box">
+              <label for="seed">Enter your seed/passphrase</label>
+              <input type="password" class="input" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
+              <label for="curve">Cryptographic curve</label>
+              <select id="curve" class="select">
+                <option value="P256">P256</option>
+                <option value="ed25519">Ed25519</option>
+                <option value="secp256k1">secp256k1</option>
+              </select>
+            </div>
+            <div class="box">
+              <label for="index">Transaction index</label>
+              <input type="number" class="input" min=0 id="index" value="0"/>
+            </div>
+            <div class="box">
+              <label for="type">Select a type of transaction</label>
+              <select id="type" class="select">
+                  <option value="transfer">Transfer</option>
+                  <option value="hosting">Hosting</option>
+                  <option value="nft">NFT</option>
+              </select>
+            </div>
+            <div class="box">
+              <label for="code">Enter your smart contract code</label>
+              <br />
+              <textarea id="code" cols="40" rows="5" class="textarea" placeholder="Smart contract code"></textarea>
+            </div>
+            <div class="box">
+              <label for="code">Enter your content</label>
+              <br />
+              <textarea id="content" class="textarea" cols="40" rows="5" placeholder="Content to host"></textarea>
+              <br />
+              <br />
+
+              <input type="file" id="content_upload">
+              <label  for="file">Choose a file</label>
+            </div>
+            <div class="box">
+              <label for="code">Enter a secret</label>
+              <br />
+              <input type="password" id="secret" class="input" placeholder="Secret to host"></textarea>
+            </div>
+            <div class="box">
+              <label for="auth_public_key">Add a public key to read the secret</label>
+              <br />
+              <input type="text" class="input" id="auth_public_key" placeholder="Enter the public key to authorize" style="width: 400px" />
+              <button class="button" type="button" onClick="onClickAddAuthPubKey()">Add Authorized Public Key</button>
+              <button class="button" type="button" onClick="onClickAddStorageNoncePublicKey()">Add Storage Nonce Public Key</button>
+              <br />
+              <select id="authorized_public_keys" style="width: 500px;" size="0" multiple="true"></select>
+            </div>
+            <div class="box">
+              <label for="amount_address">Add a UCO transfer</label>
+              <br />
+              <input type="text" class="input" id="amount_address" placeholder="Enter the address of the recipient" style="width: 400px" />
+              <input type="text" class="input" id="uco_amount" placeholder="Enter the amount to send" style="width: 200px" />
+              <button type="button" class="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
+              <br />
+              <select id="uco_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+            </div>
+            <div class="box">
+              <label for="nft_amount_address">Add a NFT transfer</label>
+              <br />
+              <input type="text" class="input" id="nft_recipient_address" placeholder="Enter the address of the recipient" style="width: 400px" />
+              <input type="text" class="input" id="nft_amount" placeholder="Enter the amount to send" style="width: 200px" />
+              <input type="text" class="input" id="nft_address" placeholder="Enter the NFT address to send" style="width: 200px" />
+              <button class="button" type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
+              <br />
+              <select id="nft_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+            </div>
+            <div class="box">
+              <label for="recipient">Add recipient</label>
+              <br />
+              <input type="text" class="input" id="recipient" placeholder="Enter the address of the recipient" style="width: 400px" />
+              <button type="button" class="button" onclick="onClickAddRecipient()">Add recipient</button>
+              <br />
+              <select id="recipients" class="select" multiple="true" size="0" style="width: 500px;"></select>
+            </div>
         </form>
         <div id="transactionOutput" style="overflow: auto; visibility: hidden;" >
             <pre id="address" style="padding: 10px; background-color: #f5f5f5; overflow: auto"></pre>
             <br />
-            <button type="button" onclick="sendTransaction()">Send</button
+            <button type="button" class="button" onclick="sendTransaction()">Send</button
             <div id="results">
                 <pre id="errors"></pre>
                 <p id="success" style="display:none">Your transaction is in pending validation</p>
             </div>
         </div>
     </div>
+  </div>
     <script src="../dist/index.js"></script>
     <script>
 
         const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
+        let file_content = ""
 
         let transaction
 
@@ -100,9 +134,15 @@
             transaction = null
             document.querySelector("#transactionOutput").style.visibility = "hidden";
 
+
+            content = document.querySelector("#content").value
+            if (file_content != "") {
+              content = file_content
+            }
+
             txBuilder = ArchEthic.newTransactionBuilder(document.querySelector("#type").value)
                 .setCode(document.querySelector("#code").value)
-                .setContent(document.querySelector("#content").value)
+                .setContent(content)
 
             secret = document.querySelector("#secret").value
             if (secret != "") {
@@ -134,9 +174,10 @@
 
             seed = document.querySelector("#seed").value
             index = document.querySelector("#index").value
+            curve = document.querySelector("#curve").value
 
             transaction = txBuilder
-                .build(seed, parseInt(index))
+                .build(seed, parseInt(index), curve)
                 .originSign(originPrivateKey)
 
             document.querySelector("#transactionOutput #address").innerText = toHex(transaction.address)
@@ -252,11 +293,24 @@
         function getTransactionIndex() {
             endpoint = document.querySelector("#endpoint").value
             seed = document.querySelector("#seed").value
-            address = ArchEthic.deriveAddress(seed, 0)
+            curve = document.querySelector("#curve").value
+
+            address = ArchEthic.deriveAddress(seed, 0, curve)
             ArchEthic.getTransactionIndex(address, endpoint).then((nb) => {
                 document.querySelector("#index").value = nb
             })
         }
+
+
+       document.querySelector('#content_upload').addEventListener('change', (event) => {
+         const fileList = event.target.files;
+         
+         let fr = new FileReader()
+         fr.onload = function (e) {
+           file_content = e.target.result
+         }
+         fr.readAsArrayBuffer(fileList[0])
+       })
     </script>
 </body>
 </html>

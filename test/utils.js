@@ -25,13 +25,22 @@ describe("Utils", () => {
     })
 
     describe("concatUint8Arrays", () => {
-        it ("should concat Uint8 arrays", () => {
+        it ("should concat small Uint8 arrays", () => {
             const a = new Uint8Array([1, 2, 3])
             const b = new Uint8Array([4, 5, 6])
 
-            assert.deepStrictEqual(concatUint8Arrays([a, b]), new Uint8Array([1, 2, 3, 4, 5, 6]))
+            assert.deepStrictEqual(concatUint8Arrays([a, b]).byteLength, 6)
         })
+  
+       it ("should concat big Uint8 arrays", () => {
+          const a = new Uint8Array(20000)
+          const b = new Uint8Array([1, 2, 3, 4])
+
+          const newArray = concatUint8Arrays([a, b])
+          assert.equal(newArray.byteLength, 20004)
+       })
     })
+
 
     describe("encodeInt32", () => {
         it ("should encode an integer", () => {
