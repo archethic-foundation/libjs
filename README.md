@@ -72,7 +72,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require("archethic")
-  const { publicKey: publicKey, privateKey: privateKey} = archethic.derivePublicKey("mysuperpassphraseorseed", 0)
+  const { publicKey: publicKey, privateKey: privateKey} = archethic.deriveKeyPair("mysuperpassphraseorseed", 0)
   // publicKey => 0100048cac473e46edd109c3ef59eec22b9ece9f99a2d0dce1c4ccb31ce0bacec4a9ad246744889fb7c98ea75c0f0ecd60002c07fae92f23382669ca9aff1339f44216 
   ```
 
@@ -214,7 +214,7 @@ It supports the ArchEthic Cryptography rules which are:
   ```js
   const archethic = require('archethic')
   tx = ...
-  archethic.sendTransaction(tx, "http://www.archethic.com")
+  archethic.sendTransaction(tx, "http://www.archethic.net")
   ```
 
 
