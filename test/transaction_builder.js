@@ -1,6 +1,6 @@
 const TransactionBuilder = require("../lib/transaction_builder")
 const Crypto = require("../lib/crypto")
-const { hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt64, encodeInt32, encodeFloat64 } = require("../lib/utils")
+const { hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeFloat64 } = require("../lib/utils")
 
 const assert = require("assert")
 

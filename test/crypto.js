@@ -1,8 +1,8 @@
 const Crypto = require("../lib/crypto")
 const assert = require("assert")
-const { createECDH, createDecipheriv, randomBytes } = require('crypto')
+const { randomBytes } = require('crypto')
 
-const { uint8ArrayToHex, concatUint8Arrays} = require('../lib/utils')
+const { uint8ArrayToHex}= require('../lib/utils')
 
  describe("Crypto", () => {
 
