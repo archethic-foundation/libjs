@@ -1,5 +1,6 @@
 ![Node.js CI](https://github.com/archethic-foundation/libjs/workflows/Node.js%20CI/badge.svg?branch=master)
 
+
 # ArchEthic SDK Javascript
 
 Official ArchEthic Javascript library for Node and Browser.
