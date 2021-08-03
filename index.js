@@ -79,6 +79,24 @@ module.exports = {
     },
 
     /**
+     * Retrieve the last address of transaction in a specific chain
+     * @param {String} address Transaction address
+     * @param {String} endpoint Node endpoint
+     */
+     getLastTransaction: function (address, endpoint) {
+        return API.getLastTransaction(address, endpoint)
+    },
+
+    /**
+     * Retrieve all transaction addresses in a specific chain (sorted by most recent)
+     * @param {String} address Transaction address
+     * @param {String} endpoint Node endpoint
+     */
+     getTransactionChain: function (address, endpoint) {
+        return API.getTransactionChain(address, endpoint)
+    },
+
+    /**
      * Generate a random secret key of 32 bytes
      */
     randomSecretKey: function() {

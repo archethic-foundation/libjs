@@ -231,6 +231,29 @@ It supports the ArchEthic Cryptography rules which are:
   // 0
   ```
 
+    #### getLastTransaction(address, endpoint)
+  Query a node to find the last address of a chain
+  
+  - `address` Transaction address (in hexadecimal)
+  - `endpoint` Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const index = archethic.getLastTransaction("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
+  // 0
+  ```
+    #### getTransactionChain(address, endpoint)
+  Query a node to find all transaction addresses of a chain (sorted by most recent)
+  
+  - `address` Transaction address (in hexadecimal)
+  - `endpoint` Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const index = archethic.getTransactionChain("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
+  // 0
+  ```
+
   #### getStorageNoncePublicKey(endpoint)
   Query a node to find the public key of the shared storage node key
   
