@@ -2,10 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArchEthic - Public Key Generator</title>
+    <title>ARCHEthic - Public Key Generator</title>
 </head>
 <body>
-    <h1>ArchEthic Public Key generator</h1>
+    <h1>ARCHEthic Public Key generator</h1>
 
     <label for="seed">Key generation seed</label> <br />
     <input type="password" id="seed" placeholder="Enter your transaction seed" style="width: 500px" />
@@ -37,7 +37,7 @@
                 return
             }
 
-            const { publicKey } = ArchEthic.deriveKeyPair(seed, index, curve)
+            const { publicKey } = ARCHEthic.deriveKeyPair(seed, index, curve)
             document.querySelector("#publicKey").innerText = publicKey
         }
     </script>
