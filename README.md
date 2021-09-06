@@ -142,10 +142,10 @@ It supports the ArchEthic Cryptography rules which are:
   `content` is a string defining the smart contract
   
   #### addSecret(secret, authorizedKeys)
-  Add add secret in the `data.keys.secrets` section of the transaction with its related authorized public keys able to decrypt it
+  Add a secret in the `data.keys.secrets` section of the transaction with its related authorized public keys able to decrypt it
   `secret` is the hexadecimal encoding or Uint8Array representing the encrypted secret
   `authorizedKeys` is an object represented by `publicKey` => `encryptedSecretKeyForThisKey`
-		- `publicKey` is the hexadecimal encoding or Uint8Array representing the public keyV
+		- `publicKey` is the hexadecimal encoding or Uint8Array representing the public key
 		- `encryptedSecretKey` is the hexadecimal encoding or Uint8Array representing the secret key encrypted with the public key (see `ecEncrypt`)
   
   #### addUCOTransfer(to, amount)
