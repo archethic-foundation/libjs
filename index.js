@@ -88,12 +88,22 @@ module.exports = {
     },
 
     /**
-     * Retrieve all transaction addresses in a specific chain (sorted by most recent)
+     * Retrieve 10 transactions in a specific chain (sorted by most recent)
+     * @param {String} address Transaction address
+     * @param {Integer} page Page number
+     * @param {String} endpoint Node endpoint
+     */
+     getTransactionChain: function (address, page, endpoint) {
+        return API.getTransactionChain(address, page, endpoint)
+    },
+
+    /**
+     * Retrieve last balance of an address
      * @param {String} address Transaction address
      * @param {String} endpoint Node endpoint
      */
-     getTransactionChain: function (address, endpoint) {
-        return API.getTransactionChain(address, endpoint)
+     getLastAddressBalance: function (address, endpoint) {
+        return API.getLastAddressBalance(address, endpoint)
     },
 
     /**

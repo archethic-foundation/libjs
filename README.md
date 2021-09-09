@@ -230,7 +230,7 @@ It supports the ArchEthic Cryptography rules which are:
   ```
 
   #### getLastTransaction(address, endpoint)
-  Query a node to find the last address of a chain
+  Query a node to find the last transaction of a chain
   
   - `address` Transaction address (in hexadecimal)
   - `endpoint` Node endpoint
@@ -238,19 +238,152 @@ It supports the ArchEthic Cryptography rules which are:
   ```js
   const archethic = require('archethic')
   const index = archethic.getLastTransaction("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
+  ```
+  <details>
+  <summary>Object returned</summary>
+
+  ```JSON
+  {
+    "address": "",
+    "chainLength": 1,
+    "type": "",
+    "data": {
+      "content": "",
+      "ledger": {
+        "nft": {
+          "transfers": [
+            {
+              "amount": 1,
+              "to": "",
+              "nft": ""
+            }
+          ]
+        },
+        "uco": {
+          "transfers": [
+            {
+              "amount": 1,
+              "to": ""
+            }
+          ]
+        }
+      }
+    },
+    "inputs": [
+      {
+        "amount": 1,
+        "from": "",
+        "nftAddress": "",
+        "timestamp": 1,
+        "type": ""
+      }
+    ],
+    "validationStamp": {
+      "ledgerOperations": {
+        "fee": 1
+      },
+      "timestamp": 1
+    }
+  }
+  ```
+  </details>
+
+
+  #### getTransactionChain(address, endpoint)
+  Query a node to find all transactions of a chain (sorted by most recent)
+
+  Result is paginated by 10 transactions, page 1 is the most recent transaction
+  
+  - `address` Transaction address (in hexadecimal)
+  - `page` Page number
+  - `endpoint` Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const index = archethic.getTransactionChain("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",  1, "https://www.archethic.net")
   // 0
   ```
-  #### getTransactionChain(address, endpoint)
-  Query a node to find all transaction addresses of a chain (sorted by most recent)
+
+  <details>
+  <summary>Object returned</summary>
+
+  Array of :
+  ```JSON
+  {
+    "address": "",
+    "chainLength": 1,
+    "type": "",
+    "data": {
+      "content": "",
+      "ledger": {
+        "nft": {
+          "transfers": [
+            {
+              "amount": 1,
+              "to": "",
+              "nft": ""
+            }
+          ]
+        },
+        "uco": {
+          "transfers": [
+            {
+              "amount": 1,
+              "to": ""
+            }
+          ]
+        }
+      }
+    },
+    "inputs": [
+      {
+        "amount": 1,
+        "from": "",
+        "nftAddress": "",
+        "timestamp": 1,
+        "type": ""
+      }
+    ],
+    "validationStamp": {
+      "ledgerOperations": {
+        "fee": 1
+      },
+      "timestamp": 1
+    }
+  }
+  ```
+  </details>
+
+
+  #### getLastAddressBalance(address, endpoint)
+  Query a node to find the last balance of an address
   
   - `address` Transaction address (in hexadecimal)
   - `endpoint` Node endpoint
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getTransactionChain("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
+  const index = archethic.getLastAddressBalance("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
   // 0
   ```
+
+  <details>
+  <summary>Object returned</summary>
+
+
+  ```JSON
+  {
+    "uco": 1,
+    "nft": [
+      {
+        "address": "",
+        "amount": 1
+      }
+    ]
+  }
+  ```
+  </details>
+
 
   #### getStorageNoncePublicKey(endpoint)
   Query a node to find the public key of the shared storage node key
