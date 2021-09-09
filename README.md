@@ -237,7 +237,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getLastTransaction("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
+  const lastTransaction = archethic.getLastTransaction("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
   ```
   <details>
   <summary>Object returned</summary>
@@ -300,8 +300,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getTransactionChain("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",  1, "https://www.archethic.net")
-  // 0
+  const transactionChain = archethic.getTransactionChain("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",  1, "https://www.archethic.net")
   ```
 
   <details>
@@ -363,8 +362,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getLastAddressBalance("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
-  // 0
+  const balance = archethic.getLastAddressBalance("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
   ```
 
   <details>
