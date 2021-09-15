@@ -27,12 +27,18 @@ describe("Transaction builder", () => {
 	describe("addSecret", () => {
 		it("should add a secret with its authorized keys into the transaction data", () => {
 			const tx = new TransactionBuilder("transfer")
-				.addSecret("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", {
-					"0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646": "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
-				})
+				.addSecret("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", [{
+					publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+					encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+				}])
 
 			assert.deepStrictEqual(tx.data.keys.secrets, [hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")])
-			assert.deepStrictEqual(tx.data.keys.authorizedKeys[0][hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")], hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"))
+			assert.deepStrictEqual(tx.data.keys.authorizedKeys[0], [
+				{
+					publicKey: hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
+					encryptedSecretKey: hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+				}
+			])
 		})
 	})
 
@@ -81,9 +87,10 @@ describe("Transaction builder", () => {
 			const secret = "mysecret"
 
 			const tx = new TransactionBuilder("transfer")
-				.addSecret(secret, { 
-					"0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646": "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
-				})
+				.addSecret(secret, [{ 
+					publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+					encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+				}])
 				.addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2020)
 				.addNFTTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 100, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
 				.setCode(code)
@@ -163,9 +170,10 @@ describe("Transaction builder", () => {
 			`
 
 			const tx = new TransactionBuilder("transfer")
-				.addSecret(secret, { 
-					"0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646": "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
-				})
+				.addSecret(secret, [{ 
+					publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+					encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+				}])
 				.addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2020)
 				.addNFTTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 100, "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
 				.setCode(code)
@@ -245,9 +253,10 @@ describe("Transaction builder", () => {
 
 			const tx = new TransactionBuilder("transfer")
 				.addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2193)
-				.addSecret(Uint8Array.from([0, 1, 2, 3, 4]), {
-					"0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646": "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
-				})
+				.addSecret(Uint8Array.from([0, 1, 2, 3, 4]), [{
+          publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+          encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+				}])
 				.build("seed", 0)
 				.originSign(originKeypair.privateKey)
 
@@ -262,8 +271,8 @@ describe("Transaction builder", () => {
 			assert.strictEqual(parsedTx.previousSignature, uint8ArrayToHex(previousSig))
 			assert.strictEqual(parsedTx.originSignature, uint8ArrayToHex(originSig))
 			assert.strictEqual(parsedTx.data.keys.secrets[0], uint8ArrayToHex(Uint8Array.from([0, 1, 2, 3, 4])))
-			assert.strictEqual(parsedTx.data.keys.authorizedKeys[0]["0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"], "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
 			assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount: toBigInt(0.2193)})
+			assert.deepStrictEqual(parsedTx.data.keys.authorizedKeys[0], [{ publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"}])
 		})
 	})
 })
