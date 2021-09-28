@@ -1,6 +1,6 @@
 const TransactionBuilder = require("../lib/transaction_builder")
 const Crypto = require("../lib/crypto")
-const { hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeFloat64 } = require("../lib/utils")
+const { hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, toBigInt } = require("../lib/utils")
 
 const assert = require("assert")
 
@@ -43,7 +43,7 @@ describe("Transaction builder", () => {
 
 			assert.strictEqual(tx.data.ledger.uco.transfers.length, 1)
 			assert.deepStrictEqual(tx.data.ledger.uco.transfers[0].to, hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
-			assert.strictEqual(tx.data.ledger.uco.transfers[0].amount, 10.03)
+			assert.strictEqual(tx.data.ledger.uco.transfers[0].amount, toBigInt(10.03))
 		})
 	})
 
@@ -57,7 +57,7 @@ describe("Transaction builder", () => {
 
 			assert.strictEqual(tx.data.ledger.nft.transfers.length, 1)
 			assert.deepStrictEqual(tx.data.ledger.nft.transfers[0].to, hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
-			assert.strictEqual(tx.data.ledger.nft.transfers[0].amount, 10.03)
+			assert.strictEqual(tx.data.ledger.nft.transfers[0].amount, toBigInt(10.03))
 			assert.deepStrictEqual(tx.data.ledger.nft.transfers[0].nft, hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
 		})
 	})
@@ -121,10 +121,10 @@ describe("Transaction builder", () => {
 				concatUint8Arrays([hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")]),
 				// Nb of uco transfers
 				Uint8Array.from([1]),
-				concatUint8Arrays([hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeFloat64(0.2020)]),
+				concatUint8Arrays([hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(0.2020))]),
 				// Nb of NFT transfers
 				Uint8Array.from([1]),
-				concatUint8Arrays([hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeFloat64(100)]),
+				concatUint8Arrays([hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(100))]),
 				// Nb of recipients
 				Uint8Array.from([1]),
 				hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
@@ -203,14 +203,14 @@ describe("Transaction builder", () => {
 				Uint8Array.from([1]),
 				concatUint8Arrays([
 					hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), 
-					encodeFloat64(0.2020)
+					encodeInt64(toBigInt(0.2020))
 				]),
 				// Nb of NFT transfers
 				Uint8Array.from([1]),
 				concatUint8Arrays([
 					hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), 
 					hexToUint8Array("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), 
-					encodeFloat64(100)
+					encodeInt64(toBigInt(100))
 				]),
 				// Nb of recipients
 				Uint8Array.from([1]),
@@ -263,7 +263,7 @@ describe("Transaction builder", () => {
 			assert.strictEqual(parsedTx.originSignature, uint8ArrayToHex(originSig))
 			assert.strictEqual(parsedTx.data.keys.secrets[0], uint8ArrayToHex(Uint8Array.from([0, 1, 2, 3, 4])))
 			assert.strictEqual(parsedTx.data.keys.authorizedKeys[0]["0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"], "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
-			assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount:  0.2193})
+			assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount: toBigInt(0.2193)})
 		})
 	})
 })
