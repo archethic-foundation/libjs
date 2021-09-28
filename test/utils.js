@@ -1,4 +1,4 @@
-const { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, encodeFloat64 } = require("../lib/utils")
+const { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64 } = require("../lib/utils")
 const assert = require("assert")
 
 describe("Utils", () => {
@@ -51,12 +51,6 @@ describe("Utils", () => {
 	describe("encodeInt64", () => {
 		it ("should encode an integer into a big integer on 8 bytes", () => {
 			assert.deepStrictEqual(encodeInt64(212323839821021), new Uint8Array([0, 0, 193, 27, 127, 12, 196, 221]))
-		})
-	})
-
-	describe("encodeFloat64", () => {
-		it ("should encode an double into a 8 bytes array", () => {
-			assert.deepStrictEqual(encodeFloat64(0.243829489482948), new Uint8Array([63, 207, 53, 206, 1, 144, 151, 247]))
 		})
 	})
 
