@@ -1,421 +1,421 @@
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>ARCHEthic - TransactionBuilder</title>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-		<style> 
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCHEthic - TransactionBuilder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style> 
 body {
-	background: linear-gradient(-30deg,#00a4db 30%,#006cd2 70%)
+  background: linear-gradient(-30deg,#00a4db 30%,#006cd2 70%)
 }
-		</style>
-	</head>
-	<body>
-		<div class="container margin-top-6">
-			<div class="columns">
-				<div class="column">
-					<h1 class="is-size-2 has-text-white">ARCHEthic</h1>
-				</div>
-			</div>
-			<div class="columns">
-				<div class="column">
-					<h1 class="is-size-5 has-text-white">Transaction Builder</h1>
-				</div>
-			</div>
-
-			<div style="">
-				<form>
-					<div class="box">
-						<label for="endpoint">Node endpoint</label> <br /><br />
-						<input type="text" class="input" value="http://www.archethic.net" id="endpoint"/>
-					</div>
-					<div class="box">
-						<label for="seed">Enter your seed/passphrase</label>
-						<input type="password" class="input" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
-						<label for="curve">Cryptographic curve</label>
-						<select id="curve" class="select">
-							<option value="P256">P256</option>
-							<option value="ed25519">Ed25519</option>
-							<option value="secp256k1">secp256k1</option>
-						</select>
-					</div>
-					<div class="box">
-						<label for="index">Transaction index</label>
-						<input type="number" class="input" min=0 id="index" value="0"/>
-					</div>
-					<div class="box">
-						<label for="type">Select a type of transaction</label>
-						<select id="type" class="select">
-							<option value="transfer">Transfer</option>
-							<option value="hosting">Hosting</option>
-							<option value="nft">NFT</option>
-						</select>
-					</div>
-					<div class="box">
-						<label for="code">Enter your smart contract code</label>
-						<br />
-						<textarea id="code" cols="40" rows="5" class="textarea" placeholder="Smart contract code"></textarea>
-					</div>
-					<div class="box">
-						<label for="code">Enter your content</label>
-						<br />
-						<textarea id="content" class="textarea" cols="40" rows="5" placeholder="Content to host"></textarea>
-						<br />
-						<br />
-
-						<input type="file" id="content_upload">
-						<label  for="file">Choose a file</label>
-					</div>
-					<div class="box">
-						<button class="button" type="button" onClick="addSecret()">Add secret</button>
-						<div id="secrets"></div>
-					</div>
-					<div class="box">
-						<label for="amount_address">Add a UCO transfer</label>
-						<br />
-						<input type="text" class="input" id="amount_address" placeholder="Enter the address of the recipient" style="width: 400px" />
-						<input type="text" class="input" id="uco_amount" placeholder="Enter the amount to send" style="width: 200px" />
-						<button type="button" class="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
-						<br />
-						<select id="uco_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
-					</div>
-					<div class="box">
-						<label for="nft_amount_address">Add a NFT transfer</label>
-						<br />
-						<input type="text" class="input" id="nft_recipient_address" placeholder="Enter the address of the recipient" style="width: 400px" />
-						<input type="text" class="input" id="nft_amount" placeholder="Enter the amount to send" style="width: 200px" />
-						<input type="text" class="input" id="nft_address" placeholder="Enter the NFT address to send" style="width: 200px" />
-						<button class="button" type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
-						<br />
-						<select id="nft_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
-					</div>
-					<div class="box">
-						<label for="recipient">Add recipient</label>
-						<br />
-						<input type="text" class="input" id="recipient" placeholder="Enter the address of the recipient" style="width: 400px" />
-						<button type="button" class="button" onclick="onClickAddRecipient()">Add recipient</button>
-						<br />
-						<select id="recipients" class="select" multiple="true" size="0" style="width: 500px;"></select>
-					</div>
-				</form>
-				<div class="column">
-					<button type="button" class="button is-warning" onclick="generate_transaction()">Generate</button>
-				</div>
-				<div class="columns">
-					<div class="column">
-						<div class="box" style="visibility: hidden" id="transactionOutput">
-							<p>Transaction address: <span id="address"></span></p>
-							<button type="button" class="button" onclick="sendTransaction()">Send</button>
-							<p id="success" style="display: none">Your transaction has been sent to the network. <br />You can verify it at <a id="tx_address_link" target="_blank"></a></p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<script src="../dist/index.js"></script>
-		<script>
-
-			const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
-			let file_content = ""
-
-			let transaction
-			let ucoTransfers = []	
-			let nftTransfers = []	
-			let recipients = []
-			let secrets = []
-			let authorizedPublicKeysBySecret = []
-
-			function generate_transaction() {
-				transaction = null
-				document.querySelector("#transactionOutput").style.visibility = "hidden";
-
-				seed = document.querySelector("#seed").value
-				index = document.querySelector("#index").value
-				curve = document.querySelector("#curve").value
-				endpoint = document.querySelector("#endpoint").value
-
-				code = document.querySelector("#code").value
-				if (code != "") {
-					secretIndex = secrets.findIndex(function (secret) { return secret == seed })
-					if (secretIndex == -1) {
-						alert("You need to add the transaction seed in the secret to let nodes generate new transaction from your smart contract")
-						return
-					}
-
-					ARCHEthic.getStorageNoncePublicKey(endpoint).then(function (publicKey) {
-						if (!authorizedPublicKeysBySecret.find(function (key) { key == publicKey })) {
-								authorizedPublicKeysBySecret[secretIndex].push(publicKey)
-							}
-						})
-				}
-
-				content = document.querySelector("#content").value
-				if (file_content != "") {
-					content = file_content
-				}
-
-				txBuilder = ARCHEthic.newTransactionBuilder(document.querySelector("#type").value)
-					.setCode(document.querySelector("#code").value)
-					.setContent(content)
-
-				secrets.forEach(function(secret, index) {
-					secretKey = ARCHEthic.randomSecretKey()
-					cipher = ARCHEthic.aesEncrypt(secret, secretKey)
-
-					authorizedKeys = authorizedPublicKeysBySecret[index].reduce(function (acc, publicKey) {
-						acc[publicKey] = ARCHEthic.ecEncrypt(secretKey, publicKey)
-						return acc
-					}, {})
-
-					txBuilder.addSecret(cipher, authorizedKeys)
-				})
-
-				ucoTransfers.forEach(function (transfer) {
-					txBuilder.addUCOTransfer(transfer.to, transfer.amount)
-				})
-
-				nftTransfers.forEach(function (transfer) {
-					txBuilder.addNFTTransfer(transfer.to, transfer.amount, transfer.nft)
-				})
-
-				recipients.forEach(function (recipient) {
-					txBuilder.addRecipient(recipient)
-				})
-
-
-				transaction = txBuilder
-					.build(seed, parseInt(index), curve)
-					.originSign(originPrivateKey)
-
-				document.querySelector("#transactionOutput #address").innerText = toHex(transaction.address)
-				document.querySelector("#transactionOutput").style.visibility = "visible";
-			}
-
-			function onClickAddStorageNoncePublicKey() {
-				endpoint = document.querySelector("#endpoint").value
-				ARCHEthic.getStorageNoncePublicKey(endpoint).then(function (storage_nonce) {
-					var option = document.createElement("option");
-					option.text = storage_nonce;
-					option.value = storage_nonce;
-					var select = document.querySelector("#authorized_public_keys");
-					select.appendChild(option);
-				})
-			}
-
-			function onClickAddTransfer() {
-				transfer_to = document.querySelector("#amount_address").value
-				transfer_amount = document.querySelector("#uco_amount").value
-
-				amount = parseFloat(transfer_amount)
-				if (transfer_amount == "" || amount == NaN || amount < 0.0) {
-					return
-				}
-
-				if (transfer_to == "") {
-					return
-				}
-
-				ucoTransfers.push({ to: transfer_to, amount: transfer_amount })
-
-				var option = document.createElement("option");
-				option.text = transfer_to + ": " + transfer_amount;
-				option.value = transfer_to + ":" + transfer_amount;
-				var select = document.querySelector("#uco_transfers");
-				select.appendChild(option);
-
-				select.size += 1;
-
-				document.querySelector("#amount_address").value = ""
-				document.querySelector("#uco_amount").value = ""
-			}
-
-			function onClickAddNFTTransfer() {
-				transfer_to = document.querySelector("#nft_recipient_address").value
-				transfer_amount = document.querySelector("#nft_amount").value
-				transfer_nft = document.querySelector("#nft_address").value
-
-				amount = parseFloat(transfer_amount)
-				if (transfer_amount == "" || amount == NaN || amount < 0.0) {
-					return
-				}
-
-				if (transfer_to == "") {
-					return
-				}
-
-				if (transfer_nft == "") {
-					return
-				}
-
-				nftTransfers.push({ to: transfer_to, amount: transfer_amount, nft: transfer_nft })
-
-				var option = document.createElement("option");
-				option.text = transfer_to + ": " + transfer_amount + ": " + transfer_nft;
-				option.value = transfer_to + ":" + transfer_amount + ":" + transfer_nft;
-				var select = document.querySelector("#nft_transfers");
-				select.appendChild(option);
-
-				select.size += 1;
-
-				document.querySelector("#nft_recipient_address").value = ""
-				document.querySelector("#nft_amount").value = ""
-				document.querySelector("#nft_address").value = ""
-			}
-
-			function onClickAddRecipient() {
-				var recipient = document.querySelector("#recipient").value
-				recipients.push(recipient)
-
-				var option = document.createElement("option");
-				option.text = recipient;
-				option.value = recipient;
-				var select = document.querySelector("#recipients");
-				select.appendChild(option);
-
-				select.size += 1;
-
-				document.querySelector("#recipient").value = ""
-			}
-
-			function toHex(bytes) {
-				return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
-			}
-
-			function toByteArray(hexString) {
-				return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-			}
-
-			function sendTransaction() {
-					endpoint = document.querySelector("#endpoint").value
-					ARCHEthic.sendTransaction(transaction, endpoint).then((data) => {
-						if (data.errors) {
-							document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
-							return
-						}
-
-						document.querySelector("#success").style.display = "block"
-						document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(transaction.address)
-						document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(transaction.address))
-					})
-				}
-
-			function getTransactionIndex() {
-				endpoint = document.querySelector("#endpoint").value
-				seed = document.querySelector("#seed").value
-				curve = document.querySelector("#curve").value
-
-				address = ARCHEthic.deriveAddress(seed, 0, curve)
-				ARCHEthic.getTransactionIndex(address, endpoint).then((nb) => {
-					document.querySelector("#index").value = nb
-				})
-			}
-
-
-			document.querySelector('#content_upload').addEventListener('change', (event) => {
-				const fileList = event.target.files;
-
-				let fr = new FileReader()
-				fr.onload = function (e) {
-								file_content = e.target.result
-							}
-				fr.readAsArrayBuffer(fileList[0])
-			})
-
-			function addSecret() {
-
-				let secretIndex = secrets.length
-
-				let secretEl = document.createElement("div")
-
-				let secretInputLabel = document.createElement("label")
-				secretInputLabel.innerText = "Enter the secret"
-				secretInputLabel.setAttribute("for", "secret_" + secretIndex)
-
-				let secretInput = document.createElement("input")
-				secretInput.setAttribute("type", "password")
-				secretInput.setAttribute("id", "secret_" + secretIndex)
-				secretInput.setAttribute("placeholder", "Secret to host")
-				secretInput.setAttribute("class", "input")
-				secretInput.addEventListener("change", function (e) {
-					secrets[secretIndex] = e.target.value
-				})
-
-				secretEl.appendChild(document.createElement("hr"))
-				secretEl.appendChild(secretInputLabel)
-				secretEl.appendChild(secretInput)
-				secretEl.appendChild(document.createElement("br"))
-				secretEl.appendChild(document.createElement("br"))
-
-				let authorizedPublicKeyLabel = document.createElement("label")
-				authorizedPublicKeyLabel.setAttribute("for", "authPublicKey_0")
-
-				let authorizedPublicKeyInput = document.createElement("input")
-				authorizedPublicKeyInput.setAttribute("type", "text")
-				authorizedPublicKeyInput.setAttribute("id", "authPublicKey_0")
-				authorizedPublicKeyInput.setAttribute("placeholder", "Enter the public key to authorize")
-				authorizedPublicKeyInput.setAttribute("class", "input")
-
-				let authorizedPublicKeyButtonAdd = document.createElement("button")
-				authorizedPublicKeyButtonAdd.setAttribute("class", "button")
-				authorizedPublicKeyButtonAdd.setAttribute("type", "button")
-				authorizedPublicKeyButtonAdd.innerText = "Add public key"
-				authorizedPublicKeyButtonAdd.addEventListener("click", function() { addPublicKey(secretIndex) })
-
-				let storageNoncePublicKeyButtonAdd = document.createElement("button")
-				storageNoncePublicKeyButtonAdd.setAttribute("class", "button")
-				storageNoncePublicKeyButtonAdd.setAttribute("type", "button")
-				storageNoncePublicKeyButtonAdd.innerText = "Load storage nonce public key"
-				storageNoncePublicKeyButtonAdd.addEventListener("click", function () { loadStorageNoncePublicKey(secretIndex) })
-
-				let publicKeyList = document.createElement("select")
-				publicKeyList.setAttribute("multiple", "true")
-				publicKeyList.setAttribute("class", "select")
-				publicKeyList.setAttribute("id", "publicKeys_0")
-				publicKeyList.style.width = "500px"
-
-				secretEl.appendChild(authorizedPublicKeyLabel)
-				secretEl.appendChild(authorizedPublicKeyInput)
-				secretEl.appendChild(authorizedPublicKeyButtonAdd)
-				secretEl.appendChild(storageNoncePublicKeyButtonAdd)
-				secretEl.appendChild(document.createElement("br"))
-				secretEl.appendChild(document.createElement("br"))
-				secretEl.appendChild(publicKeyList)
-				document.querySelector("#secrets").appendChild(secretEl)
-			}
-
-			function addPublicKey(secretIndex) {
-				if (authorizedPublicKeysBySecret[secretIndex] == undefined) {
-					authorizedPublicKeysBySecret[secretIndex] = []
-				}
-
-				let publicKey = document.querySelector("#authPublicKey_" + secretIndex).value
-				if (publicKey == "") {
-					return
-				}
-				authorizedPublicKeysBySecret[secretIndex].push(publicKey)
-				addPublicKeyToTheList(secretIndex, publicKey)
-				document.querySelector("#authPublicKey_" + secretIndex).value = ""
-			}
-
-			function loadStorageNoncePublicKey(secretIndex) {
-				if (authorizedPublicKeysBySecret[secretIndex] == undefined) {
-					authorizedPublicKeysBySecret[secretIndex] = []
-				}
-
-				endpoint = document.querySelector("#endpoint").value
-				ARCHEthic.getStorageNoncePublicKey(endpoint).then(function (publicKey) {
-					authorizedPublicKeysBySecret[secretIndex].push(publicKey)
-					addPublicKeyToTheList(secretIndex, publicKey)
-				})
-			}
-
-			function addPublicKeyToTheList(secretIndex, publicKey) {
-				var option = document.createElement("option");
-				option.text = publicKey;
-				option.value = publicKey;
-				var select = document.querySelector("#publicKeys_" + secretIndex);
-				select.appendChild(option);
-			}
-		</script>
-	</body>
+    </style>
+  </head>
+  <body>
+    <div class="container margin-top-6">
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-2 has-text-white">ARCHEthic</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-5 has-text-white">Transaction Builder</h1>
+        </div>
+      </div>
+
+      <div style="">
+        <form>
+          <div class="box">
+            <label for="endpoint">Node endpoint</label> <br /><br />
+            <input type="text" class="input" value="http://www.archethic.net" id="endpoint"/>
+          </div>
+          <div class="box">
+            <label for="seed">Enter your seed/passphrase</label>
+            <input type="password" class="input" id="seed" placeholder="TransactionChain seed" style="width: 500px" onchange="getTransactionIndex()" />
+            <label for="curve">Cryptographic curve</label>
+            <select id="curve" class="select">
+              <option value="P256">P256</option>
+              <option value="ed25519">Ed25519</option>
+              <option value="secp256k1">secp256k1</option>
+            </select>
+          </div>
+          <div class="box">
+            <label for="index">Transaction index</label>
+            <input type="number" class="input" min=0 id="index" value="0"/>
+          </div>
+          <div class="box">
+            <label for="type">Select a type of transaction</label>
+            <select id="type" class="select">
+              <option value="transfer">Transfer</option>
+              <option value="hosting">Hosting</option>
+              <option value="nft">NFT</option>
+            </select>
+          </div>
+          <div class="box">
+            <label for="code">Enter your smart contract code</label>
+            <br />
+            <textarea id="code" cols="40" rows="5" class="textarea" placeholder="Smart contract code"></textarea>
+          </div>
+          <div class="box">
+            <label for="code">Enter your content</label>
+            <br />
+            <textarea id="content" class="textarea" cols="40" rows="5" placeholder="Content to host"></textarea>
+            <br />
+            <br />
+
+            <input type="file" id="content_upload">
+            <label  for="file">Choose a file</label>
+          </div>
+          <div class="box">
+            <button class="button" type="button" onClick="addSecret()">Add secret</button>
+            <div id="secrets"></div>
+          </div>
+          <div class="box">
+            <label for="amount_address">Add a UCO transfer</label>
+            <br />
+            <input type="text" class="input" id="amount_address" placeholder="Enter the address of the recipient" style="width: 400px" />
+            <input type="text" class="input" id="uco_amount" placeholder="Enter the amount to send" style="width: 200px" />
+            <button type="button" class="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
+            <br />
+            <select id="uco_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+          </div>
+          <div class="box">
+            <label for="nft_amount_address">Add a NFT transfer</label>
+            <br />
+            <input type="text" class="input" id="nft_recipient_address" placeholder="Enter the address of the recipient" style="width: 400px" />
+            <input type="text" class="input" id="nft_amount" placeholder="Enter the amount to send" style="width: 200px" />
+            <input type="text" class="input" id="nft_address" placeholder="Enter the NFT address to send" style="width: 200px" />
+            <button class="button" type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
+            <br />
+            <select id="nft_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+          </div>
+          <div class="box">
+            <label for="recipient">Add recipient</label>
+            <br />
+            <input type="text" class="input" id="recipient" placeholder="Enter the address of the recipient" style="width: 400px" />
+            <button type="button" class="button" onclick="onClickAddRecipient()">Add recipient</button>
+            <br />
+            <select id="recipients" class="select" multiple="true" size="0" style="width: 500px;"></select>
+          </div>
+        </form>
+        <div class="column">
+          <button type="button" class="button is-warning" onclick="generate_transaction()">Generate</button>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box" style="visibility: hidden" id="transactionOutput">
+              <p>Transaction address: <span id="address"></span></p>
+              <button type="button" class="button" onclick="sendTransaction()">Send</button>
+              <p id="success" style="display: none">Your transaction has been sent to the network. <br />You can verify it at <a id="tx_address_link" target="_blank"></a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="../dist/index.js"></script>
+    <script>
+
+      const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
+      let file_content = ""
+
+      let transaction
+      let ucoTransfers = [] 
+      let nftTransfers = [] 
+      let recipients = []
+      let secrets = []
+      let authorizedPublicKeysBySecret = []
+
+      function generate_transaction() {
+        transaction = null
+        document.querySelector("#transactionOutput").style.visibility = "hidden";
+
+        seed = document.querySelector("#seed").value
+        index = document.querySelector("#index").value
+        curve = document.querySelector("#curve").value
+        endpoint = document.querySelector("#endpoint").value
+
+        code = document.querySelector("#code").value
+        if (code != "") {
+          secretIndex = secrets.findIndex(function (secret) { return secret == seed })
+          if (secretIndex == -1) {
+            alert("You need to add the transaction seed in the secret to let nodes generate new transaction from your smart contract")
+            return
+          }
+
+          ARCHEthic.getStorageNoncePublicKey(endpoint).then(function (publicKey) {
+            if (!authorizedPublicKeysBySecret.find(function (key) { key == publicKey })) {
+                authorizedPublicKeysBySecret[secretIndex].push(publicKey)
+              }
+            })
+        }
+
+        content = document.querySelector("#content").value
+        if (file_content != "") {
+          content = file_content
+        }
+
+        txBuilder = ARCHEthic.newTransactionBuilder(document.querySelector("#type").value)
+          .setCode(document.querySelector("#code").value)
+          .setContent(content)
+
+        secrets.forEach(function(secret, index) {
+          secretKey = ARCHEthic.randomSecretKey()
+          cipher = ARCHEthic.aesEncrypt(secret, secretKey)
+
+          authorizedKeys = authorizedPublicKeysBySecret[index].reduce(function (acc, publicKey) {
+            acc[publicKey] = ARCHEthic.ecEncrypt(secretKey, publicKey)
+            return acc
+          }, {})
+
+          txBuilder.addSecret(cipher, authorizedKeys)
+        })
+
+        ucoTransfers.forEach(function (transfer) {
+          txBuilder.addUCOTransfer(transfer.to, transfer.amount)
+        })
+
+        nftTransfers.forEach(function (transfer) {
+          txBuilder.addNFTTransfer(transfer.to, transfer.amount, transfer.nft)
+        })
+
+        recipients.forEach(function (recipient) {
+          txBuilder.addRecipient(recipient)
+        })
+
+
+        transaction = txBuilder
+          .build(seed, parseInt(index), curve)
+          .originSign(originPrivateKey)
+
+        document.querySelector("#transactionOutput #address").innerText = toHex(transaction.address)
+        document.querySelector("#transactionOutput").style.visibility = "visible";
+      }
+
+      function onClickAddStorageNoncePublicKey() {
+        endpoint = document.querySelector("#endpoint").value
+        ARCHEthic.getStorageNoncePublicKey(endpoint).then(function (storage_nonce) {
+          var option = document.createElement("option");
+          option.text = storage_nonce;
+          option.value = storage_nonce;
+          var select = document.querySelector("#authorized_public_keys");
+          select.appendChild(option);
+        })
+      }
+
+      function onClickAddTransfer() {
+        transfer_to = document.querySelector("#amount_address").value
+        transfer_amount = document.querySelector("#uco_amount").value
+
+        amount = parseFloat(transfer_amount)
+        if (transfer_amount == "" || amount == NaN || amount < 0.0) {
+          return
+        }
+
+        if (transfer_to == "") {
+          return
+        }
+
+        ucoTransfers.push({ to: transfer_to, amount: transfer_amount })
+
+        var option = document.createElement("option");
+        option.text = transfer_to + ": " + transfer_amount;
+        option.value = transfer_to + ":" + transfer_amount;
+        var select = document.querySelector("#uco_transfers");
+        select.appendChild(option);
+
+        select.size += 1;
+
+        document.querySelector("#amount_address").value = ""
+        document.querySelector("#uco_amount").value = ""
+      }
+
+      function onClickAddNFTTransfer() {
+        transfer_to = document.querySelector("#nft_recipient_address").value
+        transfer_amount = document.querySelector("#nft_amount").value
+        transfer_nft = document.querySelector("#nft_address").value
+
+        amount = parseFloat(transfer_amount)
+        if (transfer_amount == "" || amount == NaN || amount < 0.0) {
+          return
+        }
+
+        if (transfer_to == "") {
+          return
+        }
+
+        if (transfer_nft == "") {
+          return
+        }
+
+        nftTransfers.push({ to: transfer_to, amount: transfer_amount, nft: transfer_nft })
+
+        var option = document.createElement("option");
+        option.text = transfer_to + ": " + transfer_amount + ": " + transfer_nft;
+        option.value = transfer_to + ":" + transfer_amount + ":" + transfer_nft;
+        var select = document.querySelector("#nft_transfers");
+        select.appendChild(option);
+
+        select.size += 1;
+
+        document.querySelector("#nft_recipient_address").value = ""
+        document.querySelector("#nft_amount").value = ""
+        document.querySelector("#nft_address").value = ""
+      }
+
+      function onClickAddRecipient() {
+        var recipient = document.querySelector("#recipient").value
+        recipients.push(recipient)
+
+        var option = document.createElement("option");
+        option.text = recipient;
+        option.value = recipient;
+        var select = document.querySelector("#recipients");
+        select.appendChild(option);
+
+        select.size += 1;
+
+        document.querySelector("#recipient").value = ""
+      }
+
+      function toHex(bytes) {
+        return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+      }
+
+      function toByteArray(hexString) {
+        return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+      }
+
+      function sendTransaction() {
+          endpoint = document.querySelector("#endpoint").value
+          ARCHEthic.sendTransaction(transaction, endpoint).then((data) => {
+            if (data.errors) {
+              document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
+              return
+            }
+
+            document.querySelector("#success").style.display = "block"
+            document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(transaction.address)
+            document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(transaction.address))
+          })
+        }
+
+      function getTransactionIndex() {
+        endpoint = document.querySelector("#endpoint").value
+        seed = document.querySelector("#seed").value
+        curve = document.querySelector("#curve").value
+
+        address = ARCHEthic.deriveAddress(seed, 0, curve)
+        ARCHEthic.getTransactionIndex(address, endpoint).then((nb) => {
+          document.querySelector("#index").value = nb
+        })
+      }
+
+
+      document.querySelector('#content_upload').addEventListener('change', (event) => {
+        const fileList = event.target.files;
+
+        let fr = new FileReader()
+        fr.onload = function (e) {
+                file_content = e.target.result
+              }
+        fr.readAsArrayBuffer(fileList[0])
+      })
+
+      function addSecret() {
+
+        let secretIndex = secrets.length
+
+        let secretEl = document.createElement("div")
+
+        let secretInputLabel = document.createElement("label")
+        secretInputLabel.innerText = "Enter the secret"
+        secretInputLabel.setAttribute("for", "secret_" + secretIndex)
+
+        let secretInput = document.createElement("input")
+        secretInput.setAttribute("type", "password")
+        secretInput.setAttribute("id", "secret_" + secretIndex)
+        secretInput.setAttribute("placeholder", "Secret to host")
+        secretInput.setAttribute("class", "input")
+        secretInput.addEventListener("change", function (e) {
+          secrets[secretIndex] = e.target.value
+        })
+
+        secretEl.appendChild(document.createElement("hr"))
+        secretEl.appendChild(secretInputLabel)
+        secretEl.appendChild(secretInput)
+        secretEl.appendChild(document.createElement("br"))
+        secretEl.appendChild(document.createElement("br"))
+
+        let authorizedPublicKeyLabel = document.createElement("label")
+        authorizedPublicKeyLabel.setAttribute("for", "authPublicKey_0")
+
+        let authorizedPublicKeyInput = document.createElement("input")
+        authorizedPublicKeyInput.setAttribute("type", "text")
+        authorizedPublicKeyInput.setAttribute("id", "authPublicKey_0")
+        authorizedPublicKeyInput.setAttribute("placeholder", "Enter the public key to authorize")
+        authorizedPublicKeyInput.setAttribute("class", "input")
+
+        let authorizedPublicKeyButtonAdd = document.createElement("button")
+        authorizedPublicKeyButtonAdd.setAttribute("class", "button")
+        authorizedPublicKeyButtonAdd.setAttribute("type", "button")
+        authorizedPublicKeyButtonAdd.innerText = "Add public key"
+        authorizedPublicKeyButtonAdd.addEventListener("click", function() { addPublicKey(secretIndex) })
+
+        let storageNoncePublicKeyButtonAdd = document.createElement("button")
+        storageNoncePublicKeyButtonAdd.setAttribute("class", "button")
+        storageNoncePublicKeyButtonAdd.setAttribute("type", "button")
+        storageNoncePublicKeyButtonAdd.innerText = "Load storage nonce public key"
+        storageNoncePublicKeyButtonAdd.addEventListener("click", function () { loadStorageNoncePublicKey(secretIndex) })
+
+        let publicKeyList = document.createElement("select")
+        publicKeyList.setAttribute("multiple", "true")
+        publicKeyList.setAttribute("class", "select")
+        publicKeyList.setAttribute("id", "publicKeys_0")
+        publicKeyList.style.width = "500px"
+
+        secretEl.appendChild(authorizedPublicKeyLabel)
+        secretEl.appendChild(authorizedPublicKeyInput)
+        secretEl.appendChild(authorizedPublicKeyButtonAdd)
+        secretEl.appendChild(storageNoncePublicKeyButtonAdd)
+        secretEl.appendChild(document.createElement("br"))
+        secretEl.appendChild(document.createElement("br"))
+        secretEl.appendChild(publicKeyList)
+        document.querySelector("#secrets").appendChild(secretEl)
+      }
+
+      function addPublicKey(secretIndex) {
+        if (authorizedPublicKeysBySecret[secretIndex] == undefined) {
+          authorizedPublicKeysBySecret[secretIndex] = []
+        }
+
+        let publicKey = document.querySelector("#authPublicKey_" + secretIndex).value
+        if (publicKey == "") {
+          return
+        }
+        authorizedPublicKeysBySecret[secretIndex].push(publicKey)
+        addPublicKeyToTheList(secretIndex, publicKey)
+        document.querySelector("#authPublicKey_" + secretIndex).value = ""
+      }
+
+      function loadStorageNoncePublicKey(secretIndex) {
+        if (authorizedPublicKeysBySecret[secretIndex] == undefined) {
+          authorizedPublicKeysBySecret[secretIndex] = []
+        }
+
+        endpoint = document.querySelector("#endpoint").value
+        ARCHEthic.getStorageNoncePublicKey(endpoint).then(function (publicKey) {
+          authorizedPublicKeysBySecret[secretIndex].push(publicKey)
+          addPublicKeyToTheList(secretIndex, publicKey)
+        })
+      }
+
+      function addPublicKeyToTheList(secretIndex, publicKey) {
+        var option = document.createElement("option");
+        option.text = publicKey;
+        option.value = publicKey;
+        var select = document.querySelector("#publicKeys_" + secretIndex);
+        select.appendChild(option);
+      }
+    </script>
+  </body>
 </html>
