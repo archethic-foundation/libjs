@@ -162,10 +162,10 @@ body {
           secretKey = ARCHEthic.randomSecretKey()
           cipher = ARCHEthic.aesEncrypt(secret, secretKey)
 
-          authorizedKeys = authorizedPublicKeysBySecret[index].reduce(function (acc, publicKey) {
-            acc[publicKey] = ARCHEthic.ecEncrypt(secretKey, publicKey)
-            return acc
-          }, {})
+          authorizedKeys = authorizedPublicKeysBySecret[index].map(function (publicKey) {
+            encryptedSecretKey = ARCHEthic.ecEncrypt(secretKey, publicKey)
+            return { publicKey, encryptedSecretKey }
+          })
 
           txBuilder.addSecret(cipher, authorizedKeys)
         })
