@@ -141,12 +141,14 @@ It supports the ArchEthic Cryptography rules which are:
   Add the content in the `data.content` section of the transaction
   `content` is a string defining the smart contract
   
-  #### addSecret(secret, authorizedKeys)
-  Add a secret in the `data.keys.secrets` section of the transaction with its related authorized public keys able to decrypt it
+  #### addOwnership(secret, authorizedKeys)
+  Add an ownership in the `data.ownerships` section of the transaction with a secret and its related authorized public keys to be able to decrypt it.
+  This aims to prove the ownership or the delegatation of some secret to a given list of public keys.
+
   `secret` is the hexadecimal encoding or Uint8Array representing the encrypted secret
-  `authorizedKeys` is an object represented by `publicKey` => `encryptedSecretKeyForThisKey`
-		- `publicKey` is the hexadecimal encoding or Uint8Array representing the public key
-		- `encryptedSecretKey` is the hexadecimal encoding or Uint8Array representing the secret key encrypted with the public key (see `ecEncrypt`)
+  `authorizedKeys` is a list of object represented by 
+    - `publicKey` is the hexadecimal encoding or Uint8Array representing the public key
+    - `encryptedSecretKey` is the hexadecimal encoding or Uint8Array representing the secret key encrypted with the public key (see `ecEncrypt`)
   
   #### addUCOTransfer(to, amount)
   Add a UCO transfer to the `data.ledger.uco.transfers` section of the transaction
