@@ -164,7 +164,7 @@ body {
 
           authorizedKeys = ownership.authorizedKeys.map(function (authKey) {
             encryptedSecretKey = ARCHEthic.ecEncrypt(secretKey, authKey.publicKey)
-            return { publicKey: authKey.publicKey, encryptedSecretKey: encryptedSecretKey }
+            return { publicKey, encryptedSecretKey }
           })
 
           txBuilder.addOwnership(cipher, authorizedKeys)
@@ -323,7 +323,7 @@ body {
 
       function addOwnership() {
 
-        let ownershipIndex = ownerships.length
+        let ownershipIndex = ownership.length
 
         let ownershipEl = document.createElement("div")
 
