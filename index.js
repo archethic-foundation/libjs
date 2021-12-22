@@ -60,6 +60,16 @@ module.exports = {
     },
 
     /**
+   * Decrypt a ciphertext for a given private key using ECIES algorithm
+   * @param {String | Uint8Array} ciphertext Ciphertext to decrypt
+   * @param {String | Uint8Array} privateKey Private key for the shared secret encryption
+   */
+    ecDecrypt: function (ciphertext, privateKey) {
+        const data = Crypto.ecDecrypt(ciphertext, privateKey)
+        return data
+    },
+
+    /**
      * Encrypt a data for a given public key using AES algorithm
      * @param {String | Uint8Array} data Data to encrypt
      * @param {String | Uint8Array} key Symmetric key
@@ -67,6 +77,17 @@ module.exports = {
     aesEncrypt: function (data, key) {
         const ciphertext = Crypto.aesEncrypt(data, key)
         return uint8ArrayToHex(ciphertext)
+    },
+
+    /**
+     * Decrypt a ciphertext using AES algorithm
+     * @param {String | Uint8Array} ciphertext Ciphertext to decrypt
+     * @param {String | Uint8Array} key key
+     */
+
+    aesDecrypt: function (cipherText, key){
+        const data = Crypto.aesDecrypt(cipherText, key)
+        return data
     },
 
     /**
