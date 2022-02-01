@@ -50,8 +50,8 @@
                 return
             }
 
-            address = ARCHEthic.deriveAddress(seed, index, curve, hash)
-            document.querySelector("#address").innerText = address
+            address_curve = ARCHEthic.deriveAddressCurvePrepended(seed, index, curve, hash)
+            document.querySelector("#address").innerText = address_curve
         }
     </script>
 </body>
