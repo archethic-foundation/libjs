@@ -141,6 +141,34 @@ describe("Transaction builder", () => {
     })
   })
 
+  describe("setPreviousSignatureAndPreviousPublicKey", () => {
+    it("should set previous signature and previous public key in transaction builder", () => {
+
+      const examplePublicKey = "0100044d91a0a1a7cf06a2902d3842f82d2791bcbf3ee6f6dc8de0f90e53e9991c3cb33684b7b9e66f26e7c9f5302f73c69897be5f301de9a63521a08ac4ef34c18728";
+      const exampleSignature = "3044022009ed5124c35feb3449f4287eb5a885dec06f10491146bf73d44684f5a2ced8d7022049e1fb29fcd6e622a8cd2e120931ab038987edbdc44e7a9ec12e5a290599a97e";
+
+      const tx = new TransactionBuilder("transfer")
+        .setPreviousSignatureAndPreviousPublicKey(exampleSignature, examplePublicKey)
+
+      assert.strictEqual(Buffer.from(tx.previousPublicKey).toString("hex"), examplePublicKey)
+      assert.strictEqual(Buffer.from(tx.previousSignature).toString("hex"), exampleSignature)
+
+    })
+  })
+
+  describe("setAddress", () => {
+    it("should set this.address in transaction builder", () => {
+
+      const exampleAddress = "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88";
+     
+      const tx = new TransactionBuilder("transfer")
+        .setAddress(exampleAddress)
+
+      assert.deepStrictEqual(tx.address, hexToUint8Array(exampleAddress))
+      
+    })
+  })
+
   describe("build", () => {
     it("should build the transaction and the related signature", () => {
       const tx = new TransactionBuilder("transfer")
