@@ -115,12 +115,18 @@
           <div class="box" style="visibility: hidden" id="transactionOutput">
             <p>Transaction address: <span id="address"></span></p>
             <button type="button" class="button" onclick="sendTransaction()">Send</button>
-            <p id="success" style="display: none">Your transaction has been sent to the network. <br />You can verify it
-              at <a id="tx_address_link" target="_blank"></a></p>
+            <p id="success" style="display: none">
+              Your transaction has been sent to the network. <br />
+              You can verify it at <a id="tx_address_link" target="_blank"></a>
+            </p>
+            <p id="confirmed" style="display: none">
+              Transaction confirmed with <span id="confirmations"></span> replications
+            </p>
           </div>
         </div>
       </div>
     </div>
+  </div>
   </div>
   <script src="../dist/index.js"></script>
   <script>
@@ -297,6 +303,13 @@
 
     function sendTransaction() {
       endpoint = document.querySelector("#endpoint").value
+      document.querySelector("#confirmations").innerText = 0
+      
+      ARCHEthic.waitConfirmations(transaction.address, endpoint, function (nbConfirmations) {
+        document.querySelector("#confirmed").style.display = "block"
+        document.querySelector("#confirmations").innerText = nbConfirmations
+      })
+
       ARCHEthic.sendTransaction(transaction, endpoint).then((data) => {
         if (data.errors) {
           document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
