@@ -29,7 +29,7 @@ module.exports = {
      * @param {Integer} index Number of transaction in the chain
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      */
-    deriveKeyPair(seed, index, curve = "P256") {
+    deriveKeyPair(seed, index, curve = "ed25519") {
         const { privateKey, publicKey}  = Crypto.deriveKeyPair(seed, index, curve)
         return {
             privateKey: uint8ArrayToHex(privateKey),
