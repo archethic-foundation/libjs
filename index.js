@@ -44,12 +44,7 @@ module.exports = {
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
      */
-    deriveAddress(seed, index, curve = "P256", hashAlgo = "sha256") {
-        const { publicKey } = Crypto.deriveKeyPair(seed, index, curve)
-        return uint8ArrayToHex(Crypto.hash(publicKey, hashAlgo))
-    },
-
-    deriveAddressCurvePrepended(seed, index, curve = "ed25519", hashAlgo = "sha256") {
+    deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
         const { publicKey } = Crypto.deriveKeyPair(seed, index, curve)
         switch(curve) {
             case "ed25519":
