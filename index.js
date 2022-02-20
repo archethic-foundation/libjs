@@ -1,7 +1,7 @@
 const TxBuilder = require('./lib/transaction_builder')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
-const { uint8ArrayToHex, concatUint8Arrays} = require('./lib/utils')
+const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
 
 module.exports = {
@@ -45,32 +45,7 @@ module.exports = {
      * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
      */
     deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
-        const { publicKey } = Crypto.deriveKeyPair(seed, index, curve)
-        switch(curve) {
-            case "ed25519":
-                return uint8ArrayToHex(concatUint8Arrays(
-                    [
-                        Uint8Array.from([0]),
-                        Uint8Array.from(Crypto.hash(publicKey,hashAlgo))
-                    ]
-                ))
-            case "P256":
-                return uint8ArrayToHex(concatUint8Arrays(
-                    [
-                        Uint8Array.from([1]),
-                        Uint8Array.from(Crypto.hash(publicKey,hashAlgo))
-                    ]
-                ))
-            case "secp256k1":
-                return uint8ArrayToHex(concatUint8Arrays(
-                    [
-                        Uint8Array.from([2]),
-                        Uint8Array.from(Crypto.hash(publicKey,hashAlgo))
-                    ]
-                ))
-            default :
-                throw "curve not supported"
-        }
+        return uint8ArrayToHex(Crypto.deriveAddress(seed, index, curve, hashAlgo))
     },
 
     /**
