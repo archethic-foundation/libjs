@@ -1,7 +1,7 @@
 const TxBuilder = require('./lib/transaction_builder')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
-const { uint8ArrayToHex} = require('./lib/utils')
+const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
 
 module.exports = {
@@ -29,7 +29,7 @@ module.exports = {
      * @param {Integer} index Number of transaction in the chain
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      */
-    deriveKeyPair(seed, index, curve = "P256") {
+    deriveKeyPair(seed, index, curve = "ed25519") {
         const { privateKey, publicKey}  = Crypto.deriveKeyPair(seed, index, curve)
         return {
             privateKey: uint8ArrayToHex(privateKey),
@@ -44,9 +44,8 @@ module.exports = {
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
      */
-    deriveAddress(seed, index, curve = "P256", hashAlgo = "sha256") {
-        const { publicKey } = Crypto.deriveKeyPair(seed, index, curve)
-        return uint8ArrayToHex(Crypto.hash(publicKey, hashAlgo))
+    deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
+        return uint8ArrayToHex(Crypto.deriveAddress(seed, index, curve, hashAlgo))
     },
 
     /**

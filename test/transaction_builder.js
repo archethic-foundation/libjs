@@ -98,8 +98,7 @@ describe("Transaction builder", () => {
         .addRecipient("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
 
       const keypair = Crypto.deriveKeyPair("seed", 0);
-      const nextKeypair = Crypto.deriveKeyPair("seed", 1)
-      const address = Crypto.hash(nextKeypair.publicKey)
+      const address = Crypto.deriveAddress("seed", 1)
 
       tx.address = address
       tx.previousPublicKey = keypair.publicKey
@@ -173,10 +172,10 @@ describe("Transaction builder", () => {
     it("should build the transaction and the related signature", () => {
       const tx = new TransactionBuilder("transfer")
         .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.0)
-        .build("seed", 0, "P256")
-
-      assert.deepStrictEqual(tx.address, hexToUint8Array("001680dab710eca8bc6b6c8025e57ebaf2d30c03d8d23a21ba7f8a157c365c5d49"))
-      assert.deepStrictEqual(tx.previousPublicKey, hexToUint8Array("0100044d91a0a1a7cf06a2902d3842f82d2791bcbf3ee6f6dc8de0f90e53e9991c3cb33684b7b9e66f26e7c9f5302f73c69897be5f301de9a63521a08ac4ef34c18728"))
+        .build("seed", 0, "ed25519", "sha256")
+  
+      assert.deepStrictEqual(tx.address, hexToUint8Array("0000cb4ad2c856fda855aa8b67b0e6a46b5c3eeb301e67cd3e53e77ee9d9ccbfc430"))
+      assert.deepStrictEqual(tx.previousPublicKey, hexToUint8Array("000061d6cd8da68207bd01198909c139c130a3df3a8bd20f4bacb123c46354ccd52c"))
 
       assert.strictEqual(Crypto.verify(tx.previousSignature, tx.previousSignaturePayload(), tx.previousPublicKey), true)
     })
@@ -276,11 +275,10 @@ describe("Transaction builder", () => {
     it("should return a JSON from the transaction", () => {
       const originKeypair = Crypto.deriveKeyPair("origin_seed", 0)
       const transactionKeyPair = Crypto.deriveKeyPair("seed", 0)
-      const nextTransactionKeyPair = Crypto.deriveKeyPair("seed", 1)
 
 
       const tx = new TransactionBuilder("transfer")
-        .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2193)
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2193)
         .addOwnership(Uint8Array.from([0, 1, 2, 3, 4]), [{
           publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
@@ -293,13 +291,13 @@ describe("Transaction builder", () => {
       const previousSig = Crypto.sign(tx.previousSignaturePayload(), transactionKeyPair.privateKey)
       const originSig = Crypto.sign(tx.originSignaturePayload(), originKeypair.privateKey)
 
-      assert.strictEqual(parsedTx.address, uint8ArrayToHex(Crypto.hash(nextTransactionKeyPair.publicKey)))
+      assert.strictEqual(parsedTx.address, uint8ArrayToHex(Crypto.deriveAddress("seed", 1)))
       assert.strictEqual(parsedTx.type, "transfer")
       assert.strictEqual(parsedTx.previousPublicKey, uint8ArrayToHex(transactionKeyPair.publicKey))
       assert.strictEqual(parsedTx.previousSignature, uint8ArrayToHex(previousSig))
       assert.strictEqual(parsedTx.originSignature, uint8ArrayToHex(originSig))
       assert.strictEqual(parsedTx.data.ownerships[0].secret, uint8ArrayToHex(Uint8Array.from([0, 1, 2, 3, 4])))
-      assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount: toBigInt(0.2193)})
+      assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount: toBigInt(0.2193)})
       assert.deepStrictEqual(parsedTx.data.ownerships[0].authorizedKeys, [{ publicKey: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"}])
     })
   })

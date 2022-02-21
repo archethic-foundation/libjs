@@ -49,8 +49,7 @@
             if (seed == "" || index == NaN) {
                 return
             }
-
-            address = ARCHEthic.deriveAddress(seed, index, curve, hash)
+            address = ARCHEthic.deriveAddress(seed,index,curve,hash)
             document.querySelector("#address").innerText = address
         }
     </script>
