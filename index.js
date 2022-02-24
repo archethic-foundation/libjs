@@ -5,7 +5,7 @@ const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
 
 module.exports = {
-    
+
     /**
      * Create a new TransactionBuilder instance to forge transaction
      * @param {String} type Transaction type ("identity", "keychain", "transfer", "hosting", "code_proposal", "code_approval", "nft")
@@ -19,8 +19,33 @@ module.exports = {
      * @param {Object} tx Transaction to send
      * @param {String} endpoint Node endpoint
      */
-    sendTransaction: function(tx, endpoint) {
+    sendTransaction: function (tx, endpoint) {
         return API.sendTx(tx, endpoint)
+    },
+
+    /**
+     * Await the transaction confirmations
+     * @param {String | Uint8Arrray} address Address to await
+     * @param {String} endpoint Node endpoint
+     * @param {Function} handler Success handler
+     */
+    waitConfirmations: function (address, endpoint, handler) {
+
+        if (typeof (address) == "string") {
+            if (!isHex(address)) {
+                throw "'address' must be in hexadecimal form if it's string"
+            }
+        }
+
+        if (address instanceof Uint8Array) {
+            address = uint8ArrayToHex(address)
+        }
+
+        if (!(handler instanceof Function)) {
+            throw "'handler' must be a function"
+        }
+
+        API.waitConfirmations(address, endpoint, handler)
     },
 
     /**
@@ -30,7 +55,7 @@ module.exports = {
      * @param {String} curve  Elliptic curve to use ("ed25519", "P256", "secp256k1")
      */
     deriveKeyPair(seed, index, curve = "ed25519") {
-        const { privateKey, publicKey}  = Crypto.deriveKeyPair(seed, index, curve)
+        const { privateKey, publicKey } = Crypto.deriveKeyPair(seed, index, curve)
         return {
             privateKey: uint8ArrayToHex(privateKey),
             publicKey: uint8ArrayToHex(publicKey)
@@ -84,7 +109,7 @@ module.exports = {
      * @param {String | Uint8Array} key key
      */
 
-    aesDecrypt: function (cipherText, key){
+    aesDecrypt: function (cipherText, key) {
         const data = Crypto.aesDecrypt(cipherText, key)
         return data
     },
@@ -101,7 +126,7 @@ module.exports = {
     /**
      * Generate a random secret key of 32 bytes
      */
-    randomSecretKey: function() {
+    randomSecretKey: function () {
         return new Uint8Array(randomBytes(32))
     },
 

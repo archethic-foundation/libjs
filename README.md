@@ -211,13 +211,35 @@ It supports the ArchEthic Cryptography rules which are:
   
   - `tx` represent the built transaction from the **transactionBuilder**
   - `endpoint` is the HTTP URL to a ArchEthic node (acting as welcome node)
+
+  Returns
+  
+  ```js
+  {
+    address: "..."
+    status: "pending"
+  }
+  ```
+
+  ```js
+  const archethic = require('archethic')
+  tx = ...
+  const result = await archethic.sendTransaction(tx, "https://testnet.archethic.net")
+  ```
+
+  #### waitConfirmations(address, endpoint)
+  It's awaiting asynchronously the transaction confirmations of the replication
+  
+  An handler is required which supports the observer design pattern. An replication confirmation will emit the handler function with the new number of replication number.   
   
   ```js
   const archethic = require('archethic')
   tx = ...
-  archethic.sendTransaction(tx, "http://www.archethic.net")
+  await archethic.sendTransaction(tx, "https://testnet.archethic.net")
+  archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", function(nbConfirmations) {
+    console.log(nbConfirmations)
+  })
   ```
-
 
   #### getTransactionIndex(address, endpoint)
   Query a node to find the length of the chain to retrieve the transaction index
