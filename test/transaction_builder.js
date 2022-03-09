@@ -209,7 +209,7 @@ describe("Transaction builder", () => {
         .addRecipient("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         .build("seed", 0, "P256")
 
-      const transactionKeyPair = Crypto.deriveKeyPair("seed", 0)
+      const transactionKeyPair = Crypto.deriveKeyPair("seed", 0, "P256")
       const previousSig = Crypto.sign(tx.previousSignaturePayload(), transactionKeyPair.privateKey)
 
       const payload = tx.originSignaturePayload()
