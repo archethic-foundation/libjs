@@ -264,6 +264,17 @@ It supports the ArchEthic Cryptography rules which are:
   // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
   ```
 
+  #### getTransactionFee(tx, endpoint)
+  Query a node to fetch the tx fee for a given transaction
+  
+  - `tx` Generated transaction
+  - `endpoint` Node endpoint
+  
+  ```js
+  const archethic = require('archethic')
+  const tx = ...
+  const { fee: fee } = await archethic.getTransactionFee(tx, "https://testnet.archethic.net")
+  ```
 
 ## Running the tests
 

@@ -114,6 +114,7 @@
         <div class="column">
           <div class="box" style="visibility: hidden" id="transactionOutput">
             <p>Transaction address: <span id="address"></span></p>
+            <p>Transaction fee: <span id="tx_fee"></span></p>
             <button type="button" class="button" onclick="sendTransaction()">Send</button>
             <p id="success" style="display: none">
               Your transaction has been sent to the network. <br />
@@ -203,8 +204,12 @@
         .build(seed, parseInt(index), curve)
         .originSign(originPrivateKey)
 
+
       document.querySelector("#transactionOutput #address").innerText = toHex(transaction.address)
       document.querySelector("#transactionOutput").style.visibility = "visible";
+      ARCHEthic.getTransactionFee(transaction, endpoint).then((result) => {
+        document.querySelector("#tx_fee").innerText = result.fee + " UCO"
+      })
     }
 
     function onClickAddStorageNoncePublicKey() {
