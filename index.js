@@ -136,5 +136,14 @@ module.exports = {
      */
     getStorageNoncePublicKey: function (endpoint) {
         return API.getStorageNoncePublicKey(endpoint)
+    },
+
+    /**
+     * Request transaction fee from the endpoint for the given transaction
+     * @param {Object} tx Transaction to send
+     * @param {String} endpoint Node endpoint
+     */
+    getTransactionFee: function(tx, endpoint) {
+      return API.getTransactionFee(tx, endpoint)
     }
 }
