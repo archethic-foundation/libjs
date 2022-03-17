@@ -83,13 +83,13 @@ It supports the ArchEthic Cryptography rules which are:
 
   - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
   - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
-  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1") - Default to "P256"
+  - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1") - Default to "ed25519"
   - `hashAlgo` is the hash algorithm to create the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b") - default to "sha256"
 
   ```js
   const archethic = require("archethic")
   const address = archethic.deriveAddress("mysuperpassphraseorseed", 0)
-  // Address: 004195d45987f33e5dcb71edfa63438d5e6add655b216acfdd31945d58210fe5d2
+  // Address: 00004195d45987f33e5dcb71edfa63438d5e6add655b216acfdd31945d58210fe5d2
   ```
 
   It creates a new keypair and extract the public key into hexadecimal format
@@ -122,7 +122,7 @@ It supports the ArchEthic Cryptography rules which are:
   
   ```js
   const archethic = require('archethic')
-  const cipher = archethic.aesEncrypt("dataToEncrypt","00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+  const cipher = archethic.aesEncrypt("dataToEncrypt","0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
 
   ### TransactionBuilding
@@ -177,7 +177,7 @@ It supports the ArchEthic Cryptography rules which are:
   ```js
   const archethic = require('archethic')
   const tx = archethic.newTransactionBuilder("transfer")
-    .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
   ```
 
@@ -189,7 +189,7 @@ It supports the ArchEthic Cryptography rules which are:
   ```js
   const archethic = require('archethic')
   const tx = archethic.newTransactionBuilder("transfer")
-    .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
     .originSign(originPrivateKey)
   ```
@@ -200,7 +200,7 @@ It supports the ArchEthic Cryptography rules which are:
    ```js
   const archethic = require('archethic')
   const txJSON = archethic.newTransactionBuilder("transfer")
-    .addUCOTransfer("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
     .toJSON()
   ```
@@ -249,7 +249,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://www.archethic.net")
+  const index = archethic.getTransactionIndex("00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "https://testnet.archethic.net")
   // 0
   ```
 
@@ -260,7 +260,7 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  const index = archethic.getStorageNoncePublicKey("http://www.archethic.net")
+  const index = archethic.getStorageNoncePublicKey("https://testnet.archethic.net")
   // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
   ```
 
