@@ -1,7 +1,7 @@
 const TxBuilder = require('./lib/transaction_builder')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
-const { newKeychain, toDID } = require("./lib/keychain")
+const { newKeychain, decodeKeychain } = require("./lib/keychain")
 const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
 
@@ -9,12 +9,15 @@ module.exports.newTransactionBuilder = newTransactionBuilder
 module.exports.newKeychainTransaction = newKeychainTransaction
 module.exports.newAccessKeychainTransaction = newAccessKeychainTransaction
 
+module.exports.getKeychain = getKeychain
+
 module.exports.deriveKeyPair = deriveKeyPair
 module.exports.deriveAddress = deriveAddress
 module.exports.ecEncrypt = ecEncrypt
 module.exports.ecDecrypt = ecDecrypt
 module.exports.aesEncrypt = aesEncrypt
 module.exports.aesDecrypt = aesDecrypt
+module.exports.randomSecretKey = randomSecretKey
 
 module.exports.sendTransaction = sendTransaction
 module.exports.waitConfirmations = waitConfirmations
@@ -182,8 +185,8 @@ function newKeychainTransaction(seed, authorizedPublicKeys, originPrivateKey) {
   })
 
   return newTransactionBuilder("keychain")
-    .setContent(JSON.stringify(toDID(keychain)))
-    .addOwnership(aesEncrypt(JSON.stringify(keychain), aesKey), authorizedKeys)
+    .setContent(JSON.stringify(keychain.toDID()))
+    .addOwnership(aesEncrypt(keychain.encode(), aesKey), authorizedKeys)
     .build(seed, 0)
     .originSign(originPrivateKey)
 }
@@ -212,4 +215,41 @@ function newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey) {
     .addOwnership(aesEncrypt(keychainAddress, aesKey), authorizedKeys)
     .build(seed, 0)
     .originSign(originPrivateKey)
+}
+
+/**
+* Retrieve a keychain by using keychain access seed
+* @param {Uint8Array | String} seed Keychain's access seed
+* @param {String} endpoint Node endpoint
+*/
+function getKeychain(seed, endpoint) {
+
+  const { publicKey: accessPublicKey, privateKey: accessPrivateKey} = deriveKeyPair(seed, 0)
+  const accessKeychainAddress = deriveAddress(seed, 1)
+  return new Promise((resolve, reject) => {
+     
+    return API.getTransactionOwnerships(accessKeychainAddress, endpoint).then(ownerships => {
+      if (ownerships.length == 0) {
+        return reject("Keychain doesn't exists")
+      }
+   
+      var { secret: secret, authorizedPublicKeys: authorizedPublicKeys } = ownerships[0]
+      const { encryptedSecretKey } = authorizedPublicKeys.find(authKey => {
+        return authKey.publicKey.toLocaleUpperCase() == accessPublicKey.toLocaleUpperCase()
+      })
+
+      var aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
+      const keychainAddress = aesDecrypt(secret, aesKey)
+    
+      return API.getTransactionOwnerships(uint8ArrayToHex(keychainAddress), endpoint).then(ownerships => {
+        var { secret: secret, authorizedPublicKeys: authorizedKeys } = ownerships[0]
+        var { encryptedSecretKey } = authorizedKeys.find(({publicKey }) => publicKey.toUpperCase() == accessPublicKey.toUpperCase())
+    
+        var aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
+        const keychain = aesDecrypt(secret, aesKey)
+        
+        resolve(decodeKeychain(keychain))
+      })
+    })
+ })
 }

@@ -1,29 +1,22 @@
 const assert = require('assert')
 
-const { toDID, deriveArchethicKeyPair, keyToJWK } = require("../lib/keychain")
-const { uint8ArrayToHex } =  require("../lib/utils")
+const { keyToJWK, decodeKeychain, newKeychain } = require("../lib/keychain")
+const { uint8ArrayToHex, concatUint8Arrays } =  require("../lib/utils")
 const { deriveAddress } = require("../lib/crypto")
 
 
 describe("keychain to DID", () => {
   it("should encode the key material metadata", () => {
-    seed = "abcdefghijklmnopqrstuvwxyz"
-    
-    const keychain = {
-      seed: seed,
-      services: {
-        uco: {
-          derivationPath: "m/650'/0'/0'"
-        }
-      }
-    }
-    
-    const {publicKey} = deriveArchethicKeyPair(seed, "m/650'/0'/0'", 0)
+    seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
+
+    const keychain = newKeychain(seed)
+
+    const {publicKey} = keychain.deriveKeypair("uco")
     
     const address = deriveAddress(seed, 0)
     const address_hex = uint8ArrayToHex(address)
     
-    const { id, verificationMethod }  = toDID(keychain)    
+    const { id, verificationMethod }= keychain.toDID()    
     assert.equal(id, `did:archethic:${address_hex}`)
     
     const expected = [
@@ -36,4 +29,45 @@ describe("keychain to DID", () => {
     
     assert.deepStrictEqual(expected, verificationMethod)
   })    
+})
+
+describe("keychain encode", () => {
+  it ("should encode the keychain into a binary", () => {
+    const keychain = newKeychain("myseed")
+
+    const expectedBinary = concatUint8Arrays([
+      Uint8Array.from([1]), //Version
+      Uint8Array.from([6]), //Seed size
+      new TextEncoder().encode("myseed"),
+      Uint8Array.from([1]), //Nb of services
+      Uint8Array.from([3]),  //Service name length: "UCO",
+      new TextEncoder().encode("uco"),
+      Uint8Array.from([12]), //Derivation path length,
+      new TextEncoder().encode("m/650'/0'/0'")
+    ])
+
+    assert.deepStrictEqual(keychain.encode(), expectedBinary)
+  })
+
+  it("should decode keychain from a binary", () => {
+    const binary = concatUint8Arrays([
+      Uint8Array.from([1]), //Version
+      Uint8Array.from([6]), //Seed size
+      new TextEncoder().encode("myseed"),
+      Uint8Array.from([1]), //Nb of services
+      Uint8Array.from([3]),  //Service name length: "UCO",
+      new TextEncoder().encode("uco"),
+      Uint8Array.from([12]), //Derivation path length,
+      new TextEncoder().encode("m/650'/0'/0'")
+    ])
+
+    const { seed, services } = decodeKeychain(binary)
+  
+    assert.deepStrictEqual(new TextEncoder().encode("myseed"), seed)
+    assert.deepStrictEqual({
+      uco: {
+        derivationPath: "m/650'/0'/0'"
+      } 
+    }, services)
+  })
 })

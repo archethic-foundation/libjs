@@ -1,7 +1,7 @@
 const { deriveAddress, deriveKeyPair, newKeychainTransaction, newAccessKeychainTransaction, aesDecrypt, ecDecrypt} = require('../index')
 const assert = require('assert')
 const { hexToUint8Array, uint8ArrayToHex } = require('../lib/utils')
-const {newKeychain, toDID} = require("../lib/keychain")
+const {newKeychain} = require("../lib/keychain")
         
 
 describe ("deriveAddress", () => {
@@ -47,7 +47,7 @@ describe ("newKeychainTransaction", () => {
         
         const keychain = newKeychain("seed")
         
-        const tx_content = new TextEncoder().encode(JSON.stringify(toDID(keychain)))
+        const tx_content = new TextEncoder().encode(JSON.stringify(keychain.toDID()))
         
         assert.equal("keychain", tx.type)
         assert.deepStrictEqual(tx.data.content, tx_content)
