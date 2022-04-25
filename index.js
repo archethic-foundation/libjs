@@ -199,10 +199,12 @@ function newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey) {
 
   const { publicKey} = deriveKeyPair(seed, 0)
   
+  encryptedSecretKey = ecEncrypt(aesKey, publicKey)
+  
   const authorizedKeys = [
     {
       publicKey: publicKey,
-      encryptedSecretKey: ecEncrypt(aesKey, publicKey)
+      encryptedSecretKey: encryptedSecretKey
     }
   ]
   

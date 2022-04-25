@@ -82,21 +82,29 @@ describe("Crypto", () => {
       const keypair = Crypto.deriveKeyPair("seed", 0, "ed25519")
       const ciphertext = Crypto.ecEncrypt("hello", keypair.publicKey)
 
-      assert.strictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), "hello")
+      assert.deepStrictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), new TextEncoder().encode("hello"))
     })
 
     it("should encrypt a data using a P256 public key", () => {
       const keypair = Crypto.deriveKeyPair("seed", 0, "P256")
       const ciphertext = Crypto.ecEncrypt("hello", keypair.publicKey)
 
-      assert.strictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), "hello")
+      assert.deepStrictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), new TextEncoder().encode("hello"))
     })
 
     it("should encrypt a data using a secp256k1 public key", () => {
       const keypair = Crypto.deriveKeyPair("seed", 0, "secp256k1")
       const ciphertext = Crypto.ecEncrypt("hello", keypair.publicKey)
 
-      assert.strictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), "hello")
+      assert.deepStrictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), new TextEncoder().encode("hello"))
+    })
+    
+    it("should encrypt blob", () => {
+      const blob = Uint8Array.from([1, 2, 3, 4, 5])
+      
+      const keypair = Crypto.deriveKeyPair("seed", 0, "secp256k1")
+      const ciphertext = Crypto.ecEncrypt(blob, keypair.publicKey)
+      assert.deepStrictEqual(Crypto.ecDecrypt(ciphertext, keypair.privateKey), blob)
     })
   })
 

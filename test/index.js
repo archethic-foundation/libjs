@@ -1,6 +1,6 @@
 const { deriveAddress, deriveKeyPair, newKeychainTransaction, newAccessKeychainTransaction, aesDecrypt, ecDecrypt} = require('../index')
 const assert = require('assert')
-const { hexToUint8Array } = require('../lib/utils')
+const { hexToUint8Array, uint8ArrayToHex } = require('../lib/utils')
 const {newKeychain, toDID} = require("../lib/keychain")
         
 
@@ -62,12 +62,14 @@ describe("newAccessKeychainTransaction", () => {
         const keychainAddress = "0000b0c17f85ca19e3db670992e79adb94fb560bd750fda06d45bc0a42912c89d31e"
         const { publicKey, privateKey } = deriveKeyPair(seed, 0)
         
-
-                const tx = newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
-        const aesKey = ecDecrypt(tx.data.ownerships[0].authorizedKeys[0].encryptedSecretKey, privateKey)
-        const decryptedAddress = aesDecrypt(tx.data.ownerships[0].secret, aesKey)
+        const tx = newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
         
-        assert.equal("access_keychain", tx.type)
-        assert.equal(keychainAddress, decryptedAddress)
+        const aesKey = ecDecrypt(tx.data.ownerships[0].authorizedKeys[0].encryptedSecretKey, privateKey)
+        
+        const decryptedAddress = aesDecrypt(tx.data.ownerships[0].secret, aesKey)
+
+                
+        assert.equal("keychain_access", tx.type)
+        assert.deepStrictEqual(keychainAddress, uint8ArrayToHex(decryptedAddress))
     })        
 })
