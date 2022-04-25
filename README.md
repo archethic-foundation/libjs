@@ -276,6 +276,42 @@ It supports the ArchEthic Cryptography rules which are:
   const { fee: fee } = await archethic.getTransactionFee(tx, "https://testnet.archethic.net")
   ```
 
+  ### Keychain / Wallet management
+
+  #### newKeychainTransaction(seed, authorizedPublicKeys, originPrivateKey)
+  Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
+
+  - `seed` Keychain's seed
+  - `authorizedPublicKeys` List of authorized public keys able to decerypt the wallet
+  - `originPrivateKey` Key to make the origin signature of the transaction
+
+  #### newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
+  Creates a new keychain access transaction to allow a seed and its key to access a keychain
+
+  - `seed` Keychain access's seed
+  - `keychainAddress` Keychain's tx address
+  - `originPrivateKey` Key to make the origin signature of the transaction  
+
+  #### getKeychain(seed, endpoint)
+  Retrieve a keychain from the keychain access transaction and decrypt the wallet to retrieve the services associated
+
+  - `seed` Keychain access's seed
+  - `endpoint` Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  archethic.getKeychain("mysecretseed", "https://testnet.archethic.net").then(console.log)
+  {
+    version: 1,
+    seed: "masterKeychainSeed",
+    services: {
+      uco: {
+        derivationPath: "m/650'/0'/0'"
+      }
+    }
+  }
+  ```   
+
 ## Running the tests
 
 ```bash
