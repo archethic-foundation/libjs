@@ -43,7 +43,9 @@ describe("keychain encode", () => {
       Uint8Array.from([3]),  //Service name length: "UCO",
       new TextEncoder().encode("uco"),
       Uint8Array.from([12]), //Derivation path length,
-      new TextEncoder().encode("m/650'/0'/0'")
+      new TextEncoder().encode("m/650'/0'/0'"),
+      Uint8Array.from([0]), //Ed25519 curve
+      Uint8Array.from([0])  //SHA256 hash algo
     ])
 
     assert.deepStrictEqual(keychain.encode(), expectedBinary)
@@ -58,7 +60,9 @@ describe("keychain encode", () => {
       Uint8Array.from([3]),  //Service name length: "UCO",
       new TextEncoder().encode("uco"),
       Uint8Array.from([12]), //Derivation path length,
-      new TextEncoder().encode("m/650'/0'/0'")
+      new TextEncoder().encode("m/650'/0'/0'"),
+      Uint8Array.from([0]), //Ed25519 curve
+      Uint8Array.from([0])  //SHA256 hash algo
     ])
 
     const { seed, services } = decodeKeychain(binary)
@@ -66,7 +70,9 @@ describe("keychain encode", () => {
     assert.deepStrictEqual(new TextEncoder().encode("myseed"), seed)
     assert.deepStrictEqual({
       uco: {
-        derivationPath: "m/650'/0'/0'"
+        derivationPath: "m/650'/0'/0'",
+        curve: "ed25519",
+        hashAlgo: "sha256"
       } 
     }, services)
   })
