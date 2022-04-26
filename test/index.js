@@ -60,7 +60,7 @@ describe("newAccessKeychainTransaction", () => {
         
         const seed = "mysuperseed"
         const keychainAddress = "0000b0c17f85ca19e3db670992e79adb94fb560bd750fda06d45bc0a42912c89d31e"
-        const { publicKey } = deriveKeyPair(seed, 0)
+        const { privateKey } = deriveKeyPair(seed, 0)
         
         const tx = newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
         
