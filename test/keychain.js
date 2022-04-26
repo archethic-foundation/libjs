@@ -65,7 +65,7 @@ describe("keychain encode", () => {
       Uint8Array.from([0])  //SHA256 hash algo
     ])
 
-    const { seed, services } = decodeKeychain(binary)
+    const { seed, services } = decodeKeychain(binary)
   
     assert.deepStrictEqual(new TextEncoder().encode("myseed"), seed)
     assert.deepStrictEqual({
