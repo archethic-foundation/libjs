@@ -24,6 +24,7 @@ module.exports.waitConfirmations = waitConfirmations
 module.exports.getTransactionIndex = getTransactionIndex
 module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
+module.exports.getTransactionOwnerships = getTransactionOwnerships
 
 /**
  * Create a new TransactionBuilder instance to forge transaction
@@ -252,4 +253,13 @@ function getKeychain(seed, endpoint) {
       })
     })
  })
+}
+
+/**
+ * Get the list the ownerships of a given transaction's address
+ * @param {String} address Transaction's address
+ * @param {String} endpoint Node endpoint
+ */
+function getTransactionOwnerships(address, endpoint) {
+  return API.getTransactionOwnerships(address, endpoint)
 }

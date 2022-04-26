@@ -276,6 +276,29 @@ It supports the ArchEthic Cryptography rules which are:
   const { fee: fee } = await archethic.getTransactionFee(tx, "https://testnet.archethic.net")
   ```
 
+  #### getTransactionOwnerships(address, endpoint)
+  Query a node to find the ownerships (secrets and authorized keys) to given transaction's address
+
+  - `address`: Transaction's address
+  - `endpoint`: Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const ownerships = await archethic.getTransactionOwnerships(tx.address, "https://testnet.archethic.net")
+  console.log(ownerships)
+  [
+    {
+      secret: "...",
+      authorizedPublicKeys: [
+        {
+          publicKey: "...",
+          encryptedSecretKey: ""
+        }
+      ] 
+    }
+  ]
+  ```
+
   ### Keychain / Wallet management
 
   #### newKeychainTransaction(seed, authorizedPublicKeys, originPrivateKey)
