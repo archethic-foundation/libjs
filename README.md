@@ -282,7 +282,7 @@ It supports the ArchEthic Cryptography rules which are:
   Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
 
   - `seed` Keychain's seed
-  - `authorizedPublicKeys` List of authorized public keys able to decerypt the wallet
+  - `authorizedPublicKeys` List of authorized public keys able to decrypt the wallet
   - `originPrivateKey` Key to make the origin signature of the transaction
 
   #### newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
@@ -300,7 +300,8 @@ It supports the ArchEthic Cryptography rules which are:
 
   ```js
   const archethic = require('archethic')
-  archethic.getKeychain("mysecretseed", "https://testnet.archethic.net").then(console.log)
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  console.log(keychain)
   {
     version: 1,
     seed: "masterKeychainSeed",
@@ -310,7 +311,78 @@ It supports the ArchEthic Cryptography rules which are:
       }
     }
   }
-  ```   
+  ```  
+
+  Once retreived the keychain provide the following methods:
+
+  ##### deriveAddress(service, index)
+  Derive an address for the given service at the index given
+
+  - `service`: Service name to identify the derivation path to use
+  - `index`: Chain index to derive (default to 0)
+
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  const genesisUCOAddress = keychain.deriveAddress("uco", 0)
+  ``` 
+
+  ##### deriveKeypair(service, index)
+  Derive a keypair for the given service at the index given
+
+  - `service`: Service name to identify the derivation path to use
+  - `index`: Chain index to derive (default to 0)
+  
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  const { publicKey } = keychain.deriveKeypair("uco", 0)
+  ``` 
+
+  ##### toDID
+  Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
+
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  const did  = keychain.toDID()
+  console.log(did)
+  {
+    "@context": [
+       "https://www.w3.org/ns/did/v1"
+    ],
+    "id": "did:archethic:keychain_address",
+    "authentification": servicesMaterials, //list of public keys of the services
+    "verificationMethod": servicesMaterials //list of public keys of the services
+  }
+  ```
+
+  ##### addService(name, derivationPath, curve, hashAlgo)
+  Add a service into the keychain
+
+  - `name`: Name of the service to add
+  - `derivationPath`: Crypto derivation path
+  - `curve`: Elliptic curve to use
+  - `hashAlgo`: Hash algo
+
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  keychain.addService("nft1", "m/650'/1'/0'")
+  console.log(keychain)
+  {
+    version: 1,
+    seed: "mymasterseed",
+    services: {
+      uco: {
+        derivationPath: "m/650'/0'/0'",
+        curve: "ed25519",
+        hashAlgo: "sha256"
+      },
+      nft1: {
+        derivationPath: "m/650'/0'/0'",
+        curve: "ed25519",
+        hashAlgo: "sha256"
+      }
+    }
+  }
+  ```
 
 ## Running the tests
 
