@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Keychain example</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <style>
+    body {
+      background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
+      min-height: 100vh;
+      padding-bottom: 20px;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container margin-top-6">
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-2 has-text-white">Archethic</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-5 has-text-white">Keychain tool</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <div class="box">
+            <label for="endpoint">Node endpoint</label>
+            <input type="text" class="input" placeholder="Node endpoint" id="endpoint" />
+          </div>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <div class="box">
+            <div class="message is-info"> 
+              <p class="message-body">To access your keychain an access need to be configured through its own transaction to help the retrieval of the keychain.</p>
+            </div>
+            <label for="accessSeed">Access seed</label>
+            <input class="input" type="password" placeholder="Enter your access seed" id="accessSeed" />
+          </div>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <button class="button" onClick="createKeychain()">Create keychain</button>
+        </div>
+        <div class="column">
+          <button class="button" onClick="getKeychain()">Access keychain</button>
+        </div>
+      </div>
+
+      <div class="columns" id="keychainCreation" style="display: none">
+        <div class="column">
+          <div class="columns">
+            <div class="column box">
+              <p class="is-size-6 title">Keychain seed: </p>
+              <p id="keychainSeed1"></p>
+            </div>
+          </div>
+          <div class="columns message is-success mt-4">
+              <div class="column message-body content">
+                <p>Keychain's transaction confirmed. </p>
+                <p>You can verify it at: <a id="keychainTxLink" target="_blank"></a></p>
+              </div>
+          </div>
+          <div class="columns message is-success mt-4">
+             <div class="column message-body content">
+               <p>Keychain access transaction confirmed. </p>
+               <p> You can verify it at: <a id="accessKeychainTxLink" target="_blank"></a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns" id="keychainInfo" style="display: none">
+        <div class="column">
+          <div class="columns">
+            <div class="column">
+              <div class="box">
+                <p class="is-size-6 title">Keychain seed: </p>
+                <p id="keychainSeed2"></p>
+              </div>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <p class="mt-4 has-text-white subtitle">Services registered:</p>
+              <div id="services" class="tile is-ancestor"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <script src="../dist/index.js"></script>
+    <script>
+      const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
+
+      async function createKeychain() {
+        const endpoint = document.querySelector("#endpoint").value
+        const seed = document.querySelector("#accessSeed").value
+
+        const { publicKey } = ARCHEthic.deriveKeyPair(seed, 0)
+
+        const keychainSeed = ARCHEthic.randomSecretKey()
+        const keychainTx = ARCHEthic.newKeychainTransaction(keychainSeed, [publicKey], originPrivateKey)       
+        
+        ARCHEthic.waitConfirmations(keychainTx.address, endpoint, async function () {
+          document.querySelector("#keychainSeed1").innerText = toHex(keychainSeed)
+          let txEndpointLink =  endpoint + "/explorer/transaction/" + toHex(keychainTx.address)
+          document.querySelector("#keychainTxLink").innerText = txEndpointLink
+          document.querySelector("#keychainTxLink").setAttribute("href", txEndpointLink)
+          
+          const accessKeychainTx = ARCHEthic.newAccessKeychainTransaction(seed, keychainTx.address, originPrivateKey)
+          ARCHEthic.waitConfirmations(accessKeychainTx.address, endpoint, function () {
+            let txEndpointLink =  endpoint + "/explorer/transaction/" + toHex(accessKeychainTx.address)
+            document.querySelector("#accessKeychainTxLink").innerText = txEndpointLink
+            document.querySelector("#accessKeychainTxLink").setAttribute("href", txEndpointLink)
+            document.querySelector("#keychainCreation").style.display = "block"
+          })
+         
+          await ARCHEthic.sendTransaction(accessKeychainTx, endpoint)
+          
+        })
+       
+        await ARCHEthic.sendTransaction(keychainTx, endpoint)
+      }
+
+      function getKeychain() {
+        const endpoint = document.querySelector("#endpoint").value
+        const seed = document.querySelector("#accessSeed").value
+
+        ARCHEthic.getKeychain(seed, endpoint).then((keychain) => {
+          const { seed, services } = keychain
+          document.querySelector("#keychainSeed2").innerText = toHex(seed)
+        
+          let servicesContainer = document.querySelector("#services")
+
+          for (service in services) {
+           const { derivationPath } = services[service]
+  
+           var serviceContainer = document.createElement("div")
+           serviceContainer.classList = "tile is-parent"
+      
+           var serviceBox = document.createElement("div")
+           serviceBox.classList = "title is-child box"
+
+
+           var serviceNameEl = document.createElement("p")
+           serviceNameEl.innerText = service
+           serviceNameEl.classList = "title"
+           serviceBox.appendChild(serviceNameEl)
+
+           serviceContainer.appendChild(serviceBox)
+
+           var serviceDerivationPathEl = document.createElement("p")
+           serviceDerivationPathEl.innerText = "Derivation path: " + services[service].derivationPath
+           serviceDerivationPathEl.classList = "subtitle"
+           serviceBox.appendChild(serviceDerivationPathEl)
+
+           var serviceDetails = document.createElement("div")
+           serviceDetails.classList = "content"
+
+           if (derivationPath.startsWith("m/650")) {
+             var serviceAddressEl = document.createElement("p")
+             serviceAddressEl.classList = "is-size-6"
+             const address = keychain.deriveAddress(service, 0)
+
+             var serviceAddressLink = document.createElement("a")
+             serviceAddressLink.innerText = "Address: " + toHex(address)
+             serviceAddressLink.setAttribute("href", endpoint + "/explorer/transaction/" + toHex(address))
+             serviceAddressLink.setAttribute("target", "_blank")
+
+            serviceAddressEl.appendChild(serviceAddressLink)
+            serviceDetails.appendChild(serviceAddressEl)
+           }
+
+           serviceBox.appendChild(serviceDetails)
+
+            servicesContainer.appendChild(serviceContainer)
+          }
+       })
+        
+        document.querySelector("#keychainInfo").style.display = "block"
+      }
+
+      function toHex(bytes) {
+        return bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+      }
+    </script>
+  </body>
+</html>

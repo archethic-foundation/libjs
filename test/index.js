@@ -1,5 +1,8 @@
-const { deriveAddress, deriveKeyPair } = require('../index')
+const { deriveAddress, deriveKeyPair, newKeychainTransaction, newAccessKeychainTransaction, aesDecrypt, ecDecrypt} = require('../index')
 const assert = require('assert')
+const { hexToUint8Array, uint8ArrayToHex } = require('../lib/utils')
+const {newKeychain} = require("../lib/keychain")
+        
 
 describe ("deriveAddress", () => {
     it("should derive a address by using a seed and index with default", () => {
@@ -34,4 +37,39 @@ describe ("deriveKeyPair", () => {
     it("should derive a keypair by using a seed and index using ", () => {
         assert.strictEqual(deriveKeyPair("mysuperseed", 0, 'secp256k1').publicKey, "02010478d2cc0c37955b3765e9c9553e8dbcd71925253fdc9d63389acc417438838720d709de3e514b1f0bd50353545e834b2fe03d764958a65045f5f4d33416ddde04")
     })
+})
+
+describe ("newKeychainTransaction", () => {
+    it("should create a new keychain transaction", () => {
+        const { privateKey: originPrivateKey} = deriveKeyPair("origin_seed", 0)
+        const authorizedPublicKey = hexToUint8Array("000161d6cd8da68207bd01198909c139c130a3df3a8bd20f4bacb123c46354ccd52c")        
+        const tx = newKeychainTransaction("seed", [authorizedPublicKey], originPrivateKey)
+        
+        const keychain = newKeychain("seed")
+        
+        const tx_content = new TextEncoder().encode(JSON.stringify(keychain.toDID()))
+        
+        assert.equal("keychain", tx.type)
+        assert.deepStrictEqual(tx.data.content, tx_content)
+    })        
+})
+
+describe("newAccessKeychainTransaction", () => {
+    it("should create a new access keychain transaction and encrypt the keychain address in the secret", () => {
+        const { privateKey: originPrivateKey} = deriveKeyPair("origin_seed", 0)
+        
+        const seed = "mysuperseed"
+        const keychainAddress = "0000b0c17f85ca19e3db670992e79adb94fb560bd750fda06d45bc0a42912c89d31e"
+        const { privateKey } = deriveKeyPair(seed, 0)
+        
+        const tx = newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
+        
+        const aesKey = ecDecrypt(tx.data.ownerships[0].authorizedKeys[0].encryptedSecretKey, privateKey)
+        
+        const decryptedAddress = aesDecrypt(tx.data.ownerships[0].secret, aesKey)
+
+                
+        assert.equal("keychain_access", tx.type)
+        assert.deepStrictEqual(keychainAddress, uint8ArrayToHex(decryptedAddress))
+    })        
 })

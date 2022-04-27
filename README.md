@@ -276,6 +276,137 @@ It supports the ArchEthic Cryptography rules which are:
   const { fee: fee } = await archethic.getTransactionFee(tx, "https://testnet.archethic.net")
   ```
 
+  #### getTransactionOwnerships(address, endpoint)
+  Query a node to find the ownerships (secrets and authorized keys) to given transaction's address
+
+  - `address`: Transaction's address
+  - `endpoint`: Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const ownerships = await archethic.getTransactionOwnerships(tx.address, "https://testnet.archethic.net")
+  console.log(ownerships)
+  [
+    {
+      secret: "...",
+      authorizedPublicKeys: [
+        {
+          publicKey: "...",
+          encryptedSecretKey: ""
+        }
+      ] 
+    }
+  ]
+  ```
+
+  ### Keychain / Wallet management
+
+  #### newKeychainTransaction(seed, authorizedPublicKeys, originPrivateKey)
+  Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
+
+  - `seed` Keychain's seed
+  - `authorizedPublicKeys` List of authorized public keys able to decrypt the wallet
+  - `originPrivateKey` Key to make the origin signature of the transaction
+
+  #### newAccessKeychainTransaction(seed, keychainAddress, originPrivateKey)
+  Creates a new keychain access transaction to allow a seed and its key to access a keychain
+
+  - `seed` Keychain access's seed
+  - `keychainAddress` Keychain's tx address
+  - `originPrivateKey` Key to make the origin signature of the transaction  
+
+  #### getKeychain(seed, endpoint)
+  Retrieve a keychain from the keychain access transaction and decrypt the wallet to retrieve the services associated
+
+  - `seed` Keychain access's seed
+  - `endpoint` Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  console.log(keychain)
+  {
+    version: 1,
+    seed: "masterKeychainSeed",
+    services: {
+      uco: {
+        derivationPath: "m/650'/0'/0'"
+      }
+    }
+  }
+  ```  
+
+  Once retreived the keychain provide the following methods:
+
+  ##### deriveAddress(service, index)
+  Derive an address for the given service at the index given
+
+  - `service`: Service name to identify the derivation path to use
+  - `index`: Chain index to derive (default to 0)
+
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  const genesisUCOAddress = keychain.deriveAddress("uco", 0)
+  ``` 
+
+  ##### deriveKeypair(service, index)
+  Derive a keypair for the given service at the index given
+
+  - `service`: Service name to identify the derivation path to use
+  - `index`: Chain index to derive (default to 0)
+  
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  const { publicKey } = keychain.deriveKeypair("uco", 0)
+  ``` 
+
+  ##### toDID
+  Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
+
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  const did  = keychain.toDID()
+  console.log(did)
+  {
+    "@context": [
+       "https://www.w3.org/ns/did/v1"
+    ],
+    "id": "did:archethic:keychain_address",
+    "authentification": servicesMaterials, //list of public keys of the services
+    "verificationMethod": servicesMaterials //list of public keys of the services
+  }
+  ```
+
+  ##### addService(name, derivationPath, curve, hashAlgo)
+  Add a service into the keychain
+
+  - `name`: Name of the service to add
+  - `derivationPath`: Crypto derivation path
+  - `curve`: Elliptic curve to use
+  - `hashAlgo`: Hash algo
+
+  ```js
+  const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
+  keychain.addService("nft1", "m/650'/1'/0'")
+  console.log(keychain)
+  {
+    version: 1,
+    seed: "mymasterseed",
+    services: {
+      uco: {
+        derivationPath: "m/650'/0'/0'",
+        curve: "ed25519",
+        hashAlgo: "sha256"
+      },
+      nft1: {
+        derivationPath: "m/650'/1'/0'",
+        curve: "ed25519",
+        hashAlgo: "sha256"
+      }
+    }
+  }
+  ```
+
 ## Running the tests
 
 ```bash
