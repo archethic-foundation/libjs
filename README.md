@@ -399,7 +399,7 @@ It supports the ArchEthic Cryptography rules which are:
         hashAlgo: "sha256"
       },
       nft1: {
-        derivationPath: "m/650'/0'/0'",
+        derivationPath: "m/650'/1'/0'",
         curve: "ed25519",
         hashAlgo: "sha256"
       }
