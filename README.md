@@ -1,9 +1,9 @@
 ![Node.js CI](https://github.com/archethic-foundation/libjs/workflows/Node.js%20CI/badge.svg?branch=master)
 
 
-# ArchEthic SDK Javascript
+# Archethic SDK Javascript
 
-Official ArchEthic Javascript library for Node and Browser.
+Official Archethic Javascript library for Node and Browser.
 
 ## Installing
 
@@ -13,9 +13,9 @@ npm install archethic
 
 ## Usage
 
-This library aims to provide a easy way to create ArchEthic transaction and to send them over the network.
+This library aims to provide a easy way to create Archethic transaction and to send them over the network.
 
-It supports the ArchEthic Cryptography rules which are:
+It supports the Archethic Cryptography rules which are:
 
 - Algorithm identification: keys are prepared by metadata bytes to indicate the curve used and the origin of the generation, and hashes are prepended by a byte to indicate the hash algorithm used. 
   Those information help during the verification
@@ -43,7 +43,7 @@ It supports the ArchEthic Cryptography rules which are:
   
 - Key derivation:
   
-    To be able to retrieve previous public key, the ArchEthic network designs the key derivation through a seed (passphrase) and an index(number of
+    To be able to retrieve previous public key, the Archethic network designs the key derivation through a seed (passphrase) and an index(number of
      previous public keys/transactions).
     The procedure is described as follows:
     
@@ -210,7 +210,7 @@ It supports the ArchEthic Cryptography rules which are:
   Dispatch  the transaction to a node by serializing a GraphQL request
   
   - `tx` represent the built transaction from the **transactionBuilder**
-  - `endpoint` is the HTTP URL to a ArchEthic node (acting as welcome node)
+  - `endpoint` is the HTTP URL to a Archethic node (acting as welcome node)
 
   Returns
   
