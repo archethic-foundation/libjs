@@ -36,7 +36,7 @@ describe("keychain encode", () => {
     const keychain = newKeychain("myseed")
 
     const expectedBinary = concatUint8Arrays([
-      Uint8Array.from([1]), //Version
+      Uint8Array.from([0, 0, 0, 1]), //Version
       Uint8Array.from([6]), //Seed size
       new TextEncoder().encode("myseed"),
       Uint8Array.from([1]), //Nb of services
@@ -53,7 +53,7 @@ describe("keychain encode", () => {
 
   it("should decode keychain from a binary", () => {
     const binary = concatUint8Arrays([
-      Uint8Array.from([1]), //Version
+      Uint8Array.from([0, 0, 0, 1]), //Version
       Uint8Array.from([6]), //Seed size
       new TextEncoder().encode("myseed"),
       Uint8Array.from([1]), //Nb of services
