@@ -27,7 +27,7 @@
         <div class="column">
           <div class="box">
             <label for="endpoint">Node endpoint</label>
-            <input type="text" class="input" placeholder="Node endpoint" id="endpoint" />
+            <input type="text" class="input" value="http://localhost:4000" placeholder="Node endpoint" id="endpoint" />
           </div>
         </div>
       </div>
@@ -97,11 +97,13 @@
 
     <script src="../dist/index.js"></script>
     <script>
-      const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
+      // const originPrivateKey = "01009280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009"
 
       async function createKeychain() {
         const endpoint = document.querySelector("#endpoint").value
         const seed = document.querySelector("#accessSeed").value
+
+        const originPrivateKey = await ARCHEthic.getOriginKey(endpoint)
 
         const { publicKey } = ARCHEthic.deriveKeyPair(seed, 0)
 

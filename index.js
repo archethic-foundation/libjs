@@ -2,8 +2,9 @@ const TxBuilder = require('./lib/transaction_builder')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
 const { newKeychain, decodeKeychain } = require("./lib/keychain")
-const { uint8ArrayToHex } = require('./lib/utils')
+const { uint8ArrayToHex, hexToUint8Array } = require('./lib/utils')
 const { randomBytes } = require("crypto")
+const { ORIGIN_PUBLIC_KEY, ORIGIN_PRIVATE_KEY } = require("./lib/utils")
 
 module.exports.newTransactionBuilder = newTransactionBuilder
 module.exports.newKeychainTransaction = newKeychainTransaction
@@ -25,6 +26,7 @@ module.exports.getTransactionIndex = getTransactionIndex
 module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
 module.exports.getTransactionOwnerships = getTransactionOwnerships
+module.exports.getOriginKey = getOriginKey
 
 /**
  * Create a new TransactionBuilder instance to forge transaction
@@ -262,4 +264,29 @@ function getKeychain(seed, endpoint) {
  */
 function getTransactionOwnerships(address, endpoint) {
   return API.getTransactionOwnerships(address, endpoint)
+}
+
+/**
+ * Get the origin private keys
+ * @param {String} authorizedPublicKey Authorized public key in origin shared secrets chain
+ * @param {String} privateKey Private Key to decode secrets key
+ * @param {String} endpoint Node endpoint
+ */
+function getOriginKey(endpoint, authorizedPublicKey = ORIGIN_PUBLIC_KEY, privateKey = ORIGIN_PRIVATE_KEY) {
+  return new Promise((resolve, reject) => {
+    API.getOriginKey(endpoint, authorizedPublicKey).then(res => {
+      if (res.error) {
+        reject(res.error)
+      }
+
+      try {
+        const secretKey = Crypto.ecDecrypt(res.encrypted_secret_key, hexToUint8Array(privateKey))
+        const originPrivateKey = Crypto.aesDecrypt(res.encrypted_origin_private_keys, secretKey)
+        resolve(uint8ArrayToHex(originPrivateKey))
+      } catch(er) {
+        console.log(er)
+        reject("Invalid pair of public/private key")
+      }
+    })
+  })
 }
