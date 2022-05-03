@@ -206,6 +206,35 @@ It supports the Archethic Cryptography rules which are:
   ```
   
   ### Remote Endpoint calls
+  #### getOriginKey(endpoint, authorizedPublicKey, privateKey)
+  Query a node to get the origin private key encrypted by the `authorizedPublicKey`. This origin private key is used to sign the transaction (see originSign).
+
+  - `endpoint` is the HTTP URL to a Archethic node
+  - `authorizedPublicKey` is the public key which encode the origin private key. Default value is set to the genesis origin public key of the network.
+  - `privateKey` is the private key corresponding to the `authorizedPublicKey` needed to decrypt the origin private key secret. Default value is set to the genesis origin private key of the network.
+
+  Return is the origin private key.
+
+  Getting the default origin Key :
+  ```js
+  const archethic = require('archethic')
+  const originPrivateKey = archethic.getOriginKey("https://testnet.archethic.net")
+  const tx = archethic.newTransactionBuilder("transfer")
+  ...
+  tx.originSign(originPrivateKey)
+  ```
+  Getting another origin key :
+  ```js
+  const archethic = require('archethic')
+
+  const authPublicKey = '0001be992817b7db9807b1df5faa6bb23036e1f2189eeaab0e1f1260ede8642ecc76'
+  const privateKey = '0001621d7c3bb971a245959679bf0879822a4df60c95c8f7f2193352d85498840b7d'
+
+  const originPrivateKey = archethic.getOriginKey("https://testnet.archethic.net", authPublicKey, privateKey)
+  const tx = archethic.newTransactionBuilder("transfer")
+  ...
+  tx.originSign(originPrivateKey)
+  ```
   #### sendTransaction(tx, endpoint)
   Dispatch  the transaction to a node by serializing a GraphQL request
   
