@@ -280,11 +280,10 @@ function getOriginKey(endpoint, authorizedPublicKey = ORIGIN_PUBLIC_KEY, private
       }
 
       try {
-        const secretKey = Crypto.ecDecrypt(res.encrypted_secret_key, hexToUint8Array(privateKey))
-        const originPrivateKey = Crypto.aesDecrypt(res.encrypted_origin_private_keys, secretKey)
+        const secretKey = ecDecrypt(res.encrypted_secret_key, hexToUint8Array(privateKey))
+        const originPrivateKey = aesDecrypt(res.encrypted_origin_private_keys, secretKey)
         resolve(uint8ArrayToHex(originPrivateKey))
       } catch(er) {
-        console.log(er)
         reject("Invalid pair of public/private key")
       }
     })
