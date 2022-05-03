@@ -67,7 +67,7 @@ function waitConfirmations(address, endpoint, handler) {
         throw "'handler' must be a function"
     }
 
-    API.waitConfirmations(address, endpoint, handler)
+    return API.waitConfirmations(address, endpoint, handler)
 }
 
 /**

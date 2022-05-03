@@ -110,14 +110,14 @@
         const keychainSeed = ARCHEthic.randomSecretKey()
         const keychainTx = ARCHEthic.newKeychainTransaction(keychainSeed, [publicKey], originPrivateKey)       
         
-        ARCHEthic.waitConfirmations(keychainTx.address, endpoint, async function () {
+        await ARCHEthic.waitConfirmations(keychainTx.address, endpoint, async function () {
           document.querySelector("#keychainSeed1").innerText = toHex(keychainSeed)
           let txEndpointLink =  endpoint + "/explorer/transaction/" + toHex(keychainTx.address)
           document.querySelector("#keychainTxLink").innerText = txEndpointLink
           document.querySelector("#keychainTxLink").setAttribute("href", txEndpointLink)
           
           const accessKeychainTx = ARCHEthic.newAccessKeychainTransaction(seed, keychainTx.address, originPrivateKey)
-          ARCHEthic.waitConfirmations(accessKeychainTx.address, endpoint, function () {
+          await ARCHEthic.waitConfirmations(accessKeychainTx.address, endpoint, function () {
             let txEndpointLink =  endpoint + "/explorer/transaction/" + toHex(accessKeychainTx.address)
             document.querySelector("#accessKeychainTxLink").innerText = txEndpointLink
             document.querySelector("#accessKeychainTxLink").setAttribute("href", txEndpointLink)
