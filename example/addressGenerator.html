@@ -2,10 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCHEthic - Address Generator</title>
+    <title>Archethic - Address Generator</title>
 </head>
 <body>
-    <h1>ARCHEthic Address generator</h1>
+    <h1>Archethic Address generator</h1>
 
     <label for="seed">Key generation seed</label> <br />
     <input type="password" id="seed" placeholder="Enter your transaction seed" style="width: 500px" />
@@ -49,7 +49,7 @@
             if (seed == "" || index == NaN) {
                 return
             }
-            address = ARCHEthic.deriveAddress(seed,index,curve,hash)
+            address = Archethic.deriveAddress(seed,index,curve,hash)
             document.querySelector("#address").innerText = address
         }
     </script>

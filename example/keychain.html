@@ -103,39 +103,39 @@
         const endpoint = document.querySelector("#endpoint").value
         const seed = document.querySelector("#accessSeed").value
 
-        const originPrivateKey = await ARCHEthic.getOriginKey(endpoint)
+        const originPrivateKey = await Archethic.getOriginKey(endpoint)
 
-        const { publicKey } = ARCHEthic.deriveKeyPair(seed, 0)
+        const { publicKey } = Archethic.deriveKeyPair(seed, 0)
 
-        const keychainSeed = ARCHEthic.randomSecretKey()
-        const keychainTx = ARCHEthic.newKeychainTransaction(keychainSeed, [publicKey], originPrivateKey)       
+        const keychainSeed = Archethic.randomSecretKey()
+        const keychainTx = Archethic.newKeychainTransaction(keychainSeed, [publicKey], originPrivateKey)       
         
-        await ARCHEthic.waitConfirmations(keychainTx.address, endpoint, async function () {
+        await Archethic.waitConfirmations(keychainTx.address, endpoint, async function () {
           document.querySelector("#keychainSeed1").innerText = toHex(keychainSeed)
           let txEndpointLink =  endpoint + "/explorer/transaction/" + toHex(keychainTx.address)
           document.querySelector("#keychainTxLink").innerText = txEndpointLink
           document.querySelector("#keychainTxLink").setAttribute("href", txEndpointLink)
           
-          const accessKeychainTx = ARCHEthic.newAccessKeychainTransaction(seed, keychainTx.address, originPrivateKey)
-          await ARCHEthic.waitConfirmations(accessKeychainTx.address, endpoint, function () {
+          const accessKeychainTx = Archethic.newAccessKeychainTransaction(seed, keychainTx.address, originPrivateKey)
+          await Archethic.waitConfirmations(accessKeychainTx.address, endpoint, function () {
             let txEndpointLink =  endpoint + "/explorer/transaction/" + toHex(accessKeychainTx.address)
             document.querySelector("#accessKeychainTxLink").innerText = txEndpointLink
             document.querySelector("#accessKeychainTxLink").setAttribute("href", txEndpointLink)
             document.querySelector("#keychainCreation").style.display = "block"
           })
          
-          await ARCHEthic.sendTransaction(accessKeychainTx, endpoint)
+          await Archethic.sendTransaction(accessKeychainTx, endpoint)
           
         })
        
-        await ARCHEthic.sendTransaction(keychainTx, endpoint)
+        await Archethic.sendTransaction(keychainTx, endpoint)
       }
 
       function getKeychain() {
         const endpoint = document.querySelector("#endpoint").value
         const seed = document.querySelector("#accessSeed").value
 
-        ARCHEthic.getKeychain(seed, endpoint).then((keychain) => {
+        Archethic.getKeychain(seed, endpoint).then((keychain) => {
           const { seed, services } = keychain
           document.querySelector("#keychainSeed2").innerText = toHex(seed)
         

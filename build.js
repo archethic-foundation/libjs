@@ -6,7 +6,7 @@ require('esbuild').build({
   bundle: true,
   minify: true,
   sourcemap: true,
-  globalName: 'ARCHEthic',
+  globalName: 'Archethic',
   define: {
     global: 'window'
   },
