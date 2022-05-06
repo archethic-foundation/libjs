@@ -18,7 +18,7 @@ use chrome, FireFox or Internet Explorer 11`)}var f8=vt(),n8=gf(),a8=f8.Buffer,o
           nbConfirmations
         }
       }
-      `,c=rv.send(a,{operation:s});return new Promise((m,M)=>{rv.observe(a,c,{onStart:function(){m()},onError:function(B){M(B)},onResult:function(B){throw B.data.transactionConfirmed&&r(B.data.transactionConfirmed.nbConfirmations),B}})})},getTransactionFee:function(t,e){return no(e+"/api/transaction_fee",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:t.toJSON()}).then(r=>r.json())},getTransactionOwnerships:function(t,e){return no(e+"/api",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({query:`query {
+      `,c=rv.send(a,{operation:s});return new Promise((m,M)=>{rv.observe(a,c,{onStart:function(){m()},onError:function(B){M(B)},onResult:function(B){B.data.transactionConfirmed&&r(B.data.transactionConfirmed.nbConfirmations),m(B)}})})},getTransactionFee:function(t,e){return no(e+"/api/transaction_fee",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:t.toJSON()}).then(r=>r.json())},getTransactionOwnerships:function(t,e){return no(e+"/api",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({query:`query {
                     transaction(address: "${t}") {
                       data {
                         ownerships {
