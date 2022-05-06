@@ -235,26 +235,26 @@
       Archethic.getKeychain(seed, endpoint).then(async keychain => {
         const genesisAddress = keychain.deriveAddress(service, 0)
         const index = await Archethic.getTransactionIndex(toHex(genesisAddress), endpoint)
-        keychain.buildTransaction(tx, serviceName, index)
+        const signedTx = keychain.buildTransaction(tx, serviceName, index)
 
-        tx.originSign(originPrivateKey)
+        signedTx.originSign(originPrivateKey)
 
         document.querySelector("#confirmations").innerText = 0
       
-        Archethic.waitConfirmations(tx.address, endpoint, function (nbConfirmations) {
+        Archethic.waitConfirmations(signedTx.address, endpoint, function (nbConfirmations) {
           document.querySelector("#confirmed").style.display = "block"
           document.querySelector("#confirmations").innerText = nbConfirmations
         })
 
-        Archethic.sendTransaction(tx, endpoint).then((data) => {
+        Archethic.sendTransaction(signedTx, endpoint).then((data) => {
         if (data.errors) {
           document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
           return
         }
 
         document.querySelector("#success").style.display = "block"
-        document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(tx.address)
-        document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(tx.address))
+        document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(signedTx.address)
+        document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(signedTx.address))
       })
       })
     }
