@@ -82,6 +82,34 @@
         <div class="columns">
           <div class="column">
             <div class="box">
+              <p class="is-size-6 title">Create UCO transfer transaction</p>
+              <!-- <label for="txServiceName">Service name</label>
+              <input class="input" type="text" placeholder="Enter the service name" id="txServiceName" />
+              <label for="txRecipientAddress">Recipient address</label>
+              <input class="input" type="text" placeholder="Enter the recipient address" id="txRecipientAddress" />
+              <label for="txUCOAmount">Recipient address</label>
+              <input class="input" type="number" placeholder="Enter the UCO amount" id="txUCOAmount" />
+              <button class="button" onClick="sendTransaction()">Send Transaction</button> -->
+              <input type="text" class="input" id="tx_service_name" placeholder="Enter the service name"
+                style="width: 200px" />
+              <input type="text" class="input" id="tx_address" placeholder="Enter the address of the recipient"
+                style="width: 400px" />
+              <input type="text" class="input" id="tx_amount" placeholder="Enter the amount to send"
+                style="width: 200px" />
+              <button type="button" class="button" onclick="sendTransaction()">Send transaction</button>
+              <p id="success" style="display: none">
+                Your transaction has been sent to the network. <br />
+                You can verify it at <a id="tx_address_link" target="_blank"></a>
+              </p>
+              <p id="confirmed" style="display: none">
+                Transaction confirmed with <span id="confirmations"></span> replications
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box">
               <p class="is-size-6 title">Keychain seed: </p>
               <p id="keychainSeed2"></p>
             </div>
@@ -190,6 +218,45 @@
       })
 
       document.querySelector("#keychainInfo").style.display = "block"
+    }
+
+    async function sendTransaction() {
+      const endpoint = document.querySelector("#endpoint").value
+      const seed = document.querySelector("#accessSeed").value
+      const serviceName = document.querySelector("#tx_service_name").value
+      const recipientAddress = document.querySelector("#tx_address").value
+      const ucoAmount = document.querySelector("#tx_amount").value
+
+      const tx = Archethic.newTransactionBuilder("transfer")
+      .addUCOTransfer(recipientAddress, ucoAmount)
+
+      const originPrivateKey = await Archethic.getOriginKey(endpoint)
+
+      Archethic.getKeychain(seed, endpoint).then(async keychain => {
+        const genesisAddress = keychain.deriveAddress(service, 0)
+        const index = await Archethic.getTransactionIndex(toHex(genesisAddress), endpoint)
+        keychain.buildTransaction(tx, serviceName, index)
+
+        tx.originSign(originPrivateKey)
+
+        document.querySelector("#confirmations").innerText = 0
+      
+        Archethic.waitConfirmations(tx.address, endpoint, function (nbConfirmations) {
+          document.querySelector("#confirmed").style.display = "block"
+          document.querySelector("#confirmations").innerText = nbConfirmations
+        })
+
+        Archethic.sendTransaction(tx, endpoint).then((data) => {
+        if (data.errors) {
+          document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
+          return
+        }
+
+        document.querySelector("#success").style.display = "block"
+        document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(tx.address)
+        document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(tx.address))
+      })
+      })
     }
 
     function toHex(bytes) {
