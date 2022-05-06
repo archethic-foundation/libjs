@@ -1,8 +1,9 @@
 const assert = require('assert')
 
 const { keyToJWK, decodeKeychain, newKeychain } = require("../lib/keychain")
-const { uint8ArrayToHex, concatUint8Arrays } =  require("../lib/utils")
-const { deriveAddress } = require("../lib/crypto")
+const { uint8ArrayToHex, concatUint8Arrays, hexToUint8Array } =  require("../lib/utils")
+const { deriveAddress, verify } = require("../lib/crypto")
+const { newTransactionBuilder } = require("../index")
 
 
 describe("keychain to DID", () => {
@@ -75,5 +76,21 @@ describe("keychain encode", () => {
         hashAlgo: "sha256"
       } 
     }, services)
+  })
+})
+
+describe("buildTransaction", () => {
+  it("should build the transaction and the related signature", () => {
+    const keychain = newKeychain("seed")
+    
+    const tx = newTransactionBuilder("transfer")
+      .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.0)
+
+    keychain.buildTransaction(tx, "uco", 0)
+
+    assert.deepStrictEqual(tx.address, hexToUint8Array("0000a396a0dd89acf0767c3bd497a8d9c427080e1a2447065b001260f53513537174"))
+    assert.deepStrictEqual(tx.previousPublicKey, hexToUint8Array("0000267377b086539c78a374bce8858f00bcc3f4124ae71bd61b87cc0edc60c2cceb"))
+
+    assert.strictEqual(verify(tx.previousSignature, tx.previousSignaturePayload(), tx.previousPublicKey), true)
   })
 })
