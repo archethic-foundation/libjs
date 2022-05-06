@@ -166,7 +166,7 @@ It supports the Archethic Cryptography rules which are:
   - `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient)
   
   #### build(seed, index, curve, hashAlgo)
-  Generate `address`, `previousPublicKey`, `previousSignature`, `originSignature` of the transaction and 
+  Generate `address`, `previousPublicKey`, `previousSignature` of the transaction and 
   serialize it using a custom binary protocol.
   
   - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
@@ -367,6 +367,30 @@ It supports the Archethic Cryptography rules which are:
 
   Once retreived the keychain provide the following methods:
 
+  ##### buildTransaction(tx, service, index)
+  Generate `address`, `previousPublicKey`, `previousSignature` of the transaction and 
+  serialize it using a custom binary protocol, based on the derivation path, curve and hash algo of the service given in param.
+  
+  - `tx` is an instance of `TransactionBuilder`
+  - `service` is the service name to use for getting the derivation path, the curve and the hash algo
+  - `index` is the number of transactions in the chain, to generate the actual and the next public key (see the cryptography section)
+
+  Return is the signed `TransactionBuilder`. Notice that the function also sign the `TransactionBuilder` given in param, so getting the return is not mandatory
+
+  ```js
+  const endpoint = "https://testnet.archethic.net"
+  
+  const tx = archethic.newTransactionBuilder("transfert")
+  .addUCOTransfert(...)
+  const keychain = archethic.getKeychain(accessKeychainSeed, endpoint)
+
+  const index = archethic.getTransactionIndex(
+    keychain.deriveAddress("uco", 0),
+    endpoint
+  )
+  /*const signedTx =*/ keychain.buildTransaction(tx, "uco", index)
+  ```
+
   ##### deriveAddress(service, index)
   Derive an address for the given service at the index given
 
@@ -389,7 +413,7 @@ It supports the Archethic Cryptography rules which are:
   const { publicKey } = keychain.deriveKeypair("uco", 0)
   ``` 
 
-  ##### toDID
+  ##### toDID()
   Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
 
   ```js
