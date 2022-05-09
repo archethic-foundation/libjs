@@ -235,6 +235,19 @@ It supports the Archethic Cryptography rules which are:
   ...
   tx.originSign(originPrivateKey)
   ```
+  ### Hardware Interaction
+  #### setOriginSign(hardwareOriginSign)
+  Set the originSignature of transaction returned by a hardware device.  
+
+  - `hardwareOriginSign` Transaction is signed by the origin shared private key of harware .It is a (Uint8Array) HardwareOriginSignature 
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .build("mysuperpassphraseorseed", 0) 
+    .originSign(hardwareOriginSign)
+  ```
   #### sendTransaction(tx, endpoint)
   Dispatch  the transaction to a node by serializing a GraphQL request
   
