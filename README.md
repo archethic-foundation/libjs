@@ -235,6 +235,20 @@ It supports the Archethic Cryptography rules which are:
   ...
   tx.originSign(originPrivateKey)
   ```
+  ### Hardware Interaction
+  #### setOriginSign(signature)
+  Setter method for the originSignature of transaction.
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .build("mysuperpassphraseorseed", 0) 
+
+    const originPayload = tx.originSignaturePayload()
+    const originSignature = someFunctionToGetSignature(originPayload)
+    tx.setOriginSign(originSignature)
+  ```
   #### sendTransaction(tx, endpoint)
   Dispatch  the transaction to a node by serializing a GraphQL request
   
