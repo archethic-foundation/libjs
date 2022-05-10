@@ -534,6 +534,7 @@ It supports the Archethic Cryptography rules which are:
   ```
   </details>
   <br/>
+  
 ## Running the tests
 
 ```bash
