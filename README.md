@@ -211,7 +211,7 @@ It supports the Archethic Cryptography rules which are:
   ### Interacting with other signer (hardware for exemple)
 
   #### previousSignaturePayload()
-  Get the an Uint8Array payload to be signed with user seed
+  Get an Uint8Array payload to be signed with user seed
 
   ```js
   const archethic = require('archethic')
@@ -221,7 +221,7 @@ It supports the Archethic Cryptography rules which are:
     const signaturePayload = tx.previousSignaturePayload()
   ```
   #### setPreviousSignatureAndPreviousPublicKey(prevSign, prevPubKey)
-  Setter method for the previous signature and previous public key.
+  Setter method for the transaction's previous signature and previous public key.
 
   - `prevSign` is hexadecimal encoding or Uint8Array previous signature of the transaction
   - `prevPubKey` is hexadecimal encoding or Uint8Array previous public key of the transaction
@@ -237,7 +237,7 @@ It supports the Archethic Cryptography rules which are:
     tx.setPreviousSignatureAndPreviousPublicKey(prevSign, prevPubKey)
   ```
   #### setAddress(address)
-  Setter method for the address of the transaction.
+  Setter method for the transaction's address.
 
   ```js
   const archethic = require('archethic')
@@ -248,7 +248,7 @@ It supports the Archethic Cryptography rules which are:
     tx.setAddress(txAddress)
   ```
   #### originSignaturePayload()
-  Get the an Uint8Array payload to be signed with the origin private key
+  Get an Uint8Array payload to be signed with the origin private key of the device.
 
   ```js
   const archethic = require('archethic')
@@ -258,7 +258,7 @@ It supports the Archethic Cryptography rules which are:
     const originPayload = tx.originSignaturePayload()
   ```
   #### setOriginSign(signature)
-  Setter method for the originSignature of the transaction.
+  Setter method for the transaction's origin signature.
 
   ```js
   const archethic = require('archethic')
@@ -275,6 +275,7 @@ It supports the Archethic Cryptography rules which are:
   <details>
   <summary>Remote Endpoint calls</summary>
   <br/>
+
   #### getOriginKey(endpoint, authorizedPublicKey, privateKey)
   Query a node to get the origin private key encrypted by the `authorizedPublicKey`. This origin private key is used to sign the transaction (see originSign).
 
@@ -401,6 +402,7 @@ It supports the Archethic Cryptography rules which are:
   <details>
   <summary>Keychain / Wallet management</summary>
   <br/>
+
   #### newKeychainTransaction(seed, authorizedPublicKeys, originPrivateKey)
   Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
 
@@ -436,9 +438,9 @@ It supports the Archethic Cryptography rules which are:
   }
   ```  
 
-  Once retreived the keychain provide the following methods:
+  **Once retreived the keychain provide the following methods:**
 
-  ##### buildTransaction(tx, service, index)
+  #### buildTransaction(tx, service, index)
   Generate `address`, `previousPublicKey`, `previousSignature` of the transaction and 
   serialize it using a custom binary protocol, based on the derivation path, curve and hash algo of the service given in param.
   
@@ -462,7 +464,7 @@ It supports the Archethic Cryptography rules which are:
   /*const signedTx =*/ keychain.buildTransaction(tx, "uco", index)
   ```
 
-  ##### deriveAddress(service, index)
+  #### deriveAddress(service, index)
   Derive an address for the given service at the index given
 
   - `service`: Service name to identify the derivation path to use
@@ -473,7 +475,7 @@ It supports the Archethic Cryptography rules which are:
   const genesisUCOAddress = keychain.deriveAddress("uco", 0)
   ``` 
 
-  ##### deriveKeypair(service, index)
+  #### deriveKeypair(service, index)
   Derive a keypair for the given service at the index given
 
   - `service`: Service name to identify the derivation path to use
@@ -484,7 +486,7 @@ It supports the Archethic Cryptography rules which are:
   const { publicKey } = keychain.deriveKeypair("uco", 0)
   ``` 
 
-  ##### toDID()
+  #### toDID()
   Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
 
   ```js
@@ -501,7 +503,7 @@ It supports the Archethic Cryptography rules which are:
   }
   ```
 
-  ##### addService(name, derivationPath, curve, hashAlgo)
+  #### addService(name, derivationPath, curve, hashAlgo)
   Add a service into the keychain
 
   - `name`: Name of the service to add
