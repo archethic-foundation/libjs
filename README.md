@@ -208,7 +208,7 @@ It supports the Archethic Cryptography rules which are:
     .build("mysuperpassphraseorseed", 0) 
     .toJSON()
   ```
-  ### Interacting with other signer (hardware for exemple)
+  ### Interacting with other signer (hardware for example)
 
   #### previousSignaturePayload()
   Get an Uint8Array payload to be signed with user seed
