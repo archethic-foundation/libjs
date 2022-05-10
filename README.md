@@ -61,7 +61,9 @@ It supports the Archethic Cryptography rules which are:
    
 ## API
 
-  ### Cryptographic functions
+  <details>
+  <summary>Cryptographic functions</summary>
+  <br/>
 
   #### deriveKeyPair(seed, index, curve)
 
@@ -124,8 +126,11 @@ It supports the Archethic Cryptography rules which are:
   const archethic = require('archethic')
   const cipher = archethic.aesEncrypt("dataToEncrypt","0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
   ```
-
-  ### TransactionBuilding
+  </details>
+  <br/>
+  <details>
+  <summary>Transaction building</summary>
+  <br/>
   
   `newTransactionBuilder(type)` creates a new instance of the transaction builder
   
@@ -193,19 +198,84 @@ It supports the Archethic Cryptography rules which are:
     .build("mysuperpassphraseorseed", 0) 
     .originSign(originPrivateKey)
   ```
-
   #### toJSON()
   Export the transaction generated into JSON
 
-   ```js
+  ```js
   const archethic = require('archethic')
   const txJSON = archethic.newTransactionBuilder("transfer")
     .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
     .build("mysuperpassphraseorseed", 0) 
     .toJSON()
   ```
-  
-  ### Remote Endpoint calls
+  ### Interacting with other signer (hardware for example)
+
+  #### previousSignaturePayload()
+  Get an Uint8Array payload to be signed with user seed
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+
+    const signaturePayload = tx.previousSignaturePayload()
+  ```
+  #### setPreviousSignatureAndPreviousPublicKey(prevSign, prevPubKey)
+  Setter method for the transaction's previous signature and previous public key.
+
+  - `prevSign` is hexadecimal encoding or Uint8Array previous signature of the transaction
+  - `prevPubKey` is hexadecimal encoding or Uint8Array previous public key of the transaction
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420)
+
+    const signaturePayload = tx.previousSignaturePayload()
+    const prevSign = someFunctionToGetSignature(signaturePayload)
+    const prevPubKey = someFunctionToGetPubKey()
+    tx.setPreviousSignatureAndPreviousPublicKey(prevSign, prevPubKey)
+  ```
+  #### setAddress(address)
+  Setter method for the transaction's address.
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420)
+
+    const txAddress = someFunctionToGetTxAddress()
+    tx.setAddress(txAddress)
+  ```
+  #### originSignaturePayload()
+  Get an Uint8Array payload to be signed with the origin private key of the device.
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+
+    const originPayload = tx.originSignaturePayload()
+  ```
+  #### setOriginSign(signature)
+  Setter method for the transaction's origin signature.
+
+  ```js
+  const archethic = require('archethic')
+  const tx = archethic.newTransactionBuilder("transfer")
+    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
+    .build("mysuperpassphraseorseed", 0) 
+
+    const originPayload = tx.originSignaturePayload()
+    const originSignature = someFunctionToGetSignature(originPayload)
+    tx.setOriginSign(originSignature)
+  ```
+  </details>
+  <br/>
+  <details>
+  <summary>Remote Endpoint calls</summary>
+  <br/>
+
   #### getOriginKey(endpoint, authorizedPublicKey, privateKey)
   Query a node to get the origin private key encrypted by the `authorizedPublicKey`. This origin private key is used to sign the transaction (see originSign).
 
@@ -234,20 +304,6 @@ It supports the Archethic Cryptography rules which are:
   const tx = archethic.newTransactionBuilder("transfer")
   ...
   tx.originSign(originPrivateKey)
-  ```
-  ### Hardware Interaction
-  #### setOriginSign(signature)
-  Setter method for the originSignature of transaction.
-
-  ```js
-  const archethic = require('archethic')
-  const tx = archethic.newTransactionBuilder("transfer")
-    .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.420) 
-    .build("mysuperpassphraseorseed", 0) 
-
-    const originPayload = tx.originSignaturePayload()
-    const originSignature = someFunctionToGetSignature(originPayload)
-    tx.setOriginSign(originSignature)
   ```
   #### sendTransaction(tx, endpoint)
   Dispatch  the transaction to a node by serializing a GraphQL request
@@ -341,8 +397,11 @@ It supports the Archethic Cryptography rules which are:
     }
   ]
   ```
-
-  ### Keychain / Wallet management
+  </details>
+  <br/>
+  <details>
+  <summary>Keychain / Wallet management</summary>
+  <br/>
 
   #### newKeychainTransaction(seed, authorizedPublicKeys, originPrivateKey)
   Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
@@ -379,9 +438,9 @@ It supports the Archethic Cryptography rules which are:
   }
   ```  
 
-  Once retreived the keychain provide the following methods:
+  **Once retreived the keychain provide the following methods:**
 
-  ##### buildTransaction(tx, service, index)
+  #### buildTransaction(tx, service, index)
   Generate `address`, `previousPublicKey`, `previousSignature` of the transaction and 
   serialize it using a custom binary protocol, based on the derivation path, curve and hash algo of the service given in param.
   
@@ -405,7 +464,7 @@ It supports the Archethic Cryptography rules which are:
   /*const signedTx =*/ keychain.buildTransaction(tx, "uco", index)
   ```
 
-  ##### deriveAddress(service, index)
+  #### deriveAddress(service, index)
   Derive an address for the given service at the index given
 
   - `service`: Service name to identify the derivation path to use
@@ -416,7 +475,7 @@ It supports the Archethic Cryptography rules which are:
   const genesisUCOAddress = keychain.deriveAddress("uco", 0)
   ``` 
 
-  ##### deriveKeypair(service, index)
+  #### deriveKeypair(service, index)
   Derive a keypair for the given service at the index given
 
   - `service`: Service name to identify the derivation path to use
@@ -427,7 +486,7 @@ It supports the Archethic Cryptography rules which are:
   const { publicKey } = keychain.deriveKeypair("uco", 0)
   ``` 
 
-  ##### toDID()
+  #### toDID()
   Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
 
   ```js
@@ -444,7 +503,7 @@ It supports the Archethic Cryptography rules which are:
   }
   ```
 
-  ##### addService(name, derivationPath, curve, hashAlgo)
+  #### addService(name, derivationPath, curve, hashAlgo)
   Add a service into the keychain
 
   - `name`: Name of the service to add
@@ -473,7 +532,9 @@ It supports the Archethic Cryptography rules which are:
     }
   }
   ```
-
+  </details>
+  <br/>
+  
 ## Running the tests
 
 ```bash
