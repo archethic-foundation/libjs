@@ -453,8 +453,8 @@ It supports the Archethic Cryptography rules which are:
   ```js
   const endpoint = "https://testnet.archethic.net"
   
-  const tx = archethic.newTransactionBuilder("transfert")
-  .addUCOTransfert(...)
+  const tx = archethic.newTransactionBuilder("transfer")
+  .addUCOTransfer(...)
   const keychain = archethic.getKeychain(accessKeychainSeed, endpoint)
 
   const index = archethic.getTransactionIndex(
