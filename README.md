@@ -129,7 +129,7 @@ It supports the Archethic Cryptography rules which are:
   </details>
   <br/>
   <details>
-  <summary>TransactionBuilding</summary>
+  <summary>Transaction building</summary>
   <br/>
   
   `newTransactionBuilder(type)` creates a new instance of the transaction builder
