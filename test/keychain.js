@@ -22,9 +22,10 @@ describe("keychain to DID", () => {
     
     const expected = [
       {
-        id: `did:archethic:${address_hex}#key0`,
+        id: `did:archethic:${address_hex}#uco`,
         type: "JsonWebKey2020",
-        publicKeyJwk: keyToJWK(publicKey)
+        publicKeyJwk: keyToJWK(publicKey, "uco"),
+        controller: `did:archethic:${address_hex}`
       }
     ]
     
