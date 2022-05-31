@@ -432,7 +432,7 @@ It supports the Archethic Cryptography rules which are:
     seed: "masterKeychainSeed",
     services: {
       uco: {
-        derivationPath: "m/650'/0'/0'"
+        derivationPath: "m/650'/0/0"
       }
     }
   }
@@ -513,19 +513,19 @@ It supports the Archethic Cryptography rules which are:
 
   ```js
   const keychain = await archethic.getKeychain(accessKeychainSeed, "https://testnet.archethic.net")
-  keychain.addService("nft1", "m/650'/1'/0'")
+  keychain.addService("nft1", "m/650'/1/0")
   console.log(keychain)
   {
     version: 1,
     seed: "mymasterseed",
     services: {
       uco: {
-        derivationPath: "m/650'/0'/0'",
+        derivationPath: "m/650'/0/0",
         curve: "ed25519",
         hashAlgo: "sha256"
       },
       nft1: {
-        derivationPath: "m/650'/1'/0'",
+        derivationPath: "m/650'/1/0",
         curve: "ed25519",
         hashAlgo: "sha256"
       }
