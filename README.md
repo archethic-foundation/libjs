@@ -65,6 +65,16 @@ It supports the Archethic Cryptography rules which are:
   <summary>Cryptographic functions</summary>
   <br/>
 
+  #### getOriginKey()
+  Return the hardcoded origin private key for software, this is used for signing transaction (see OriginSign).
+
+  ```js
+  const archethic = require("archethic")
+  const tx = '...'
+  const originPrivateKey = archethic.getOriginKey()
+  tx.originSign(originPrivateKey)
+  ```
+
   #### deriveKeyPair(seed, index, curve)
 
   It creates a new keypair into hexadecimal format
@@ -275,9 +285,6 @@ It supports the Archethic Cryptography rules which are:
   <details>
   <summary>Remote Endpoint calls</summary>
   <br/>
-
-  #### getOriginKey()
-  Return the hardcoded origin private key for software, this is used fot signing transaction (see OriginSign).
 
   #### addOriginKey(originPublicKey, certificate, endpoint)
   Query a node to add a new origin public to be authorized to sign transaction with the corresponding private key (see OriginSign).
