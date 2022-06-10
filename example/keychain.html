@@ -134,7 +134,7 @@
       const endpoint = document.querySelector("#endpoint").value
       const seed = document.querySelector("#accessSeed").value
 
-      const originPrivateKey = await Archethic.getOriginKey(endpoint)
+      const originPrivateKey = await Archethic.getOriginKey()
 
       const { publicKey } = Archethic.deriveKeyPair(seed, 0)
 
@@ -230,7 +230,7 @@
       const tx = Archethic.newTransactionBuilder("transfer")
       .addUCOTransfer(recipientAddress, ucoAmount)
 
-      const originPrivateKey = await Archethic.getOriginKey(endpoint)
+      const originPrivateKey = Archethic.getOriginKey()
 
       Archethic.getKeychain(seed, endpoint).then(async keychain => {
         const genesisAddress = keychain.deriveAddress(service, 0)
