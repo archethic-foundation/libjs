@@ -4,7 +4,7 @@ const Crypto = require('./lib/crypto')
 const { newKeychain, decodeKeychain } = require("./lib/keychain")
 const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
-const { ORIGIN_PRIVATE_KEY } = require("./lib/utils")
+const { ORIGIN_PRIVATE_KEY, isHex } = require("./lib/utils")
 
 module.exports.newTransactionBuilder = newTransactionBuilder
 module.exports.newKeychainTransaction = newKeychainTransaction
