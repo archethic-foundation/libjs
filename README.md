@@ -276,14 +276,24 @@ It supports the Archethic Cryptography rules which are:
   <summary>Remote Endpoint calls</summary>
   <br/>
 
-  #### getOriginKey(endpoint, authorizedPublicKey, privateKey)
-  Query a node to get the origin private key encrypted by the `authorizedPublicKey`. This origin private key is used to sign the transaction (see originSign).
+  #### getOriginKey()
+  Return the hardcoded origin private key for software, this is used fot signing transaction (see OriginSign).
 
+  #### addOriginKey(originPublicKey, certificate, endpoint)
+  Query a node to add a new origin public to be authorized to sign transaction with the corresponding private key (see OriginSign).
+
+  - `originPublicKey` is the public key to be added.
+  - `certificate` is the certificate that prove the public key is allowed to be added.
   - `endpoint` is the HTTP URL to a Archethic node
-  - `authorizedPublicKey` is the public key which encode the origin private key. Default value is set to the genesis origin public key of the network.
-  - `privateKey` is the private key corresponding to the `authorizedPublicKey` needed to decrypt the origin private key secret. Default value is set to the genesis origin private key of the network.
 
-  Return is the origin private key.
+  Returns
+  
+  ```js
+  {
+    transaction_address: "..."
+    status: "pending"
+  }
+  ```
 
   Getting the default origin Key :
   ```js
@@ -315,7 +325,7 @@ It supports the Archethic Cryptography rules which are:
   
   ```js
   {
-    address: "..."
+    transaction_address: "..."
     status: "pending"
   }
   ```
