@@ -134,7 +134,7 @@
       const endpoint = document.querySelector("#endpoint").value
       const seed = document.querySelector("#accessSeed").value
 
-      const originPrivateKey = await Archethic.getOriginKey()
+      const originPrivateKey = Archethic.getOriginKey()
 
       const { publicKey } = Archethic.deriveKeyPair(seed, 0)
 
