@@ -27,6 +27,7 @@ module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
 module.exports.getTransactionOwnerships = getTransactionOwnerships
 module.exports.getOriginKey = getOriginKey
+module.exports.addOriginKey = addOriginKey
 
 /**
  * Create a new TransactionBuilder instance to forge transaction
@@ -271,4 +272,14 @@ function getTransactionOwnerships(address, endpoint) {
  */
 function getOriginKey() {
   return ORIGIN_PRIVATE_KEY
+}
+
+/**
+ * Add a new origin key
+ * @param {String} originPublicKey origin public key to be added
+ * @param {String} certificate certificate of the origin public key
+ * @param {String} endpoint Node endpoint
+ */
+ function addOriginKey(originPublicKey, certificate, endpoint) {
+  return API.addOriginKey(originPublicKey, certificate, endpoint)
 }
