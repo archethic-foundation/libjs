@@ -149,7 +149,7 @@
       index = document.querySelector("#index").value
       curve = document.querySelector("#curve").value
       endpoint = document.querySelector("#endpoint").value
-      const originPrivateKey = await Archethic.getOriginKey(endpoint)
+      const originPrivateKey = Archethic.getOriginKey()
 
       code = document.querySelector("#code").value
       if (code != "") {

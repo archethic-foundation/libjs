@@ -2,9 +2,9 @@ const TxBuilder = require('./lib/transaction_builder')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
 const { newKeychain, decodeKeychain } = require("./lib/keychain")
-const { uint8ArrayToHex, hexToUint8Array } = require('./lib/utils')
+const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
-const { ORIGIN_PUBLIC_KEY, ORIGIN_PRIVATE_KEY } = require("./lib/utils")
+const { ORIGIN_PRIVATE_KEY, isHex } = require("./lib/utils")
 
 module.exports.newTransactionBuilder = newTransactionBuilder
 module.exports.newKeychainTransaction = newKeychainTransaction
@@ -27,6 +27,7 @@ module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
 module.exports.getTransactionOwnerships = getTransactionOwnerships
 module.exports.getOriginKey = getOriginKey
+module.exports.addOriginKey = addOriginKey
 
 /**
  * Create a new TransactionBuilder instance to forge transaction
@@ -267,25 +268,18 @@ function getTransactionOwnerships(address, endpoint) {
 }
 
 /**
- * Get the origin private keys
- * @param {String} authorizedPublicKey Authorized public key in origin shared secrets chain
- * @param {String} privateKey Private Key to decode secrets key
+ * Return the origin private keys
+ */
+function getOriginKey() {
+  return ORIGIN_PRIVATE_KEY
+}
+
+/**
+ * Add a new origin key
+ * @param {String} originPublicKey origin public key to be added
+ * @param {String} certificate certificate of the origin public key
  * @param {String} endpoint Node endpoint
  */
-function getOriginKey(endpoint, authorizedPublicKey = ORIGIN_PUBLIC_KEY, privateKey = ORIGIN_PRIVATE_KEY) {
-  return new Promise((resolve, reject) => {
-    API.getOriginKey(endpoint, authorizedPublicKey).then(res => {
-      if (res.error) {
-        reject(res.error)
-      }
-
-      try {
-        const secretKey = ecDecrypt(res.encrypted_secret_key, hexToUint8Array(privateKey))
-        const originPrivateKey = aesDecrypt(res.encrypted_origin_private_keys, secretKey)
-        resolve(uint8ArrayToHex(originPrivateKey))
-      } catch(er) {
-        reject("Invalid pair of public/private key")
-      }
-    })
-  })
+ function addOriginKey(originPublicKey, certificate, endpoint) {
+  return API.addOriginKey(originPublicKey, certificate, endpoint)
 }
