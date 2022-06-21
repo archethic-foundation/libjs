@@ -37,8 +37,8 @@
             onchange="getTransactionIndex()" />
           <label for="curve">Cryptographic curve</label>
           <select id="curve" class="select">
-            <option value="P256">P256</option>
             <option value="ed25519">Ed25519</option>
+            <option value="P256">P256</option>
             <option value="secp256k1">secp256k1</option>
           </select>
         </div>
@@ -92,6 +92,9 @@
           <input type="text" class="input" id="nft_amount" placeholder="Enter the amount to send"
             style="width: 200px" />
           <input type="text" class="input" id="nft_address" placeholder="Enter the NFT address to send"
+            style="width: 200px" />
+          <input type="text" class="input" id="nft_id" placeholder="Enter the NFT id to send"
+            value = "0"
             style="width: 200px" />
           <button class="button" type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
           <br />
@@ -193,7 +196,7 @@
       })
 
       nftTransfers.forEach(function (transfer) {
-        txBuilder.addNFTTransfer(transfer.to, transfer.amount, transfer.nft)
+        txBuilder.addNFTTransfer(transfer.to, transfer.amount, transfer.nft, transfer.nft_id)
       })
 
       recipients.forEach(function (recipient) {
@@ -252,11 +255,12 @@
     }
 
     function onClickAddNFTTransfer() {
-      transfer_to = document.querySelector("#nft_recipient_address").value
-      transfer_amount = document.querySelector("#nft_amount").value
-      transfer_nft = document.querySelector("#nft_address").value
+      var transfer_to = document.querySelector("#nft_recipient_address").value
+      var transfer_amount = document.querySelector("#nft_amount").value
+      var transfer_nft = document.querySelector("#nft_address").value
+      var transfer_nft_id = document.querySelector("#nft_id").value
 
-      amount = parseFloat(transfer_amount)
+      var amount = parseFloat(transfer_amount)
       if (transfer_amount == "" || amount == NaN || amount < 0.0) {
         return
       }
@@ -269,10 +273,10 @@
         return
       }
 
-      nftTransfers.push({ to: transfer_to, amount: transfer_amount, nft: transfer_nft })
+      nftTransfers.push({ to: transfer_to, amount: transfer_amount, nft: transfer_nft, nft_id: parseInt(transfer_nft_id) })
 
       var option = document.createElement("option");
-      option.text = transfer_to + ": " + transfer_amount + ": " + transfer_nft;
+      option.text = transfer_to.substring(0, 10) + ": " + transfer_amount + ": " + transfer_nft.substring(0, 10) + ":" + transfer_nft_id;
       option.value = transfer_to + ":" + transfer_amount + ":" + transfer_nft;
       var select = document.querySelector("#nft_transfers");
       select.appendChild(option);
@@ -282,6 +286,7 @@
       document.querySelector("#nft_recipient_address").value = ""
       document.querySelector("#nft_amount").value = ""
       document.querySelector("#nft_address").value = ""
+      document.querySelector("#nft_id").value = "0"
     }
 
     function onClickAddRecipient() {

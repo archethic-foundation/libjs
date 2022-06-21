@@ -56,8 +56,8 @@ describe("Transaction builder", () => {
   describe("addNFTTransfer", () => {
     it("should add an nft transfer to the transaction data", () => {
       const tx = new TransactionBuilder("transfer").addNFTTransfer(
-        "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 
-        10.03, 
+        "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+        10.03,
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
       )
 
@@ -82,12 +82,12 @@ describe("Transaction builder", () => {
               end
             `
 
-      const content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet leo egestas, lobortis lectus a, dignissim orci." 
+      const content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet leo egestas, lobortis lectus a, dignissim orci."
 
       const secret = "mysecret"
 
       const tx = new TransactionBuilder("transfer")
-        .addOwnership(secret, [{ 
+        .addOwnership(secret, [{
           publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         }])
@@ -130,7 +130,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays([hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(0.2020))]),
         // Nb of NFT transfers
         Uint8Array.from([1]),
-        concatUint8Arrays([hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(100))]),
+        concatUint8Arrays([hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(100)), Uint8Array.from([0])]),
         // Nb of recipients
         Uint8Array.from([1]),
         hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
@@ -159,12 +159,12 @@ describe("Transaction builder", () => {
     it("should set this.address in transaction builder", () => {
 
       const exampleAddress = "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88";
-     
+
       const tx = new TransactionBuilder("transfer")
         .setAddress(exampleAddress)
 
       assert.deepStrictEqual(tx.address, hexToUint8Array(exampleAddress))
-      
+
     })
   })
 
@@ -173,7 +173,7 @@ describe("Transaction builder", () => {
       const tx = new TransactionBuilder("transfer")
         .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.0)
         .build("seed", 0, "ed25519", "sha256")
- 
+
 
       assert.deepStrictEqual(tx.address, hexToUint8Array("00001ff1733caa91336976ee7cef5aff6bb26c7682213b8e6770ab82272f966dac35"))
       assert.deepStrictEqual(tx.previousPublicKey, hexToUint8Array("000161d6cd8da68207bd01198909c139c130a3df3a8bd20f4bacb123c46354ccd52c"))
@@ -198,7 +198,7 @@ describe("Transaction builder", () => {
       `
 
       const tx = new TransactionBuilder("transfer")
-        .addOwnership(secret, [{ 
+        .addOwnership(secret, [{
           publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         }])
@@ -238,15 +238,16 @@ describe("Transaction builder", () => {
         // Nb of uco transfers
         Uint8Array.from([1]),
         concatUint8Arrays([
-          hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), 
+          hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
           encodeInt64(toBigInt(0.2020))
         ]),
         // Nb of NFT transfers
         Uint8Array.from([1]),
         concatUint8Arrays([
-          hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), 
-          hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), 
-          encodeInt64(toBigInt(100))
+          hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
+          hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
+          encodeInt64(toBigInt(100)),
+          Uint8Array.from([0])
         ]),
         // Nb of recipients
         Uint8Array.from([1]),
