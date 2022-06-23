@@ -51,7 +51,7 @@
           <select id="type" class="select">
             <option value="transfer">Transfer</option>
             <option value="hosting">Hosting</option>
-            <option value="nft">NFT</option>
+            <option value="token">Token</option>
           </select>
         </div>
         <div class="box">
@@ -85,20 +85,20 @@
           <select id="uco_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
         </div>
         <div class="box">
-          <label for="nft_amount_address">Add a NFT transfer</label>
+          <label for="token_amount_address">Add a Token transfer</label>
           <br />
-          <input type="text" class="input" id="nft_recipient_address" placeholder="Enter the address of the recipient"
+          <input type="text" class="input" id="token_recipient_address" placeholder="Enter the address of the recipient"
             style="width: 400px" />
-          <input type="text" class="input" id="nft_amount" placeholder="Enter the amount to send"
+          <input type="text" class="input" id="token_amount" placeholder="Enter the amount to send"
             style="width: 200px" />
-          <input type="text" class="input" id="nft_address" placeholder="Enter the NFT address to send"
+          <input type="text" class="input" id="token_address" placeholder="Enter the Token address to send"
             style="width: 200px" />
-          <input type="text" class="input" id="nft_id" placeholder="Enter the NFT id to send"
+          <input type="text" class="input" id="token_id" placeholder="Enter the Token id to send"
             value = "0"
             style="width: 200px" />
-          <button class="button" type="button" onclick="onClickAddNFTTransfer()">Add NFT Transfer</button>
+          <button class="button" type="button" onclick="onClickAddTokenTransfer()">Add Token Transfer</button>
           <br />
-          <select id="nft_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+          <select id="token_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
         </div>
         <div class="box">
           <label for="recipient">Add recipient</label>
@@ -140,7 +140,7 @@
 
     let transaction
     let ucoTransfers = []
-    let nftTransfers = []
+    let tokenTransfers = []
     let recipients = []
     let ownerships = []
 
@@ -195,8 +195,8 @@
         txBuilder.addUCOTransfer(transfer.to, transfer.amount)
       })
 
-      nftTransfers.forEach(function (transfer) {
-        txBuilder.addNFTTransfer(transfer.to, transfer.amount, transfer.nft, transfer.nft_id)
+      tokenTransfers.forEach(function (transfer) {
+        txBuilder.addTokenTransfer(transfer.to, transfer.amount, transfer.token, transfer.token_id)
       })
 
       recipients.forEach(function (recipient) {
@@ -254,11 +254,11 @@
       document.querySelector("#uco_amount").value = ""
     }
 
-    function onClickAddNFTTransfer() {
-      var transfer_to = document.querySelector("#nft_recipient_address").value
-      var transfer_amount = document.querySelector("#nft_amount").value
-      var transfer_nft = document.querySelector("#nft_address").value
-      var transfer_nft_id = document.querySelector("#nft_id").value
+    function onClickAddTokenTransfer() {
+      var transfer_to = document.querySelector("#token_recipient_address").value
+      var transfer_amount = document.querySelector("#token_amount").value
+      var transfer_token = document.querySelector("#token_address").value
+      var transfer_token_id = document.querySelector("#token_id").value
 
       var amount = parseFloat(transfer_amount)
       if (transfer_amount == "" || amount == NaN || amount < 0.0) {
@@ -269,24 +269,24 @@
         return
       }
 
-      if (transfer_nft == "") {
+      if (transfer_token == "") {
         return
       }
 
-      nftTransfers.push({ to: transfer_to, amount: transfer_amount, nft: transfer_nft, nft_id: parseInt(transfer_nft_id) })
+      tokenTransfers.push({ to: transfer_to, amount: transfer_amount, token: transfer_token, token_id: parseInt(transfer_token_id) })
 
       var option = document.createElement("option");
-      option.text = transfer_to.substring(0, 10) + ": " + transfer_amount + ": " + transfer_nft.substring(0, 10) + ":" + transfer_nft_id;
-      option.value = transfer_to + ":" + transfer_amount + ":" + transfer_nft;
-      var select = document.querySelector("#nft_transfers");
+      option.text = transfer_to.substring(0, 10) + ": " + transfer_amount + ": " + transfer_token.substring(0, 10) + ":" + transfer_token_id;
+      option.value = transfer_to + ":" + transfer_amount + ":" + transfer_token;
+      var select = document.querySelector("#token_transfers");
       select.appendChild(option);
 
       select.size += 1;
 
-      document.querySelector("#nft_recipient_address").value = ""
-      document.querySelector("#nft_amount").value = ""
-      document.querySelector("#nft_address").value = ""
-      document.querySelector("#nft_id").value = "0"
+      document.querySelector("#token_recipient_address").value = ""
+      document.querySelector("#token_amount").value = ""
+      document.querySelector("#token_address").value = ""
+      document.querySelector("#token_id").value = "0"
     }
 
     function onClickAddRecipient() {

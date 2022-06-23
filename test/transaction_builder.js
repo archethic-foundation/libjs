@@ -53,18 +53,18 @@ describe("Transaction builder", () => {
     })
   })
 
-  describe("addNFTTransfer", () => {
-    it("should add an nft transfer to the transaction data", () => {
-      const tx = new TransactionBuilder("transfer").addNFTTransfer(
+  describe("addTokenTransfer", () => {
+    it("should add an token transfer to the transaction data", () => {
+      const tx = new TransactionBuilder("transfer").addTokenTransfer(
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
         10.03,
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
       )
 
-      assert.strictEqual(tx.data.ledger.nft.transfers.length, 1)
-      assert.deepStrictEqual(tx.data.ledger.nft.transfers[0].to, hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
-      assert.strictEqual(tx.data.ledger.nft.transfers[0].amount, toBigInt(10.03))
-      assert.deepStrictEqual(tx.data.ledger.nft.transfers[0].nft, hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
+      assert.strictEqual(tx.data.ledger.token.transfers.length, 1)
+      assert.deepStrictEqual(tx.data.ledger.token.transfers[0].to, hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
+      assert.strictEqual(tx.data.ledger.token.transfers[0].amount, toBigInt(10.03))
+      assert.deepStrictEqual(tx.data.ledger.token.transfers[0].token, hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"))
     })
   })
 
@@ -92,7 +92,7 @@ describe("Transaction builder", () => {
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         }])
         .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2020)
-        .addNFTTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 100, "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+        .addTokenTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 100, "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         .setCode(code)
         .setContent(content)
         .addRecipient("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
@@ -128,7 +128,7 @@ describe("Transaction builder", () => {
         // Nb of uco transfers
         Uint8Array.from([1]),
         concatUint8Arrays([hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(0.2020))]),
-        // Nb of NFT transfers
+        // Nb of Token transfers
         Uint8Array.from([1]),
         concatUint8Arrays([hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(100)), Uint8Array.from([0])]),
         // Nb of recipients
@@ -203,7 +203,7 @@ describe("Transaction builder", () => {
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         }])
         .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2020)
-        .addNFTTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 100, "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
+        .addTokenTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 100, "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         .setCode(code)
         .setContent(content)
         .addRecipient("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
@@ -241,7 +241,7 @@ describe("Transaction builder", () => {
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
           encodeInt64(toBigInt(0.2020))
         ]),
-        // Nb of NFT transfers
+        // Nb of Token transfers
         Uint8Array.from([1]),
         concatUint8Arrays([
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
