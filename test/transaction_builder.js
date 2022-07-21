@@ -116,21 +116,31 @@ describe("Transaction builder", () => {
         //Content size
         encodeInt32(content.length),
         new TextEncoder().encode(content),
+        // Nb of byte to encode nb of ownerships
+        Uint8Array.from([1]),
         //Nb of ownerships
         Uint8Array.from([1]),
         //Secret size
         encodeInt32(secret.length),
         new TextEncoder().encode(secret),
+        // Nb of byte to encode nb of authorized keys
+        Uint8Array.from([1]),
         // Nb of authorized keys
         Uint8Array.from([1]),
         // Authorized keys encoding
         concatUint8Arrays([hexToUint8Array("0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")]),
+        // Nb of byte to encode nb of uco transfers
+        Uint8Array.from([1]),
         // Nb of uco transfers
         Uint8Array.from([1]),
         concatUint8Arrays([hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(0.2020))]),
+        // Nb of byte to encode nb of Token transfers
+        Uint8Array.from([1]),
         // Nb of Token transfers
         Uint8Array.from([1]),
         concatUint8Arrays([hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"), hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), encodeInt64(toBigInt(100)), Uint8Array.from([0])]),
+        // Nb of byte to encode nb of recipients
+        Uint8Array.from([1]),
         // Nb of recipients
         Uint8Array.from([1]),
         hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
@@ -224,23 +234,31 @@ describe("Transaction builder", () => {
         //Content size
         encodeInt32(content.length),
         new TextEncoder().encode(content),
+        // Nb of byte to encode nb of ownerships
+        Uint8Array.from([1]),
         //Nb ownerships
         Uint8Array.from([1]),
         //Secret size
         encodeInt32(secret.length),
         new TextEncoder().encode(secret),
+        // Nb of byte to encode nb of authorized key
+        Uint8Array.from([1]),
         // Nb of authorized keys
         Uint8Array.from([1]),
         // Authorized keys encoding
         concatUint8Arrays([
           hexToUint8Array("0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         ]),
+        // Nb of byte to encode nb of uco transfers
+        Uint8Array.from([1]),
         // Nb of uco transfers
         Uint8Array.from([1]),
         concatUint8Arrays([
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
           encodeInt64(toBigInt(0.2020))
         ]),
+        // Nb of byte to encode nb of Token transfers
+        Uint8Array.from([1]),
         // Nb of Token transfers
         Uint8Array.from([1]),
         concatUint8Arrays([
@@ -249,6 +267,8 @@ describe("Transaction builder", () => {
           encodeInt64(toBigInt(100)),
           Uint8Array.from([0])
         ]),
+        // Nb of byte to encode nb of recipients
+        Uint8Array.from([1]),
         // Nb of recipients
         Uint8Array.from([1]),
         hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
