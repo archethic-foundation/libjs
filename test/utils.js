@@ -56,6 +56,7 @@ describe("Utils", () => {
 
   describe("toByteArray", () => {
     it ("should encode an integer into a UnInt8Array", () => {
+      assert.deepStrictEqual(toByteArray(0), [0])
       assert.deepStrictEqual(toByteArray(123), [123])
       assert.deepStrictEqual(toByteArray(258), [1, 2])
       assert.deepStrictEqual(toByteArray(65535), [255, 255])
