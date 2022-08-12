@@ -344,17 +344,18 @@ It supports the Archethic Cryptography rules which are:
   const result = await archethic.sendTransaction(tx, "https://testnet.archethic.net")
   ```
 
-  #### waitConfirmations(address, endpoint)
+  #### waitConfirmations(address, endpoint, function(nbConfirmations, maxConfirmations))
   It's awaiting asynchronously the transaction confirmations of the replication
   
-  An handler is required which supports the observer design pattern. An replication confirmation will emit the handler function with the new number of replication number.   
+  An handler is required which supports the observer design pattern. An replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.   
   
   ```js
   const archethic = require('archethic')
   tx = ...
   await archethic.sendTransaction(tx, "https://testnet.archethic.net")
-  archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", function(nbConfirmations) {
+  archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", function(nbConfirmations, maxConfirmations) {
     console.log(nbConfirmations)
+    console.log(maxConfirmations)
   })
   ```
 

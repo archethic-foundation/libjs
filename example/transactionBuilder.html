@@ -124,7 +124,7 @@
               You can verify it at <a id="tx_address_link" target="_blank"></a>
             </p>
             <p id="confirmed" style="display: none">
-              Transaction confirmed with <span id="confirmations"></span> replications
+              Transaction confirmed with <span id="confirmations"></span> replications out of <span id="maxConfirmations"></span>
             </p>
           </div>
         </div>
@@ -316,9 +316,10 @@
       endpoint = document.querySelector("#endpoint").value
       document.querySelector("#confirmations").innerText = 0
       
-      Archethic.waitConfirmations(transaction.address, endpoint, function (nbConfirmations) {
+      Archethic.waitConfirmations(transaction.address, endpoint, function (nbConfirmations, maxConfirmations) {
         document.querySelector("#confirmed").style.display = "block"
         document.querySelector("#confirmations").innerText = nbConfirmations
+        document.querySelector("#maxConfirmations").innerText = maxConfirmations
       })
 
       Archethic.sendTransaction(transaction, endpoint).then((data) => {

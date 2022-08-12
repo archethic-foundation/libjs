@@ -15,10 +15,11 @@ use chrome, FireFox or Internet Explorer 11`)}var a8=vt(),f8=bf(),o8=a8.Buffer,s
                 }`})}).then(e=>e.json()).then(e=>e.data.sharedSecrets==null?"":e.data.sharedSecrets.storageNoncePublicKey)},waitConfirmations:function(t,e,r){let{host:i,protocol:n}=new URL(e);ws_protocol=n=="https:"?"wss":"ws";let a=new $K(`${ws_protocol}://${i}/socket`,{transport:WK}),s=tv.create(a),c=`
       subscription {
         transactionConfirmed(address: "${t}") {
-          nbConfirmations
+          nbConfirmations,
+          maxConfirmations
         }
       }
-      `,m=tv.send(s,{operation:c});return new Promise((M,B)=>{tv.observe(s,m,{onStart:function(){M()},onError:function(R){B(R)},onResult:function(R){R.data.transactionConfirmed&&r(R.data.transactionConfirmed.nbConfirmations)}})})},getTransactionFee:function(t,e){return no(e+"/api/transaction_fee",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:t.toJSON()}).then(r=>r.json())},getTransactionOwnerships:function(t,e){return no(e+"/api",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({query:`query {
+      `,m=tv.send(s,{operation:c});return new Promise((M,B)=>{tv.observe(s,m,{onStart:function(){M()},onError:function(R){B(R)},onResult:function(R){if(R.data.transactionConfirmed){let{nbConfirmations:F,maxConfirmations:N}=R.data.transactionConfirmed;r(F,N)}}})})},getTransactionFee:function(t,e){return no(e+"/api/transaction_fee",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:t.toJSON()}).then(r=>r.json())},getTransactionOwnerships:function(t,e){return no(e+"/api",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({query:`query {
                     transaction(address: "${t}") {
                       data {
                         ownerships {
