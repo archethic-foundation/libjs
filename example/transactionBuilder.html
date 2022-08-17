@@ -126,6 +126,9 @@
             <p id="confirmed" style="display: none">
               Transaction confirmed with <span id="confirmations"></span> replications out of <span id="maxConfirmations"></span>
             </p>
+            <p id="transaction_error" style="display: none; color: red">
+              Error during transaction validation :  <span id="error_reason"></span>
+            </p>
           </div>
         </div>
       </div>
@@ -320,6 +323,11 @@
         document.querySelector("#confirmed").style.display = "block"
         document.querySelector("#confirmations").innerText = nbConfirmations
         document.querySelector("#maxConfirmations").innerText = maxConfirmations
+      })
+
+      Archethic.waitError(transaction.address, endpoint, function (context, reason) {
+        document.querySelector("#transaction_error").style.display = "block"
+        document.querySelector("#error_reason").innerText = reason
       })
 
       Archethic.sendTransaction(transaction, endpoint).then((data) => {
