@@ -340,6 +340,7 @@
         document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(transaction.address)
         document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(transaction.address))
       })
+            .catch(console.error)
     }
 
     function getTransactionIndex() {
