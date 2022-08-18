@@ -22,6 +22,7 @@ module.exports.randomSecretKey = randomSecretKey
 
 module.exports.sendTransaction = sendTransaction
 module.exports.waitConfirmations = waitConfirmations
+module.exports.waitError = waitError
 module.exports.getTransactionIndex = getTransactionIndex
 module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
@@ -69,6 +70,31 @@ function waitConfirmations(address, endpoint, handler) {
     }
 
     return API.waitConfirmations(address, endpoint, handler)
+}
+
+/**
+ * Await the transaction error
+ * @param {String | Uint8Arrray} address Address to await
+ * @param {String} endpoint Node endpoint
+ * @param {Function} handler Success handler
+ */
+ function waitError(address, endpoint, handler) {
+
+  if (typeof (address) == "string") {
+      if (!isHex(address)) {
+          throw "'address' must be in hexadecimal form if it's string"
+      }
+  }
+
+  if (address instanceof Uint8Array) {
+      address = uint8ArrayToHex(address)
+  }
+
+  if (!(handler instanceof Function)) {
+      throw "'handler' must be a function"
+  }
+
+  return API.waitError(address, endpoint, handler)
 }
 
 /**

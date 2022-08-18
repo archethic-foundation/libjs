@@ -347,16 +347,30 @@ It supports the Archethic Cryptography rules which are:
   #### waitConfirmations(address, endpoint, function(nbConfirmations, maxConfirmations))
   It's awaiting asynchronously the transaction confirmations of the replication
   
-  An handler is required which supports the observer design pattern. An replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.   
+  An handler is required which supports the observer design pattern. A replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.   
   
   ```js
   const archethic = require('archethic')
   tx = ...
-  await archethic.sendTransaction(tx, "https://testnet.archethic.net")
   archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", function(nbConfirmations, maxConfirmations) {
     console.log(nbConfirmations)
     console.log(maxConfirmations)
-  })
+  }).then(archethic.sendTransaction(tx, "https://testnet.archethic.net"))
+  ```
+
+  #### waitError(address, endpoint)
+  It's awaiting asynchronously the transaction error if there is
+  
+  An handler is required which supports the observer design pattern. An error during mining will emit the handler function with the context and the reason of the error.
+  Context is a string with "INVALID_TRANSACTION" for error in the transaction itself like "Insufficient funds" or "NETWORK_ISSUE" for error in mining like "Consensus error"
+  
+  ```js
+  const archethic = require('archethic')
+  tx = ...
+  archethic.waitError(tx.address, "https://testnet.archethic.net", function(context, reason) {
+    console.log(context)
+    console.log(reason)
+  }).then(archethic.sendTransaction(tx, "https://testnet.archethic.net"))
   ```
 
   #### getTransactionIndex(address, endpoint)
