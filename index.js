@@ -23,6 +23,7 @@ module.exports.randomSecretKey = randomSecretKey
 module.exports.sendTransaction = sendTransaction
 module.exports.waitConfirmations = waitConfirmations
 module.exports.waitError = waitError
+module.exports.cancelSubscription = cancelSubscription
 module.exports.getTransactionIndex = getTransactionIndex
 module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
@@ -95,6 +96,14 @@ function waitConfirmations(address, endpoint, handler) {
   }
 
   return API.waitError(address, endpoint, handler)
+}
+
+/**
+ * Cancel a subscription
+ * @param {Object} subscription subcription to cancel
+ */
+ function cancelSubscription(subscription) {
+  return API.cancelSubscription(subscription)
 }
 
 /**

@@ -306,23 +306,12 @@ It supports the Archethic Cryptography rules which are:
   Getting the default origin Key :
   ```js
   const archethic = require('archethic')
-  const originPrivateKey = archethic.getOriginKey("https://testnet.archethic.net")
+  const originPrivateKey = archethic.getOriginKey()
   const tx = archethic.newTransactionBuilder("transfer")
   ...
   tx.originSign(originPrivateKey)
   ```
-  Getting another origin key :
-  ```js
-  const archethic = require('archethic')
 
-  const authPublicKey = '0001be992817b7db9807b1df5faa6bb23036e1f2189eeaab0e1f1260ede8642ecc76'
-  const privateKey = '0001621d7c3bb971a245959679bf0879822a4df60c95c8f7f2193352d85498840b7d'
-
-  const originPrivateKey = archethic.getOriginKey("https://testnet.archethic.net", authPublicKey, privateKey)
-  const tx = archethic.newTransactionBuilder("transfer")
-  ...
-  tx.originSign(originPrivateKey)
-  ```
   #### sendTransaction(tx, endpoint)
   Dispatch  the transaction to a node by serializing a GraphQL request
   
@@ -347,30 +336,65 @@ It supports the Archethic Cryptography rules which are:
   #### waitConfirmations(address, endpoint, function(nbConfirmations, maxConfirmations))
   It's awaiting asynchronously the transaction confirmations of the replication
   
-  An handler is required which supports the observer design pattern. A replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.   
+  An handler is required which supports the observer design pattern. A replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.
+
+  Return the a subscription object that can be cancelled by `cancelSubscription` (see bellow).
+
+  Subscription is automatically closed 1 minutes after the first confirmation.
   
   ```js
   const archethic = require('archethic')
   tx = ...
-  archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", function(nbConfirmations, maxConfirmations) {
+  archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", (nbConfirmations, maxConfirmations) => {
     console.log(nbConfirmations)
     console.log(maxConfirmations)
-  }).then(archethic.sendTransaction(tx, "https://testnet.archethic.net"))
+  }).then((subscription) => archethic.sendTransaction(tx, "https://testnet.archethic.net"))
+
+  -----
+
+  const confirmSubscription = await archethic.waitConfirmation(...)
   ```
 
   #### waitError(address, endpoint)
   It's awaiting asynchronously the transaction error if there is
   
   An handler is required which supports the observer design pattern. An error during mining will emit the handler function with the context and the reason of the error.
-  Context is a string with "INVALID_TRANSACTION" for error in the transaction itself like "Insufficient funds" or "NETWORK_ISSUE" for error in mining like "Consensus error"
+  Context is a string with "INVALID_TRANSACTION" for error in the transaction itself like "Insufficient funds" or "NETWORK_ISSUE" for error in mining like "Consensus error".
+
+  Return the a subscription object that can be cancelled by `cancelSubscription` (see bellow).
+
+  Subscription is automatically closed when receiving an error.
   
   ```js
   const archethic = require('archethic')
   tx = ...
-  archethic.waitError(tx.address, "https://testnet.archethic.net", function(context, reason) {
+  archethic.waitError(tx.address, "https://testnet.archethic.net", (context, reason) => {
     console.log(context)
     console.log(reason)
-  }).then(archethic.sendTransaction(tx, "https://testnet.archethic.net"))
+  }).then((subscription) => archethic.sendTransaction(tx, "https://testnet.archethic.net"))
+
+  -----
+
+  const errorSubscription = await archethic.waitError(...)
+  ```
+
+  #### cancelSubscription(subscription)
+  Cancel a subscription returned by `waitConfirmations` or `waitError`.
+
+  ```js
+  let confirmSubscription, errorSubscription
+
+  errorSubscription = await archethic.waitError(tx.address, endpoint, (context, reason) => {
+    ...
+    archethic.cancelSubscription(confirmSubscription)
+  })
+
+  confirmSubscription = await archethic.waitConfirmations(tx.address, endpoint, (nbConf, maxConf) => {
+    ...
+    archethic.cancelSubscription(errorSubscription)
+  })
+
+  archethic.sendTransaction(tx, endpoint)
   ```
 
   #### getTransactionIndex(address, endpoint)

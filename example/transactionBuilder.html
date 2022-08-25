@@ -315,19 +315,25 @@
       return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
     }
 
-    function sendTransaction() {
+    async function sendTransaction() {
       endpoint = document.querySelector("#endpoint").value
       document.querySelector("#confirmations").innerText = 0
       
-      Archethic.waitConfirmations(transaction.address, endpoint, function (nbConfirmations, maxConfirmations) {
+      let errorSubscription, confirmSubscription
+
+      confirmSubscription = await Archethic.waitConfirmations(transaction.address, endpoint, function (nbConfirmations, maxConfirmations) {
+        document.querySelector("#transaction_error").style.display = "none"
         document.querySelector("#confirmed").style.display = "block"
         document.querySelector("#confirmations").innerText = nbConfirmations
         document.querySelector("#maxConfirmations").innerText = maxConfirmations
+        Archethic.cancelSubscription(errorSubscription)
       })
 
-      Archethic.waitError(transaction.address, endpoint, function (context, reason) {
+      errorSubscription = await Archethic.waitError(transaction.address, endpoint, function (context, reason) {
+        document.querySelector("#confirmed").style.display = "none"
         document.querySelector("#transaction_error").style.display = "block"
         document.querySelector("#error_reason").innerText = reason
+        Archethic.cancelSubscription(confirmSubscription)
       })
 
       Archethic.sendTransaction(transaction, endpoint).then((data) => {
