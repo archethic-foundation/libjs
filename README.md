@@ -338,7 +338,7 @@ It supports the Archethic Cryptography rules which are:
   
   An handler is required which supports the observer design pattern. A replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.
 
-  Return the a subscription object that can be cancelled by `cancelSubscription` (see bellow).
+  Return a subscription object that can be cancelled by `cancelSubscription` (see bellow).
 
   Subscription is automatically closed 1 minutes after the first confirmation.
   
@@ -361,7 +361,7 @@ It supports the Archethic Cryptography rules which are:
   An handler is required which supports the observer design pattern. An error during mining will emit the handler function with the context and the reason of the error.
   Context is a string with "INVALID_TRANSACTION" for error in the transaction itself like "Insufficient funds" or "NETWORK_ISSUE" for error in mining like "Consensus error".
 
-  Return the a subscription object that can be cancelled by `cancelSubscription` (see bellow).
+  Return a subscription object that can be cancelled by `cancelSubscription` (see bellow).
 
   Subscription is automatically closed when receiving an error.
   
