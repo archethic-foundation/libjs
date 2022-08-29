@@ -27,6 +27,9 @@ module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
 module.exports.getTransactionOwnerships = getTransactionOwnerships
 module.exports.getOriginKey = getOriginKey
 module.exports.addOriginKey = addOriginKey
+module.exports.getLastOracleData = getLastOracleData
+module.exports.getOracleDataAt = getOracleDataAt
+module.exports.subscribeToOracleUpdates = subscribeToOracleUpdates
 
 module.exports.fromBigInt = fromBigInt
 
@@ -255,7 +258,7 @@ function getOriginKey() {
  * @param {String} certificate certificate of the origin public key
  * @param {String} endpoint Node endpoint
  */
- function addOriginKey(originPublicKey, certificate, endpoint) {
+function addOriginKey(originPublicKey, certificate, endpoint) {
   return API.addOriginKey(originPublicKey, certificate, endpoint)
 }
 
@@ -265,4 +268,30 @@ function getOriginKey() {
  */
 function fromBigInt(number) {
   return Utils.fromBigInt(number)
+}
+
+/**
+ * Get the latest OracleChain data
+ * @param {String} endpoint Node endpoint
+ */
+function getLastOracleData(endpoint) {
+  return API.getLastOracleData(endpoint)
+}
+
+/**
+ * Get the OracleChain data at a given time
+ * @param {Integer} timestamp Unix timestamp
+ * @param {String} endpoint Node endpoint
+ */
+function getOracleDataAt(timestamp, endpoint) {
+  return API.getOracleDataAt(timestamp, endpoint)
+}
+
+/**
+ * Subscribe to get the OracleChain in real time
+ * @param {String} endpoint Node endpoint
+ * @param {Function} handler Callback function which will receive the OracleChain data
+ */
+function subscribeToOracleUpdates(endpoint, handler) {
+  return API.subscribeToOracleUpdates(endpoint, handler)
 }

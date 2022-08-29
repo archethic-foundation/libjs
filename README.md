@@ -428,6 +428,66 @@ It supports the Archethic Cryptography rules which are:
     }
   ]
   ```
+  
+  #### getLatestOracleData(endpoint)
+  Query a node to get the latest OracleChain data
+
+  - `endpoint`: Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const oracleData = await archethic.getLatestOracleData("https://testnet.archethic.net")
+  console.log(oracleData)
+  {
+    timestamp: ...,
+    services: {
+      uco: {
+        eur: ...,
+        usd: ...
+      }
+    }
+  }
+  ```
+  
+  #### getOracleDataAt(timestamp, endpoint)
+  Query a node to get the OracleChain data at a given time
+
+  - `timestamp`: UNIX timestamp
+  - `endpoint`: Node endpoint
+
+  ```js
+  const archethic = require('archethic')
+  const oracleData = await archethic.getOracleDataAt(timestamp, "https://testnet.archethic.net")
+  console.log(oracleData)
+  {
+    services: {
+      uco: {
+        eur: ...,
+        usd: ...
+      }
+    }
+  }
+  ```
+  
+  #### subscribeToOracleUpdates(endpoint, handler)
+  Subscribe to a node to get the real time updates of the OracleChain
+
+  - `endpoint`: Node endpoint
+  - `handler`: Callback to handle the new data
+
+  ```js
+  const archethic = require('archethic')
+  await archethic.subscribeToOracleUpdates("https://testnet.archethic.net", console.log)
+  {
+    timestamp: ...,
+    services: {
+      uco: {
+        eur: ...,
+        usd: ...
+      }
+    }
+  }
+  ```
   </details>
   <br/>
   <details>
