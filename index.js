@@ -2,10 +2,9 @@ const TxBuilder = require('./lib/transaction_builder')
 const TxSender = require('./lib/transaction_sender')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
+const Utils = require('./lib/utils')
 const { newKeychain, decodeKeychain } = require("./lib/keychain")
-const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
-const { ORIGIN_PRIVATE_KEY, isHex } = require("./lib/utils")
 
 module.exports.newTransactionBuilder = newTransactionBuilder
 module.exports.newTransactionSender = newTransactionSender
@@ -28,6 +27,8 @@ module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
 module.exports.getTransactionOwnerships = getTransactionOwnerships
 module.exports.getOriginKey = getOriginKey
 module.exports.addOriginKey = addOriginKey
+
+module.exports.fromBigInt = fromBigInt
 
 /**
  * Create a new TransactionBuilder instance to forge transaction
@@ -54,8 +55,8 @@ function newTransactionBuilder(type) {
 function deriveKeyPair(seed, index, curve = "ed25519") {
     const { privateKey, publicKey } = Crypto.deriveKeyPair(seed, index, curve)
     return {
-        privateKey: uint8ArrayToHex(privateKey),
-        publicKey: uint8ArrayToHex(publicKey)
+        privateKey: Utils.uint8ArrayToHex(privateKey),
+        publicKey: Utils.uint8ArrayToHex(publicKey)
     }
 }
 
@@ -67,7 +68,7 @@ function deriveKeyPair(seed, index, curve = "ed25519") {
  * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
  */
 function deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
-    return uint8ArrayToHex(Crypto.deriveAddress(seed, index, curve, hashAlgo))
+    return Utils.uint8ArrayToHex(Crypto.deriveAddress(seed, index, curve, hashAlgo))
 }
 
 /**
@@ -77,7 +78,7 @@ function deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
  */
 function ecEncrypt(data, publicKey) {
     const ciphertext = Crypto.ecEncrypt(data, publicKey)
-    return uint8ArrayToHex(ciphertext)
+    return Utils.uint8ArrayToHex(ciphertext)
 }
 
 /**
@@ -97,7 +98,7 @@ function ecDecrypt(ciphertext, privateKey) {
  */
 function aesEncrypt(data, key) {
     const ciphertext = Crypto.aesEncrypt(data, key)
-    return uint8ArrayToHex(ciphertext)
+    return Utils.uint8ArrayToHex(ciphertext)
 }
 
 /**
@@ -219,7 +220,7 @@ function getKeychain(seed, endpoint) {
       var aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
       const keychainAddress = aesDecrypt(secret, aesKey)
     
-      return API.getTransactionOwnerships(uint8ArrayToHex(keychainAddress), endpoint).then(ownerships => {
+      return API.getTransactionOwnerships(Utils.uint8ArrayToHex(keychainAddress), endpoint).then(ownerships => {
         var { secret: secret, authorizedPublicKeys: authorizedKeys } = ownerships[0]
         var { encryptedSecretKey } = authorizedKeys.find(({publicKey }) => publicKey.toUpperCase() == accessPublicKey.toUpperCase())
     
@@ -245,7 +246,7 @@ function getTransactionOwnerships(address, endpoint) {
  * Return the origin private keys
  */
 function getOriginKey() {
-  return ORIGIN_PRIVATE_KEY
+  return Utils.ORIGIN_PRIVATE_KEY
 }
 
 /**
@@ -256,4 +257,12 @@ function getOriginKey() {
  */
  function addOriginKey(originPublicKey, certificate, endpoint) {
   return API.addOriginKey(originPublicKey, certificate, endpoint)
+}
+
+/**
+ * Convert a big int number of 10^8 decimals into a decimal
+ * @param {Integer} number number to convert
+ */
+function fromBigInt(number) {
+  return Utils.fromBigInt(number)
 }

@@ -312,7 +312,8 @@ It supports the Archethic Cryptography rules which are:
   - `event` is the name of the event to subscribe
   - `handler` is a function which will be called when event is triggered
 
-  available events: 
+  available events:
+  - `'sent'` triggered when transaction is sent. handler param: no parameter
   - `'confirmation'` triggered when a new replication is received. handler params: number of replication, maximum number of replication expected
   - `'fullConfirmation'` triggered when the number of replication = the number of maximum replication expected. handler param: maximum number of replication expected
   -  `'requiredConfirmation'` triggered when the number of replication is equal or overpass for the first time the maximum replication * confirmationThreshold. handler param: number of replication
@@ -326,6 +327,7 @@ It supports the Archethic Cryptography rules which are:
   tx = archethic.newTransactionBuilder('transfer')
   ...
   sender = archethic.newTransactionSender()
+  .on('sent', () => console.log('transaction sent !'))
   .on('confirmation', (nbConf, maxConf) => console.log(nbConf, maxConf))
   .on('fullConfirmation', (nbConf) => console.log(nbConf))
   .on('requiredConfirmation', (nbConf) => console.log(nbConf))

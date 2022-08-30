@@ -141,25 +141,29 @@
       const keychainSeed = Archethic.randomSecretKey()
       const keychainTx = Archethic.newKeychainTransaction(keychainSeed, [publicKey], originPrivateKey)
 
-      await Archethic.waitConfirmations(keychainTx.address, endpoint, async function () {
+      sender = Archethic.newTransactionSender()
+
+      sender.on('confirmation', () => {
         document.querySelector("#keychainSeed1").innerText = toHex(keychainSeed)
         let txEndpointLink = endpoint + "/explorer/transaction/" + toHex(keychainTx.address)
         document.querySelector("#keychainTxLink").innerText = txEndpointLink
         document.querySelector("#keychainTxLink").setAttribute("href", txEndpointLink)
 
         const accessKeychainTx = Archethic.newAccessKeychainTransaction(seed, keychainTx.address, originPrivateKey)
-        await Archethic.waitConfirmations(accessKeychainTx.address, endpoint, function () {
+
+        sender.unsubscribe()
+
+        sender.on('confirmation', () => {
           let txEndpointLink = endpoint + "/explorer/transaction/" + toHex(accessKeychainTx.address)
           document.querySelector("#accessKeychainTxLink").innerText = txEndpointLink
           document.querySelector("#accessKeychainTxLink").setAttribute("href", txEndpointLink)
           document.querySelector("#keychainCreation").style.display = "block"
         })
 
-        await Archethic.sendTransaction(accessKeychainTx, endpoint)
-
+        sender.send(accessKeychainTx, endpoint)
       })
 
-      await Archethic.sendTransaction(keychainTx, endpoint)
+      sender.send(keychainTx, endpoint)
     }
 
     function getKeychain() {
