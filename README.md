@@ -144,7 +144,7 @@ It supports the Archethic Cryptography rules which are:
   
   `newTransactionBuilder(type)` creates a new instance of the transaction builder
   
-  `type` is the string defining the type of transaction to generate ("keychain", "keychain_access", "transfer", "hosting", "code_proposal", "code_approval", "nft")
+  `type` is the string defining the type of transaction to generate ("keychain", "keychain_access", "transfer", "hosting", "code_proposal", "code_approval", "token")
   
   The transaction builder instance contains the following methods:
   
@@ -284,6 +284,63 @@ It supports the Archethic Cryptography rules which are:
   </details>
   <br/>
   <details>
+  <summary>Transaction sending</summary>
+  <br/>
+  `newTransactionSender()` creates a new instance of the transaction sender. It is an observable that trigger events.
+  
+  The transaction sender instance contains the following methods:
+
+  #### send(tx, endpoint, confirmationThreshold, timeout)
+  - `tx` represent the built transaction from the **transactionBuilder**
+  - `endpoint` is the HTTP URL to a Archethic node (acting as welcome node)
+  - `confirmationThreshold` is a pourcentage (0 to 100) where the transaction is considered as validated. This is used to trigger `requiredConfirmation` event. Default value is to 100. This parameter is not mandatory
+  - `timeout` is the number of second to wait until timeout event is triggered. Default value is to 60 sec. This parameter is not mandatory
+
+  Send a transaction to the endpoint and subscribe the node to get confirmation or validation error.
+  When an update of the validation is received from the subscription, some events are triggered and associated function are called (see function **on** bellow)
+
+  ```js
+  tx = archethic.newTransactionBuilder('transfer')
+  ...
+  sender = archethic.newTransactionSender()
+  .on('confirmation', (nbConf, maxConf) => console.log(nbConf, maxConf))
+
+  sender.send(tx, 'http://testnet.archethic.net')
+  ```
+  #### on(event, handler)
+  Subscribe to a specific event.
+  - `event` is the name of the event to subscribe
+  - `handler` is a function which will be called when event is triggered
+
+  available events: 
+  - `'confirmation'` triggered when a new replication is received. handler params: number of replication, maximum number of replication expected
+  - `'fullConfirmation'` triggered when the number of replication = the number of maximum replication expected. handler param: maximum number of replication expected
+  -  `'requiredConfirmation'` triggered when the number of replication is equal or overpass for the first time the maximum replication * confirmationThreshold. handler param: number of replication
+  - `'error'` triggered when an error is encountered during validation. handler params: context, reason
+    - Context is a string with "INVALID_TRANSACTION" for error in the transaction itself like "Insufficient funds" or "NETWORK_ISSUE" for error in mining like "Consensus error".
+  - `'timeout'` triggered 60  sec after sending the transaction. Timeout is cleared when `'fullConfirmation'`, `'error'` or `'requiredConfirmation'` events are triggered. handler param: number of replication received yet
+
+  Mutiple function can be assigned to a same event. Just call function `on` mutiple times for the same event.
+
+  ```js
+  tx = archethic.newTransactionBuilder('transfer')
+  ...
+  sender = archethic.newTransactionSender()
+  .on('confirmation', (nbConf, maxConf) => console.log(nbConf, maxConf))
+  .on('fullConfirmation', (nbConf) => console.log(nbConf))
+  .on('requiredConfirmation', (nbConf) => console.log(nbConf))
+  .on('error', (context, reason) => console.log(context, reason))
+  .on('timeout', (nbConf) => console.log(nbConf))
+  .send(tx, 'http://testnet.archethic.net', 60)
+  ```
+
+  #### unsubscribe(event)
+  Unsubscribe to a specific event or all events.
+  - `event` is the name of the event (same as **on** function). This parameter is not mandatory, if the event name is empty all events are unsubscribed.
+
+  </details>
+  <br/>
+  <details>
   <summary>Remote Endpoint calls</summary>
   <br/>
 
@@ -310,91 +367,6 @@ It supports the Archethic Cryptography rules which are:
   const tx = archethic.newTransactionBuilder("transfer")
   ...
   tx.originSign(originPrivateKey)
-  ```
-
-  #### sendTransaction(tx, endpoint)
-  Dispatch  the transaction to a node by serializing a GraphQL request
-  
-  - `tx` represent the built transaction from the **transactionBuilder**
-  - `endpoint` is the HTTP URL to a Archethic node (acting as welcome node)
-
-  Returns
-  
-  ```js
-  {
-    transaction_address: "..."
-    status: "pending"
-  }
-  ```
-
-  ```js
-  const archethic = require('archethic')
-  tx = ...
-  const result = await archethic.sendTransaction(tx, "https://testnet.archethic.net")
-  ```
-
-  #### waitConfirmations(address, endpoint, function(nbConfirmations, maxConfirmations))
-  It's awaiting asynchronously the transaction confirmations of the replication
-  
-  An handler is required which supports the observer design pattern. A replication confirmation will emit the handler function with the new number of replication number and the maximum number of replication expected.
-
-  Return a subscription object that can be cancelled by `cancelSubscription` (see bellow).
-
-  Subscription is automatically closed 1 minutes after the first confirmation.
-  
-  ```js
-  const archethic = require('archethic')
-  tx = ...
-  archethic.waitConfirmations(tx.address, "https://testnet.archethic.net", (nbConfirmations, maxConfirmations) => {
-    console.log(nbConfirmations)
-    console.log(maxConfirmations)
-  }).then((subscription) => archethic.sendTransaction(tx, "https://testnet.archethic.net"))
-
-  -----
-
-  const confirmSubscription = await archethic.waitConfirmation(...)
-  ```
-
-  #### waitError(address, endpoint)
-  It's awaiting asynchronously the transaction error if there is
-  
-  An handler is required which supports the observer design pattern. An error during mining will emit the handler function with the context and the reason of the error.
-  Context is a string with "INVALID_TRANSACTION" for error in the transaction itself like "Insufficient funds" or "NETWORK_ISSUE" for error in mining like "Consensus error".
-
-  Return a subscription object that can be cancelled by `cancelSubscription` (see bellow).
-
-  Subscription is automatically closed when receiving an error.
-  
-  ```js
-  const archethic = require('archethic')
-  tx = ...
-  archethic.waitError(tx.address, "https://testnet.archethic.net", (context, reason) => {
-    console.log(context)
-    console.log(reason)
-  }).then((subscription) => archethic.sendTransaction(tx, "https://testnet.archethic.net"))
-
-  -----
-
-  const errorSubscription = await archethic.waitError(...)
-  ```
-
-  #### cancelSubscription(subscription)
-  Cancel a subscription returned by `waitConfirmations` or `waitError`.
-
-  ```js
-  let confirmSubscription, errorSubscription
-
-  errorSubscription = await archethic.waitError(tx.address, endpoint, (context, reason) => {
-    ...
-    archethic.cancelSubscription(confirmSubscription)
-  })
-
-  confirmSubscription = await archethic.waitConfirmations(tx.address, endpoint, (nbConf, maxConf) => {
-    ...
-    archethic.cancelSubscription(errorSubscription)
-  })
-
-  archethic.sendTransaction(tx, endpoint)
   ```
 
   #### getTransactionIndex(address, endpoint)

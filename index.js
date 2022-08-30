@@ -1,4 +1,5 @@
 const TxBuilder = require('./lib/transaction_builder')
+const TxSender = require('./lib/transaction_sender')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
 const { newKeychain, decodeKeychain } = require("./lib/keychain")
@@ -7,6 +8,7 @@ const { randomBytes } = require("crypto")
 const { ORIGIN_PRIVATE_KEY, isHex } = require("./lib/utils")
 
 module.exports.newTransactionBuilder = newTransactionBuilder
+module.exports.newTransactionSender = newTransactionSender
 module.exports.newKeychainTransaction = newKeychainTransaction
 module.exports.newAccessKeychainTransaction = newAccessKeychainTransaction
 
@@ -20,10 +22,6 @@ module.exports.aesEncrypt = aesEncrypt
 module.exports.aesDecrypt = aesDecrypt
 module.exports.randomSecretKey = randomSecretKey
 
-module.exports.sendTransaction = sendTransaction
-module.exports.waitConfirmations = waitConfirmations
-module.exports.waitError = waitError
-module.exports.cancelSubscription = cancelSubscription
 module.exports.getTransactionIndex = getTransactionIndex
 module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
@@ -40,70 +38,11 @@ function newTransactionBuilder(type) {
 }
 
 /**
- * Send the transaction to a node
- * @param {Object} tx Transaction to send
- * @param {String} endpoint Node endpoint
+ * Create a new TransactionBuilder instance to forge transaction
+ * @param {String} type Transaction type ("identity", "keychain", "transfer", "hosting", "code_proposal", "code_approval", "nft")
  */
-function sendTransaction(tx, endpoint) {
-    return API.sendTx(tx, endpoint)
-}
-
-/**
- * Await the transaction confirmations
- * @param {String | Uint8Arrray} address Address to await
- * @param {String} endpoint Node endpoint
- * @param {Function} handler Success handler
- */
-function waitConfirmations(address, endpoint, handler) {
-
-    if (typeof (address) == "string") {
-        if (!isHex(address)) {
-            throw "'address' must be in hexadecimal form if it's string"
-        }
-    }
-
-    if (address instanceof Uint8Array) {
-        address = uint8ArrayToHex(address)
-    }
-
-    if (!(handler instanceof Function)) {
-        throw "'handler' must be a function"
-    }
-
-    return API.waitConfirmations(address, endpoint, handler)
-}
-
-/**
- * Await the transaction error
- * @param {String | Uint8Arrray} address Address to await
- * @param {String} endpoint Node endpoint
- * @param {Function} handler Success handler
- */
- function waitError(address, endpoint, handler) {
-
-  if (typeof (address) == "string") {
-      if (!isHex(address)) {
-          throw "'address' must be in hexadecimal form if it's string"
-      }
-  }
-
-  if (address instanceof Uint8Array) {
-      address = uint8ArrayToHex(address)
-  }
-
-  if (!(handler instanceof Function)) {
-      throw "'handler' must be a function"
-  }
-
-  return API.waitError(address, endpoint, handler)
-}
-
-/**
- * Cancel a subscription
- * @param {Object} subscription subcription to cancel
- */
- function cancelSubscription(subscription) {
-  return API.cancelSubscription(subscription)
+ function newTransactionSender(tx, endpoint) {
+  return new TxSender(tx, endpoint)
 }
 
 /**
