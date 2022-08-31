@@ -328,7 +328,6 @@
           document.querySelector("#confirmed").style.display = "none"
           document.querySelector("#transaction_error").style.display = "block"
           document.querySelector("#error_reason").innerText = reason
-          console.log(context, reason)
         })
         .on('sent', () => {
           document.querySelector("#success").style.display = "block"
