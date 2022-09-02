@@ -5,7 +5,7 @@ const { hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encode
 const assert = require("assert")
 
 describe("Transaction builder", () => {
-  it ("should assign type when create a new transaction instance", () => {
+  it("should assign type when create a new transaction instance", () => {
     const tx = new TransactionBuilder("transfer")
     assert.strictEqual(tx.type, "transfer")
   })
@@ -30,6 +30,10 @@ describe("Transaction builder", () => {
         .addOwnership("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", [{
           publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+        },
+        {
+          publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+          encryptedSecretKey: "00601fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         }])
 
       assert.deepStrictEqual(tx.data.ownerships[0].secret, hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"))
@@ -69,7 +73,7 @@ describe("Transaction builder", () => {
   })
 
   describe("previousSignaturePayload", () => {
-    it ("should generate binary encoding of the transaction before signing", () => {
+    it("should generate binary encoding of the transaction before signing", () => {
 
       const code = `
               condition inherit: [
@@ -193,7 +197,7 @@ describe("Transaction builder", () => {
   })
 
   describe("originSignaturePayload", () => {
-    it ("should generate binary encoding of the transaction before signing", () => {
+    it("should generate binary encoding of the transaction before signing", () => {
 
       const secret = "mysecret"
       const content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet leo egestas, lobortis lectus a, dignissim orci."
@@ -210,6 +214,10 @@ describe("Transaction builder", () => {
       const tx = new TransactionBuilder("transfer")
         .addOwnership(secret, [{
           publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+          encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+        },
+        {
+          publicKey: "0001a1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
           encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         }])
         .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.2020)
@@ -244,9 +252,10 @@ describe("Transaction builder", () => {
         // Nb of byte to encode nb of authorized key
         Uint8Array.from([1]),
         // Nb of authorized keys
-        Uint8Array.from([1]),
+        Uint8Array.from([2]),
         // Authorized keys encoding
         concatUint8Arrays([
+          hexToUint8Array("0001a1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"), hexToUint8Array("00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         ]),
         // Nb of byte to encode nb of uco transfers
@@ -282,7 +291,7 @@ describe("Transaction builder", () => {
   })
 
   describe("originSign", () => {
-    it ("should sign the transaction with a origin private key", () => {
+    it("should sign the transaction with a origin private key", () => {
       const originKeypair = Crypto.deriveKeyPair("origin_seed", 0)
 
       const tx = new TransactionBuilder("transfer")
@@ -319,8 +328,8 @@ describe("Transaction builder", () => {
       assert.strictEqual(parsedTx.previousSignature, uint8ArrayToHex(previousSig))
       assert.strictEqual(parsedTx.originSignature, uint8ArrayToHex(originSig))
       assert.strictEqual(parsedTx.data.ownerships[0].secret, uint8ArrayToHex(Uint8Array.from([0, 1, 2, 3, 4])))
-      assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount: toBigInt(0.2193)})
-      assert.deepStrictEqual(parsedTx.data.ownerships[0].authorizedKeys, [{ publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"}])
+      assert.deepStrictEqual(parsedTx.data.ledger.uco.transfers[0], { to: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", amount: toBigInt(0.2193) })
+      assert.deepStrictEqual(parsedTx.data.ownerships[0].authorizedKeys, [{ publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88" }])
     })
   })
 })
