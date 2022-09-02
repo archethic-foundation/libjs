@@ -1,12 +1,13 @@
 const TxBuilder = require('./lib/transaction_builder')
+const TxSender = require('./lib/transaction_sender')
 const API = require('./lib/api')
 const Crypto = require('./lib/crypto')
+const Utils = require('./lib/utils')
 const { newKeychain, decodeKeychain } = require("./lib/keychain")
-const { uint8ArrayToHex } = require('./lib/utils')
 const { randomBytes } = require("crypto")
-const { ORIGIN_PRIVATE_KEY, isHex } = require("./lib/utils")
 
 module.exports.newTransactionBuilder = newTransactionBuilder
+module.exports.newTransactionSender = newTransactionSender
 module.exports.newKeychainTransaction = newKeychainTransaction
 module.exports.newAccessKeychainTransaction = newAccessKeychainTransaction
 
@@ -20,15 +21,14 @@ module.exports.aesEncrypt = aesEncrypt
 module.exports.aesDecrypt = aesDecrypt
 module.exports.randomSecretKey = randomSecretKey
 
-module.exports.sendTransaction = sendTransaction
-module.exports.waitConfirmations = waitConfirmations
-module.exports.waitError = waitError
 module.exports.getTransactionIndex = getTransactionIndex
 module.exports.getTransactionFee = getTransactionFee
 module.exports.getStorageNoncePublicKey = getStorageNoncePublicKey
 module.exports.getTransactionOwnerships = getTransactionOwnerships
 module.exports.getOriginKey = getOriginKey
 module.exports.addOriginKey = addOriginKey
+
+module.exports.fromBigInt = fromBigInt
 
 /**
  * Create a new TransactionBuilder instance to forge transaction
@@ -39,62 +39,11 @@ function newTransactionBuilder(type) {
 }
 
 /**
- * Send the transaction to a node
- * @param {Object} tx Transaction to send
- * @param {String} endpoint Node endpoint
+ * Create a new TransactionBuilder instance to forge transaction
+ * @param {String} type Transaction type ("identity", "keychain", "transfer", "hosting", "code_proposal", "code_approval", "nft")
  */
-function sendTransaction(tx, endpoint) {
-    return API.sendTx(tx, endpoint)
-}
-
-/**
- * Await the transaction confirmations
- * @param {String | Uint8Arrray} address Address to await
- * @param {String} endpoint Node endpoint
- * @param {Function} handler Success handler
- */
-function waitConfirmations(address, endpoint, handler) {
-
-    if (typeof (address) == "string") {
-        if (!isHex(address)) {
-            throw "'address' must be in hexadecimal form if it's string"
-        }
-    }
-
-    if (address instanceof Uint8Array) {
-        address = uint8ArrayToHex(address)
-    }
-
-    if (!(handler instanceof Function)) {
-        throw "'handler' must be a function"
-    }
-
-    return API.waitConfirmations(address, endpoint, handler)
-}
-
-/**
- * Await the transaction error
- * @param {String | Uint8Arrray} address Address to await
- * @param {String} endpoint Node endpoint
- * @param {Function} handler Success handler
- */
- function waitError(address, endpoint, handler) {
-
-  if (typeof (address) == "string") {
-      if (!isHex(address)) {
-          throw "'address' must be in hexadecimal form if it's string"
-      }
-  }
-
-  if (address instanceof Uint8Array) {
-      address = uint8ArrayToHex(address)
-  }
-
-  if (!(handler instanceof Function)) {
-      throw "'handler' must be a function"
-  }
-
-  return API.waitError(address, endpoint, handler)
+ function newTransactionSender(tx, endpoint) {
+  return new TxSender(tx, endpoint)
 }
 
 /**
@@ -106,8 +55,8 @@ function waitConfirmations(address, endpoint, handler) {
 function deriveKeyPair(seed, index, curve = "ed25519") {
     const { privateKey, publicKey } = Crypto.deriveKeyPair(seed, index, curve)
     return {
-        privateKey: uint8ArrayToHex(privateKey),
-        publicKey: uint8ArrayToHex(publicKey)
+        privateKey: Utils.uint8ArrayToHex(privateKey),
+        publicKey: Utils.uint8ArrayToHex(publicKey)
     }
 }
 
@@ -119,7 +68,7 @@ function deriveKeyPair(seed, index, curve = "ed25519") {
  * @param {String} hashAlgo  Hash algorithm ("sha256", "sha512", "sha3-256", "sha3-512", "blake2b")
  */
 function deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
-    return uint8ArrayToHex(Crypto.deriveAddress(seed, index, curve, hashAlgo))
+    return Utils.uint8ArrayToHex(Crypto.deriveAddress(seed, index, curve, hashAlgo))
 }
 
 /**
@@ -129,7 +78,7 @@ function deriveAddress(seed, index, curve = "ed25519", hashAlgo = "sha256") {
  */
 function ecEncrypt(data, publicKey) {
     const ciphertext = Crypto.ecEncrypt(data, publicKey)
-    return uint8ArrayToHex(ciphertext)
+    return Utils.uint8ArrayToHex(ciphertext)
 }
 
 /**
@@ -149,7 +98,7 @@ function ecDecrypt(ciphertext, privateKey) {
  */
 function aesEncrypt(data, key) {
     const ciphertext = Crypto.aesEncrypt(data, key)
-    return uint8ArrayToHex(ciphertext)
+    return Utils.uint8ArrayToHex(ciphertext)
 }
 
 /**
@@ -271,7 +220,7 @@ function getKeychain(seed, endpoint) {
       var aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
       const keychainAddress = aesDecrypt(secret, aesKey)
     
-      return API.getTransactionOwnerships(uint8ArrayToHex(keychainAddress), endpoint).then(ownerships => {
+      return API.getTransactionOwnerships(Utils.uint8ArrayToHex(keychainAddress), endpoint).then(ownerships => {
         var { secret: secret, authorizedPublicKeys: authorizedKeys } = ownerships[0]
         var { encryptedSecretKey } = authorizedKeys.find(({publicKey }) => publicKey.toUpperCase() == accessPublicKey.toUpperCase())
     
@@ -297,7 +246,7 @@ function getTransactionOwnerships(address, endpoint) {
  * Return the origin private keys
  */
 function getOriginKey() {
-  return ORIGIN_PRIVATE_KEY
+  return Utils.ORIGIN_PRIVATE_KEY
 }
 
 /**
@@ -308,4 +257,12 @@ function getOriginKey() {
  */
  function addOriginKey(originPublicKey, certificate, endpoint) {
   return API.addOriginKey(originPublicKey, certificate, endpoint)
+}
+
+/**
+ * Convert a big int number of 10^8 decimals into a decimal
+ * @param {Integer} number number to convert
+ */
+function fromBigInt(number) {
+  return Utils.fromBigInt(number)
 }

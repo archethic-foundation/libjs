@@ -93,8 +93,7 @@
             style="width: 200px" />
           <input type="text" class="input" id="token_address" placeholder="Enter the Token address to send"
             style="width: 200px" />
-          <input type="text" class="input" id="token_id" placeholder="Enter the Token id to send"
-            value = "0"
+          <input type="text" class="input" id="token_id" placeholder="Enter the Token id to send" value="0"
             style="width: 200px" />
           <button class="button" type="button" onclick="onClickAddTokenTransfer()">Add Token Transfer</button>
           <br />
@@ -124,10 +123,11 @@
               You can verify it at <a id="tx_address_link" target="_blank"></a>
             </p>
             <p id="confirmed" style="display: none">
-              Transaction confirmed with <span id="confirmations"></span> replications out of <span id="maxConfirmations"></span>
+              Transaction confirmed with <span id="confirmations"></span> replications out of <span
+                id="maxConfirmations"></span>
             </p>
             <p id="transaction_error" style="display: none; color: red">
-              Error during transaction validation :  <span id="error_reason"></span>
+              Error during transaction validation : <span id="error_reason"></span>
             </p>
           </div>
         </div>
@@ -206,16 +206,14 @@
         txBuilder.addRecipient(recipient)
       })
 
-
       transaction = txBuilder
         .build(seed, parseInt(index), curve)
         .originSign(originPrivateKey)
 
-
       document.querySelector("#transactionOutput #address").innerText = toHex(transaction.address)
       document.querySelector("#transactionOutput").style.visibility = "visible";
       Archethic.getTransactionFee(transaction, endpoint).then((result) => {
-        document.querySelector("#tx_fee").innerText = result.fee + " UCO"
+        document.querySelector("#tx_fee").innerText = Archethic.fromBigInt(result.fee) + " UCO"
       })
     }
 
@@ -315,32 +313,28 @@
       return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
     }
 
-    function sendTransaction() {
+    async function sendTransaction() {
       endpoint = document.querySelector("#endpoint").value
       document.querySelector("#confirmations").innerText = 0
-      
-      Archethic.waitConfirmations(transaction.address, endpoint, function (nbConfirmations, maxConfirmations) {
-        document.querySelector("#confirmed").style.display = "block"
-        document.querySelector("#confirmations").innerText = nbConfirmations
-        document.querySelector("#maxConfirmations").innerText = maxConfirmations
-      })
 
-      Archethic.waitError(transaction.address, endpoint, function (context, reason) {
-        document.querySelector("#transaction_error").style.display = "block"
-        document.querySelector("#error_reason").innerText = reason
-      })
-
-      Archethic.sendTransaction(transaction, endpoint).then((data) => {
-        if (data.errors) {
-          document.querySelector("#errors").innerText = JSON.stringify(data.errors, undefined, 2)
-          return
-        }
-
-        document.querySelector("#success").style.display = "block"
-        document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(transaction.address)
-        document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(transaction.address))
-      })
-            .catch(console.error)
+      sender = Archethic.newTransactionSender()
+        .on('confirmation', (nbConfirmations, maxConfirmations) => {
+          document.querySelector("#transaction_error").style.display = "none"
+          document.querySelector("#confirmed").style.display = "block"
+          document.querySelector("#confirmations").innerText = nbConfirmations
+          document.querySelector("#maxConfirmations").innerText = maxConfirmations
+        })
+        .on('error', (context, reason) => {
+          document.querySelector("#confirmed").style.display = "none"
+          document.querySelector("#transaction_error").style.display = "block"
+          document.querySelector("#error_reason").innerText = reason
+        })
+        .on('sent', () => {
+          document.querySelector("#success").style.display = "block"
+          document.querySelector("#tx_address_link").innerText = endpoint + "/explorer/transaction/" + toHex(transaction.address)
+          document.querySelector("#tx_address_link").setAttribute("href", endpoint + "/explorer/transaction/" + toHex(transaction.address))
+        })
+        .send(transaction, endpoint)
     }
 
     function getTransactionIndex() {
