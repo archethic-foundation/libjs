@@ -385,11 +385,11 @@
       ownershipEl.appendChild(document.createElement("br"))
 
       let authorizedPublicKeyLabel = document.createElement("label")
-      authorizedPublicKeyLabel.setAttribute("for", "authPublicKey_0")
+      authorizedPublicKeyLabel.setAttribute("for", "authPublicKey_" + ownershipIndex)
 
       let authorizedPublicKeyInput = document.createElement("input")
       authorizedPublicKeyInput.setAttribute("type", "text")
-      authorizedPublicKeyInput.setAttribute("id", "authPublicKey_0")
+      authorizedPublicKeyInput.setAttribute("id", "authPublicKey_" + ownershipIndex)
       authorizedPublicKeyInput.setAttribute("placeholder", "Enter the public key to authorize")
       authorizedPublicKeyInput.setAttribute("class", "input")
 
@@ -408,7 +408,7 @@
       let publicKeyList = document.createElement("select")
       publicKeyList.setAttribute("multiple", "true")
       publicKeyList.setAttribute("class", "select")
-      publicKeyList.setAttribute("id", "publicKeys_0")
+      publicKeyList.setAttribute("id", "publicKeys_" + ownershipIndex)
       publicKeyList.style.width = "500px"
 
       ownershipEl.appendChild(authorizedPublicKeyLabel)
