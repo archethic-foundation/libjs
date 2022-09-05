@@ -429,14 +429,14 @@ It supports the Archethic Cryptography rules which are:
   ]
   ```
   
-  #### getLatestOracleData(endpoint)
+  #### getLastOracleData(endpoint)
   Query a node to get the latest OracleChain data
 
   - `endpoint`: Node endpoint
 
   ```js
   const archethic = require('archethic')
-  const oracleData = await archethic.getLatestOracleData("https://testnet.archethic.net")
+  const oracleData = await archethic.getLastOracleData("https://testnet.archethic.net")
   console.log(oracleData)
   {
     timestamp: ...,
