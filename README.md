@@ -625,11 +625,24 @@ It supports the Archethic Cryptography rules which are:
   ```
   </details>
   <br/>
+  <details>
+  <summary>Utils</summary>
+  <br/>
+
+  #### fromBigInt(number)
+  Convert a big int number to a 8 decimals number (mainly use to display token amount)
+
+  ```js
+  archethic.fromBigInt(1_253_000_000)
+  // 12.53
+  ```
+  </details>
+  <br/>
   
 ## Running the tests
 
 ```bash
-npm test
+npm run test
 ```
 
 ## Licence
