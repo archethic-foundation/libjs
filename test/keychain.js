@@ -1,16 +1,17 @@
-const assert = require('assert')
+import assert from 'assert'
 
-const { keyToJWK, decodeKeychain, newKeychain } = require("../lib/keychain")
-const { uint8ArrayToHex, concatUint8Arrays } =  require("../lib/utils")
-const { deriveAddress, verify } = require("../lib/crypto")
-const { newTransactionBuilder } = require("../index")
+import Keychain, { keyToJWK } from "../lib/keychain"
+import { uint8ArrayToHex, concatUint8Arrays } from "../lib/utils"
+import { deriveAddress, verify } from "../lib/crypto"
+import TransactionBuilder from "../lib/transaction_builder"
 
 
 describe("keychain to DID", () => {
   it("should encode the key material metadata", () => {
-    seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
+    const seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
 
-    const keychain = newKeychain(seed)
+    const keychain = new Keychain(seed)
+    keychain.addService("uco", "m/650'/0/0")
 
     const {publicKey} = keychain.deriveKeypair("uco")
  
@@ -35,7 +36,8 @@ describe("keychain to DID", () => {
 
 describe("keychain encode", () => {
   it ("should encode the keychain into a binary", () => {
-    const keychain = newKeychain("myseed")
+    const keychain = new Keychain("myseed")
+    keychain.addService("uco", "m/650'/0/0")
 
     const expectedBinary = concatUint8Arrays([
       Uint8Array.from([0, 0, 0, 1]), //Version
@@ -67,7 +69,7 @@ describe("keychain encode", () => {
       Uint8Array.from([0])  //SHA256 hash algo
     ])
 
-    const { seed, services } = decodeKeychain(binary)
+    const { seed, services } = Keychain.decode(binary)
 
     assert.deepStrictEqual(new TextEncoder().encode("myseed"), seed)
     assert.deepStrictEqual({
@@ -82,9 +84,11 @@ describe("keychain encode", () => {
 
 describe("buildTransaction", () => {
   it("should build the transaction and the related signature", () => {
-    const keychain = newKeychain("seed")
+    const keychain = new Keychain("seed")
+    keychain.addService("uco", "m/650'/0/0")
 
-    const tx = newTransactionBuilder("transfer")
+    const tx = new TransactionBuilder()
+      .setType("transfer")
       .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.0)
 
     keychain.buildTransaction(tx, "uco", 0)
