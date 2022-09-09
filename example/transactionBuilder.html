@@ -220,10 +220,10 @@
     function onClickAddStorageNoncePublicKey() {
       endpoint = document.querySelector("#endpoint").value
       Archethic.getStorageNoncePublicKey(endpoint).then(function (storage_nonce) {
-        var option = document.createElement("option");
+        const option = document.createElement("option");
         option.text = storage_nonce;
         option.value = storage_nonce;
-        var select = document.querySelector("#authorized_public_keys");
+        const select = document.querySelector("#authorized_public_keys");
         select.appendChild(option);
       })
     }
@@ -243,10 +243,10 @@
 
       ucoTransfers.push({ to: transfer_to, amount: transfer_amount })
 
-      var option = document.createElement("option");
+      const option = document.createElement("option");
       option.text = transfer_to + ": " + transfer_amount;
       option.value = transfer_to + ":" + transfer_amount;
-      var select = document.querySelector("#uco_transfers");
+      const select = document.querySelector("#uco_transfers");
       select.appendChild(option);
 
       select.size += 1;
@@ -256,12 +256,12 @@
     }
 
     function onClickAddTokenTransfer() {
-      var transfer_to = document.querySelector("#token_recipient_address").value
-      var transfer_amount = document.querySelector("#token_amount").value
-      var transfer_token = document.querySelector("#token_address").value
-      var transfer_token_id = document.querySelector("#token_id").value
+      const transfer_to = document.querySelector("#token_recipient_address").value
+      const transfer_amount = document.querySelector("#token_amount").value
+      const transfer_token = document.querySelector("#token_address").value
+      const transfer_token_id = document.querySelector("#token_id").value
 
-      var amount = parseFloat(transfer_amount)
+      const amount = parseFloat(transfer_amount)
       if (transfer_amount == "" || amount == NaN || amount < 0.0) {
         return
       }
@@ -276,10 +276,10 @@
 
       tokenTransfers.push({ to: transfer_to, amount: transfer_amount, token: transfer_token, token_id: parseInt(transfer_token_id) })
 
-      var option = document.createElement("option");
+      const option = document.createElement("option");
       option.text = transfer_to.substring(0, 10) + ": " + transfer_amount + ": " + transfer_token.substring(0, 10) + ":" + transfer_token_id;
       option.value = transfer_to + ":" + transfer_amount + ":" + transfer_token;
-      var select = document.querySelector("#token_transfers");
+      const select = document.querySelector("#token_transfers");
       select.appendChild(option);
 
       select.size += 1;
@@ -291,13 +291,13 @@
     }
 
     function onClickAddRecipient() {
-      var recipient = document.querySelector("#recipient").value
+      const recipient = document.querySelector("#recipient").value
       recipients.push(recipient)
 
-      var option = document.createElement("option");
+      const option = document.createElement("option");
       option.text = recipient;
       option.value = recipient;
-      var select = document.querySelector("#recipients");
+      const select = document.querySelector("#recipients");
       select.appendChild(option);
 
       select.size += 1;
@@ -440,10 +440,10 @@
     }
 
     function addPublicKeyToTheList(ownershipIndex, publicKey) {
-      var option = document.createElement("option");
+      const option = document.createElement("option");
       option.text = publicKey;
       option.value = publicKey;
-      var select = document.querySelector("#publicKeys_" + ownershipIndex);
+      const select = document.querySelector("#publicKeys_" + ownershipIndex);
       select.appendChild(option);
     }
   </script>

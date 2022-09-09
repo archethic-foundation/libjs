@@ -215,19 +215,19 @@ function getKeychain(seed, endpoint) {
         return reject("Keychain doesn't exists")
       }
    
-      var { secret: secret, authorizedPublicKeys: authorizedPublicKeys } = ownerships[0]
+      const { secret: secret, authorizedPublicKeys: authorizedPublicKeys } = ownerships[0]
       const { encryptedSecretKey } = authorizedPublicKeys.find(authKey => {
         return authKey.publicKey.toLocaleUpperCase() == accessPublicKey.toLocaleUpperCase()
       })
 
-      var aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
+      const aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
       const keychainAddress = aesDecrypt(secret, aesKey)
     
       return API.getTransactionOwnerships(Utils.uint8ArrayToHex(keychainAddress), endpoint).then(ownerships => {
-        var { secret: secret, authorizedPublicKeys: authorizedKeys } = ownerships[0]
-        var { encryptedSecretKey } = authorizedKeys.find(({publicKey }) => publicKey.toUpperCase() == accessPublicKey.toUpperCase())
+        const { secret: secret, authorizedPublicKeys: authorizedKeys } = ownerships[0]
+        const { encryptedSecretKey } = authorizedKeys.find(({publicKey }) => publicKey.toUpperCase() == accessPublicKey.toUpperCase())
     
-        var aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
+        const aesKey = ecDecrypt(encryptedSecretKey, accessPrivateKey)
         const keychain = aesDecrypt(secret, aesKey)
         
         resolve(decodeKeychain(keychain))
@@ -274,7 +274,7 @@ function fromBigInt(number) {
  * Get the latest OracleChain data
  * @param {String} endpoint Node endpoint
  */
-function getLastOracleData(endpoint) {
+ function getLastOracleData(endpoint) {
   return API.getLastOracleData(endpoint)
 }
 

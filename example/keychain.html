@@ -179,34 +179,34 @@
         for (service in services) {
           const { derivationPath } = services[service]
 
-          var serviceContainer = document.createElement("div")
+          const serviceContainer = document.createElement("div")
           serviceContainer.classList = "tile is-parent"
 
-          var serviceBox = document.createElement("div")
+          const serviceBox = document.createElement("div")
           serviceBox.classList = "title is-child box"
 
 
-          var serviceNameEl = document.createElement("p")
+          const serviceNameEl = document.createElement("p")
           serviceNameEl.innerText = service
           serviceNameEl.classList = "title"
           serviceBox.appendChild(serviceNameEl)
 
           serviceContainer.appendChild(serviceBox)
 
-          var serviceDerivationPathEl = document.createElement("p")
+          const serviceDerivationPathEl = document.createElement("p")
           serviceDerivationPathEl.innerText = "Derivation path: " + services[service].derivationPath
           serviceDerivationPathEl.classList = "subtitle"
           serviceBox.appendChild(serviceDerivationPathEl)
 
-          var serviceDetails = document.createElement("div")
+          const serviceDetails = document.createElement("div")
           serviceDetails.classList = "content"
 
           if (derivationPath.startsWith("m/650")) {
-            var serviceAddressEl = document.createElement("p")
+            const serviceAddressEl = document.createElement("p")
             serviceAddressEl.classList = "is-size-6"
             const address = keychain.deriveAddress(service, 0)
 
-            var serviceAddressLink = document.createElement("a")
+            const serviceAddressLink = document.createElement("a")
             serviceAddressLink.innerText = "Address: " + toHex(address)
             serviceAddressLink.setAttribute("href", endpoint + "/explorer/transaction/" + toHex(address))
             serviceAddressLink.setAttribute("target", "_blank")
