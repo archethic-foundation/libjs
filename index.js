@@ -1,4 +1,4 @@
-import {getNearestEndpoints} from "./lib/api";
+import { getNearestEndpoints } from "./lib/api";
 import * as Utils from "./lib/utils";
 import * as Crypto from "./lib/crypto";
 import Account from "./lib/account";
@@ -30,7 +30,7 @@ export default class Archethic {
     try {
       return await call(node);
     } catch (err) {
-      console.error(err)
+      console.error(err);
       this.nearestEndpoints.shift();
       if (this.nearestEndpoints.length == 0) {
         throw "Cannot reach Archethic node";
@@ -39,4 +39,3 @@ export default class Archethic {
     }
   }
 }
-
