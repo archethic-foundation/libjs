@@ -42,11 +42,10 @@ function newTransactionBuilder(type) {
 }
 
 /**
- * Create a new TransactionBuilder instance to forge transaction
- * @param {String} type Transaction type ("identity", "keychain", "transfer", "hosting", "code_proposal", "code_approval", "nft")
+ * Create a new TransactionSender instance to send transaction
  */
- function newTransactionSender(tx, endpoint) {
-  return new TxSender(tx, endpoint)
+ function newTransactionSender() {
+  return new TxSender()
 }
 
 /**
