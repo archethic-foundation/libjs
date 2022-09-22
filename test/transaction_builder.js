@@ -234,6 +234,7 @@ describe("Transaction builder", () => {
             "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
           ),
           encodeInt64(toBigInt(100)),
+          Uint8Array.from([1]),
           Uint8Array.from([0]),
         ]),
         // Nb of byte to encode nb of recipients
@@ -430,6 +431,7 @@ describe("Transaction builder", () => {
             "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
           ),
           encodeInt64(toBigInt(100)),
+          Uint8Array.from([1]),
           Uint8Array.from([0]),
         ]),
         // Nb of byte to encode nb of recipients
