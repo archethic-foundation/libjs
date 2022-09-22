@@ -2,14 +2,13 @@
 
 require('esbuild').build({
   logLevel: "info",
-  entryPoints: ['index.js'],
+  entryPoints: ['app.js'],
   bundle: true,
   minify: true,
   sourcemap: true,
-  globalName: 'Archethic',
+  outfile: 'dist/app.js',
   define: {
     global: 'window'
   },
-  outfile: 'dist/index.js',
-  inject: ['./esbuild.inject.js']
+  inject: ['./esbuild.inject.js'],
 }).catch(() => process.exit(1))

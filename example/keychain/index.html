@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Keychain example</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <style>
+    body {
+      background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
+      min-height: 100vh;
+      padding-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container margin-top-6">
+    <div class="columns">
+      <div class="column">
+        <h1 class="is-size-2 has-text-white">Archethic</h1>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <h1 class="is-size-5 has-text-white">Keychain tool</h1>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <div class="box">
+          <label for="endpoint">Node endpoint</label>
+          <input type="text" class="input" value="http://localhost:4000" placeholder="Node endpoint" id="endpoint" />
+        </div>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <div class="box">
+          <div class="message is-info">
+            <p class="message-body">To access your keychain an access need to be configured through its own transaction
+              to help the retrieval of the keychain.</p>
+          </div>
+          <label for="accessSeed">Access seed</label>
+          <input class="input" type="password" placeholder="Enter your access seed" id="accessSeed" />
+        </div>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <button class="button" onClick="createKeychain()">Create keychain</button>
+      </div>
+      <div class="column">
+        <button class="button" onClick="getKeychain()">Access keychain</button>
+      </div>
+    </div>
+
+    <div class="columns" id="keychainCreation" style="display: none">
+      <div class="column">
+        <div class="columns">
+          <div class="column box">
+            <p class="is-size-6 title">Keychain seed: </p>
+            <p id="keychainSeed1"></p>
+          </div>
+        </div>
+        <div class="columns message is-success mt-4">
+          <div class="column message-body content">
+            <p>Keychain's transaction confirmed. </p>
+            <p>You can verify it at: <a id="keychainTxLink" target="_blank"></a></p>
+          </div>
+        </div>
+        <div class="columns message is-success mt-4">
+          <div class="column message-body content">
+            <p>Keychain access transaction confirmed. </p>
+            <p> You can verify it at: <a id="accessKeychainTxLink" target="_blank"></a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns" id="keychainInfo" style="display: none">
+      <div class="column">
+        <div class="columns">
+          <div class="column">
+            <div class="box">
+              <p class="is-size-6 title">Create UCO transfer transaction</p>
+              <!-- <label for="txServiceName">Service name</label>
+              <input class="input" type="text" placeholder="Enter the service name" id="txServiceName" />
+              <label for="txRecipientAddress">Recipient address</label>
+              <input class="input" type="text" placeholder="Enter the recipient address" id="txRecipientAddress" />
+              <label for="txUCOAmount">Recipient address</label>
+              <input class="input" type="number" placeholder="Enter the UCO amount" id="txUCOAmount" />
+              <button class="button" onClick="sendTransaction()">Send Transaction</button> -->
+              <input type="text" class="input" id="tx_service_name" placeholder="Enter the service name"
+                style="width: 200px" />
+              <input type="text" class="input" id="tx_address" placeholder="Enter the address of the recipient"
+                style="width: 400px" />
+              <input type="text" class="input" id="tx_amount" placeholder="Enter the amount to send"
+                style="width: 200px" />
+              <button type="button" class="button" onclick="sendTransaction()">Send transaction</button>
+              <p id="success" style="display: none">
+                Your transaction has been sent to the network. <br />
+                You can verify it at <a id="tx_address_link" target="_blank"></a>
+              </p>
+              <p id="confirmed" style="display: none">
+                Transaction confirmed with <span id="confirmations"></span> replications
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box">
+              <p class="is-size-6 title">Keychain seed: </p>
+              <p id="keychainSeed2"></p>
+            </div>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <p class="mt-4 has-text-white subtitle">Services registered:</p>
+            <div id="services" class="tile is-ancestor"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="dist/app.js"></script>
+</body>
+
+</html>

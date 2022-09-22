@@ -37,21 +37,6 @@
     <button type="button" onclick="generateAddress()">Generate address</button>
     <p id="address"></p>
 
-    <script src="../dist/index.js"></script>
-    <script>
-        function generateAddress() {
-
-            seed = document.querySelector("#seed").value
-            index = parseInt(document.querySelector("#index").value)
-            curve = document.querySelector("#curve").value
-            hash = document.querySelector("#hash").value
-
-            if (seed == "" || index == NaN) {
-                return
-            }
-            address = Archethic.deriveAddress(seed,index,curve,hash)
-            document.querySelector("#address").innerText = address
-        }
-    </script>
+    <script src="./dist/app.js"></script>
 </body>
 </html>

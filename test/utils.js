@@ -1,5 +1,5 @@
-const { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, toByteArray } = require("../lib/utils")
-const assert = require("assert")
+import { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, toByteArray } from "../lib/utils"
+import assert from 'assert'
 
 describe("Utils", () => {
   describe("isHex", () => {
