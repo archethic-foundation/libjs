@@ -90,7 +90,7 @@ window.generate_transaction = async () => {
       transfer.to,
       transfer.amount,
       transfer.token,
-      transfer.token_id
+      transfer.tokenId
     );
   });
 
@@ -122,10 +122,10 @@ window.onClickAddStorageNoncePublicKey = async () => {
 
 window.onClickAddTransfer = () => {
   transfer_to = document.querySelector("#amount_address").value;
-  transfer_amount = document.querySelector("#uco_amount").value;
+  transferAmount = document.querySelector("#uco_amount").value;
 
-  amount = parseFloat(transfer_amount);
-  if (transfer_amount == "" || Number.isNaN(amount) || amount < 0.0) {
+  amount = parseFloat(transferAmount);
+  if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
     return;
   }
 
@@ -133,11 +133,11 @@ window.onClickAddTransfer = () => {
     return;
   }
 
-  ucoTransfers.push({ to: transfer_to, amount: transfer_amount });
+  ucoTransfers.push({ to: transfer_to, amount: transferAmount });
 
   var option = document.createElement("option");
-  option.text = transfer_to + ": " + transfer_amount;
-  option.value = transfer_to + ":" + transfer_amount;
+  option.text = transfer_to + ": " + transferAmount;
+  option.value = transfer_to + ":" + transferAmount;
   var select = document.querySelector("#uco_transfers");
   select.appendChild(option);
 
@@ -149,12 +149,12 @@ window.onClickAddTransfer = () => {
 
 window.onClickAddTokenTransfer = () => {
   var transfer_to = document.querySelector("#token_recipient_address").value;
-  var transfer_amount = document.querySelector("#token_amount").value;
-  var transfer_token = document.querySelector("#token_address").value;
-  var transfer_token_id = document.querySelector("#token_id").value;
+  var transferAmount = document.querySelector("#token_amount").value;
+  var transferToken = document.querySelector("#token_address").value;
+  var transferTokenId = document.querySelector("#token_id").value;
 
-  var amount = parseFloat(transfer_amount);
-  if (transfer_amount == "" || Number.isNaN(amount) || amount < 0.0) {
+  var amount = parseFloat(transferAmount);
+  if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
     return;
   }
 
@@ -162,27 +162,27 @@ window.onClickAddTokenTransfer = () => {
     return;
   }
 
-  if (transfer_token == "") {
+  if (transferToken == "") {
     return;
   }
 
   tokenTransfers.push({
     to: transfer_to,
-    amount: transfer_amount,
-    token: transfer_token,
-    token_id: parseInt(transfer_token_id),
+    amount: transferAmount,
+    token: transferToken,
+    tokenId: parseInt(transferTokenId),
   });
 
   var option = document.createElement("option");
   option.text =
     transfer_to.substring(0, 10) +
     ": " +
-    transfer_amount +
+    transferAmount +
     ": " +
-    transfer_token.substring(0, 10) +
+    transferToken.substring(0, 10) +
     ":" +
-    transfer_token_id;
-  option.value = transfer_to + ":" + transfer_amount + ":" + transfer_token;
+    transferTokenId;
+  option.value = transfer_to + ":" + transferAmount + ":" + transferToken;
   var select = document.querySelector("#token_transfers");
   select.appendChild(option);
 

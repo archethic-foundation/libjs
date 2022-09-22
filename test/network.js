@@ -55,7 +55,7 @@ describe("Network", () => {
         origin_public_key: "01103109",
         certificate: "mycertificate",
       })
-      .reply(201, { transaction_address: "addr", status: "pending" });
+      .reply(201, { transactionAddress: "addr", status: "pending" });
 
     const network = new Network(archethic);
     await network.addOriginKey("01103109", "mycertificate");

@@ -265,14 +265,14 @@ Add a UCO transfer to the `data.ledger.uco.transfers` section of the transaction
 - `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient) to receive the funds
 - `amount` is the number of uco to send (float)
 
-#### addTokenTransfer(to, amount, token_address, token_id)
+#### addTokenTransfer(to, amount, tokenAddress, tokenId)
 
 Add a token transfer to the `data.ledger.token.transfers` section of the transaction
 
 - `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient) to receive the funds
 - `amount` is the number of uco to send (float)
-- `token_address` is hexadecimal encoding or Uint8Array representing the token's address to spend
-- `token_id` is the ID of the token to send (default to: 0)
+- `tokenAddress` is hexadecimal encoding or Uint8Array representing the token's address to spend
+- `tokenId` is the ID of the token to send (default to: 0)
 
 #### addRecipient(to)
 
