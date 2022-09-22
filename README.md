@@ -58,7 +58,6 @@ Creates a new keychain access transaction to allow a seed and its key to access 
 
 - `seed` Keychain access's seed
 - `keychainAddress` Keychain's tx address
-- `originPrivateKey` Key to make the origin signature of the transaction
 
 ```js
 import Archethic from "archethic";
@@ -425,7 +424,8 @@ const tx = archethic.transaction
   .addUCOTransfer(
     "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
     0.42
-  );
+  )
+  .build(seed, originPrivateKey);
 
 const originPayload = tx.originSignaturePayload();
 ```
@@ -515,7 +515,7 @@ const tx = archethic.transaction
   .on("requiredConfirmation", (nbConf) => console.log(nbConf))
   .on("error", (context, reason) => console.log(context, reason))
   .on("timeout", (nbConf) => console.log(nbConf))
-  .send(3, 60); // confirmationThreshold: 3, timeout: 60
+  .send(60); // confirmationThreshold: 60
 ```
 
 #### unsubscribe(event)
