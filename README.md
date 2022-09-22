@@ -625,9 +625,11 @@ const storageNoncePublicKey =
 // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
 ```
 
-### getLastOracleData()
+### getOracleData(timestamp)
 
-Fetch the latest OracleChain data
+Fetch the OracleChain data
+
+- `timestamp`: UNIX timestamp (optional)
 
 ```js
 import Archethic from "archethic"
@@ -635,7 +637,7 @@ import Archethic from "archethic"
 const archethic = new Archethic("https://testnet.archethic.net")
 await archethic.connect()
 
-const oracleData = await archethic.network.getLastOracleData()
+const oracleData = await archethic.network.getOracleData()
 console.log(oracleData)
 {
   timestamp: ...,
@@ -648,19 +650,13 @@ console.log(oracleData)
 }
 ```
 
-### getOracleDataAt(timestamp)
-
-Fetch the OracleChain data at a given time
-
-- `timestamp`: UNIX timestamp
-
 ```js
 import Archethic from "archethic"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 await archethic.connect()
 
-const oracleData = await archethic.network.getOracleDataAt(timestamp)
+const oracleData = await archethic.network.getOracleData(timestamp)
 console.log(oracleData)
 {
   services: {

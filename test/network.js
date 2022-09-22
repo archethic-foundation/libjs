@@ -95,7 +95,7 @@ describe("Network", () => {
       services: {
         uco: { eur: eurPrice },
       },
-    } = await network.getLastOracleData();
+    } = await network.getOracleData();
 
     assert.equal(eurPrice, 0.2);
   });
@@ -129,8 +129,10 @@ describe("Network", () => {
 
     const network = new Network(archethic);
     const {
-      uco: { eur: eurPrice },
-    } = await network.getOracleDataAt(102910921);
+      services: {
+        uco: { eur: eurPrice },
+      },
+    } = await network.getOracleData(102910921);
 
     assert.equal(eurPrice, 0.2);
   });
