@@ -1,7 +1,7 @@
-import { hash, sign, deriveKeyPair, aesEncrypt, aesDecrypt, ecEncrypt, ecDecrypt, verify} from "../lib/crypto"
+import { hash, sign, deriveKeyPair, aesEncrypt, aesDecrypt, ecEncrypt, ecDecrypt, verify} from "../lib/crypto.js"
 import assert from "assert"
 import { randomBytes } from 'crypto'
-import { uint8ArrayToHex} from '../lib/utils'
+import { uint8ArrayToHex} from '../lib/utils.js'
 
 describe("Crypto", () => {
 

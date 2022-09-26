@@ -1,5 +1,5 @@
-import Archethic from "../index";
-import * as API from "../lib/api";
+import Archethic from "../index.js";
+import * as API from "../lib/api.js";
 
 import assert from "assert";
 import nock from "nock";

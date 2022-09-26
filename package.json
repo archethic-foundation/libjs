@@ -3,6 +3,7 @@
   "version": "1.12.1",
   "description": "Archethic Javascript SDK",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "mocha --require @babel/register"
   },

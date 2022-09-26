@@ -1,4 +1,4 @@
-import { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, toByteArray } from "../lib/utils"
+import { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, toByteArray } from "../lib/utils.js"
 import assert from 'assert'
 
 describe("Utils", () => {
