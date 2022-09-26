@@ -1,9 +1,9 @@
 import assert from 'assert'
 
-import Keychain, { keyToJWK } from "../lib/keychain"
-import { uint8ArrayToHex, concatUint8Arrays } from "../lib/utils"
-import { deriveAddress, verify } from "../lib/crypto"
-import TransactionBuilder from "../lib/transaction_builder"
+import Keychain, { keyToJWK } from "../lib/keychain.js"
+import { uint8ArrayToHex, concatUint8Arrays } from "../lib/utils.js"
+import { deriveAddress, verify } from "../lib/crypto.js"
+import TransactionBuilder from "../lib/transaction_builder.js"
 
 
 describe("keychain to DID", () => {

@@ -1,9 +1,9 @@
-import { getNearestEndpoints } from "./lib/api";
-import * as Utils from "./lib/utils";
-import * as Crypto from "./lib/crypto";
-import Account from "./lib/account";
-import Network from "./lib/network";
-import Transaction from "./lib/transaction";
+import { getNearestEndpoints } from "./lib/api.js";
+import * as Utils from "./lib/utils.js";
+import * as Crypto from "./lib/crypto.js";
+import Account from "./lib/account.js";
+import Network from "./lib/network.js";
+import Transaction from "./lib/transaction.js";
 
 export { Utils, Crypto };
 export default class Archethic {

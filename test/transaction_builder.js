@@ -1,5 +1,5 @@
-import TransactionBuilder from "../lib/transaction_builder";
-import { deriveKeyPair, deriveAddress, sign, verify } from "../lib/crypto"
+import TransactionBuilder from "../lib/transaction_builder.js";
+import { deriveKeyPair, deriveAddress, sign, verify } from "../lib/crypto.js"
 import {
   hexToUint8Array,
   uint8ArrayToHex,
@@ -7,7 +7,7 @@ import {
   encodeInt32,
   encodeInt64,
   toBigInt,
-} from "../lib/utils";
+} from "../lib/utils.js";
 
 import assert from "assert";
 

@@ -1,8 +1,8 @@
-import Keychain from "../lib/keychain";
-import Account from "../lib/account";
-import Archethic from "../index";
-import { hexToUint8Array } from "../lib/utils";
-import { deriveKeyPair, deriveAddress, randomSecretKey } from "../lib/crypto";
+import Keychain from "../lib/keychain.js";
+import Account from "../lib/account.js";
+import Archethic from "../index.js";
+import { hexToUint8Array } from "../lib/utils.js";
+import { deriveKeyPair, deriveAddress, randomSecretKey } from "../lib/crypto.js";
 
 import assert from "assert";
 import nock from "nock";

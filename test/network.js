@@ -1,8 +1,8 @@
 import assert from "assert";
 import nock from "nock";
 
-import Archethic from "../index";
-import Network from "../lib/network";
+import Archethic from "../index.js";
+import Network from "../lib/network.js";
 
 let archethic;
 
