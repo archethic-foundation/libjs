@@ -586,6 +586,33 @@ console.log(ownerships)[
   <details>
     <summary>Network</summary>
 
+### getToken(tokenAddress)
+
+Query a node to get the token definition (based on [AEIP2](https://github.com/archethic-foundation/aeip/blob/main/AEIP-2.md)) from an address.
+Returns also `genesis` address and `id`
+
+- `tokenAddress` is the transaction address of the token.
+
+```js
+import Archethic from "archethic";
+const archethic = new Archethic("https://testnet.archethic.net");
+
+await archethic.connect();
+const token = await archethic.network.getToken(tokenAddress);
+console.log(token);
+{
+  collection: [],
+  decimals: 8,
+  genesis: '0000D6979F125A91465E29A12F66AE40FA454A2AD6CE3BB40099DBDDFFAF586E195A',
+  id: '9DC6196F274B979E5AB9E3D7A0B03FEE3E4C62C7299AD46C8ECF332A2C5B6574',
+  name: 'Mining UCO rewards',
+  properties: {},
+  supply: 3340000000000000, // Big Int format (ref function fromBigInt)
+  symbol: 'MUCO',
+  type: 'fungible'
+}
+```
+
 ### addOriginKey(originPublicKey, certificate)
 
 Query a node to add a new origin public to be authorized to sign transaction with the corresponding private key (see OriginSign).
