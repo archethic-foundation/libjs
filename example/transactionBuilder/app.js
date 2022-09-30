@@ -1,5 +1,7 @@
 import Archethic, { Utils, Crypto } from "archethic";
 
+const { toBigInt } = Utils
+
 let file_content = "";
 
 let transaction;
@@ -133,7 +135,7 @@ window.onClickAddTransfer = () => {
     return;
   }
 
-  ucoTransfers.push({ to: transfer_to, amount: transferAmount });
+  ucoTransfers.push({ to: transfer_to, amount: toBigInt(amount) });
 
   var option = document.createElement("option");
   option.text = transfer_to + ": " + transferAmount;
@@ -147,7 +149,7 @@ window.onClickAddTransfer = () => {
   document.querySelector("#uco_amount").value = "";
 };
 
-window.onClickAddTokenTransfer = () => {
+window.onClickAddTokenTransfer = async () => {
   var transfer_to = document.querySelector("#token_recipient_address").value;
   var transferAmount = document.querySelector("#token_amount").value;
   var transferToken = document.querySelector("#token_address").value;
@@ -166,9 +168,12 @@ window.onClickAddTokenTransfer = () => {
     return;
   }
 
+  const { decimals } = await archethic.network.getToken(transferToken)
+    .catch(() => { return { decimals: 8 } })
+
   tokenTransfers.push({
     to: transfer_to,
-    amount: transferAmount,
+    amount: toBigInt(amount, decimals),
     token: transferToken,
     tokenId: parseInt(transferTokenId),
   });
