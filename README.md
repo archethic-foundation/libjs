@@ -263,14 +263,14 @@ This aims to prove the ownership or the delegatation of some secret to a given l
 Add a UCO transfer to the `data.ledger.uco.transfers` section of the transaction
 
 - `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient) to receive the funds
-- `amount` is the number of uco to send (float)
+- `amount` is the number of uco to send (in Big Int ref function `toBigInt`)
 
 #### addTokenTransfer(to, amount, tokenAddress, tokenId)
 
 Add a token transfer to the `data.ledger.token.transfers` section of the transaction
 
 - `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient) to receive the funds
-- `amount` is the number of uco to send (float)
+- `amount` is the number of uco to send (in Big Int ref function `toBigInt`)
 - `tokenAddress` is hexadecimal encoding or Uint8Array representing the token's address to spend
 - `tokenId` is the ID of the token to send (default to: 0)
 
@@ -552,7 +552,15 @@ import Archethic from "archethic"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 const tx = ...
-const { fee: fee } = await archethic.transaction.getTransactionFee(tx)
+const fee = await archethic.transaction.getTransactionFee(tx)
+console.log(fee)
+{
+  fee: 11779421, // Big Int format (ref function fromBigInt)
+  rates: {
+    eur: 0.086326,
+    usd: 0.084913
+  }
+}
 ```
 
 ### getTransactionOwnerships(address)
@@ -585,6 +593,33 @@ console.log(ownerships)[
 
   <details>
     <summary>Network</summary>
+
+### getToken(tokenAddress)
+
+Query a node to get the token definition (based on [AEIP2](https://github.com/archethic-foundation/aeip/blob/main/AEIP-2.md)) from an address.
+Returns also `genesis` address and `id`
+
+- `tokenAddress` is the transaction address of the token.
+
+```js
+import Archethic from "archethic";
+const archethic = new Archethic("https://testnet.archethic.net");
+
+await archethic.connect();
+const token = await archethic.network.getToken(tokenAddress);
+console.log(token);
+{
+  collection: [],
+  decimals: 8,
+  genesis: '0000D6979F125A91465E29A12F66AE40FA454A2AD6CE3BB40099DBDDFFAF586E195A',
+  id: '9DC6196F274B979E5AB9E3D7A0B03FEE3E4C62C7299AD46C8ECF332A2C5B6574',
+  name: 'Mining UCO rewards',
+  properties: {},
+  supply: 3340000000000000, // Big Int format (ref function fromBigInt)
+  symbol: 'MUCO',
+  type: 'fungible'
+}
+```
 
 ### addOriginKey(originPublicKey, certificate)
 
@@ -821,14 +856,32 @@ const cipher = Crypto.aesEncrypt(
   <details>
   <summary>Utils</summary>
 
-### fromBigInt(number)
+### fromBigInt(number, decimals)
 
-Convert a big int number to a 8 decimals number (mainly use to display token amount)
+Convert a big int number to a x decimals number (mainly use to display token amount)
+- `number` Big Int number to convert to decimals number
+- `decimals` number of decimals needed (default to 8)
 
 ```js
 import { Utils } from "archethic";
-Utils.fromBigInt(1_253_000_000);
-// 12.53
+Utils.fromBigInt(1_253_450_000);
+// 12.5345
+Utils.fromBigInt(12_534_500, 6);
+// 12.5345
+```
+
+### toBigInt(number, decimals)
+
+Convert a decimals number to a BigInt number
+- `number` decimals number to convert to Big Int number
+- `decimals` number of decimals (default to 8)
+
+```js
+import { Utils } from "archethic";
+Utils.toBigInt(12.5345);
+// 1_253_450_000
+Utils.toBigInt(12.5345, 6);
+// 12_534_500
 ```
 
 ### originPrivateKey

@@ -1,4 +1,14 @@
-import { isHex, hexToUint8Array, uint8ArrayToHex, concatUint8Arrays, encodeInt32, encodeInt64, toByteArray } from "../lib/utils.js"
+import {
+  isHex,
+  hexToUint8Array,
+  uint8ArrayToHex,
+  concatUint8Arrays,
+  encodeInt32,
+  encodeInt64,
+  toByteArray,
+  toBigInt,
+  fromBigInt
+} from "../lib/utils.js"
 import assert from 'assert'
 
 describe("Utils", () => {
@@ -64,4 +74,23 @@ describe("Utils", () => {
     })
   })
 
+  describe("toBigInt", () => {
+    it ("should return Big Int with 8 decimals by default", () => {
+      assert.deepStrictEqual(toBigInt(12.5345), 1_253_450_000)
+    })
+
+    it ("should return Big Int with decimals passed in param", () => {
+      assert.deepStrictEqual(toBigInt(12.5345, 6), 12_534_500)
+    })
+  })
+
+  describe("fromBigInt", () => {
+    it ("should return 8 decimals number by default", () => {
+      assert.deepStrictEqual(fromBigInt(1_253_450_000), 12.5345)
+    })
+
+    it ("should return decimals number with decimals passed in param", () => {
+      assert.deepStrictEqual(fromBigInt(12_534_500, 6), 12.5345)
+    })
+  })
 })

@@ -86,7 +86,7 @@ describe("Transaction builder", () => {
     it("should add an uco transfer to the transaction data", () => {
       const tx = new TransactionBuilder("transfer").addUCOTransfer(
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-        10.03
+        toBigInt(10.03)
       );
 
       assert.strictEqual(tx.data.ledger.uco.transfers.length, 1);
@@ -107,7 +107,7 @@ describe("Transaction builder", () => {
     it("should add an token transfer to the transaction data", () => {
       const tx = new TransactionBuilder("transfer").addTokenTransfer(
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-        10.03,
+        toBigInt(10.03),
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
       );
 
@@ -160,11 +160,11 @@ describe("Transaction builder", () => {
         ])
         .addUCOTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          0.202
+          toBigInt(0.202)
         )
         .addTokenTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          100,
+          toBigInt(100),
           "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         )
         .setCode(code)
@@ -351,11 +351,11 @@ describe("Transaction builder", () => {
         ])
         .addUCOTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          0.202
+          toBigInt(0.202)
         )
         .addTokenTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          100,
+          toBigInt(100),
           "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         )
         .setCode(code)
@@ -477,7 +477,7 @@ describe("Transaction builder", () => {
       const tx = new TransactionBuilder("transfer")
         .addUCOTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          0.2193
+          toBigInt(0.2193)
         )
         .addOwnership(Uint8Array.from([0, 1, 2, 3, 4]), [
           {

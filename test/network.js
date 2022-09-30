@@ -136,4 +136,38 @@ describe("Network", () => {
 
     assert.equal(eurPrice, 0.2);
   });
+
+  it("should get token description", async () => {
+    const expectedToken = {
+      collection: [],
+      decimals: 8,
+      genesis: '0000D6979F125A91465E29A12F66AE40FA454A2AD6CE3BB40099DBDDFFAF586E195A',
+      id: '9DC6196F274B979E5AB9E3D7A0B03FEE3E4C62C7299AD46C8ECF332A2C5B6574',
+      name: 'Mining UCO rewards',
+      properties: {},
+      supply: 3340000000000000,
+      symbol: 'MUCO',
+      type: 'fungible'
+    }
+
+    nock("http://localhost:4000", {})
+      .post("/api", {
+        query: `query {
+                    token(address: "1234") {
+                      genesis, name, symbol, supply, type
+                      properties, collection, id, decimals
+                    }
+              }`,
+      })
+      .reply(200, {
+        data: {
+          token: expectedToken
+        },
+      });
+
+    const network = new Network(archethic);
+    const token = await network.getToken('1234');
+
+    assert.deepEqual(token, expectedToken);
+  });
 });
