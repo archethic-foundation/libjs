@@ -1,6 +1,6 @@
 import Archethic, { Utils, Crypto } from "archethic";
 
-const { toBigInt } = Utils
+const { toBigInt } = Utils;
 
 let file_content = "";
 
@@ -13,28 +13,28 @@ let ownerships = [];
 let endpoint = document.querySelector("#endpoint").value;
 
 let archethic = new Archethic(endpoint);
-archethic.connect()
+archethic.connect();
 
 document
   .querySelector("#endpoint")
   .addEventListener("change", async function () {
     archethic = new Archethic(this.value);
-    archethic.connect()
+    archethic.connect();
   });
 
 window.generate_transaction = async () => {
   transaction = null;
   document.querySelector("#transactionOutput").style.visibility = "hidden";
 
-  seed = document.querySelector("#seed").value;
-  index = document.querySelector("#index").value;
-  curve = document.querySelector("#curve").value;
-  endpoint = document.querySelector("#endpoint").value;
+  const seed = document.querySelector("#seed").value;
+  const index = document.querySelector("#index").value;
+  const curve = document.querySelector("#curve").value;
+  const endpoint = document.querySelector("#endpoint").value;
   const originPrivateKey = Utils.originPrivateKey;
 
-  code = document.querySelector("#code").value;
+  const code = document.querySelector("#code").value;
   if (code != "") {
-    ownershipIndex = ownerships.findIndex(function (ownership) {
+    const ownershipIndex = ownerships.findIndex(function (ownership) {
       return ownership.secret == seed;
     });
     if (ownershipIndex == -1) {
@@ -45,11 +45,13 @@ window.generate_transaction = async () => {
     }
 
     const publicKey = await archethic.network.getStorageNoncePublicKey();
-    if (
-      ownership[ownershipIndex].authorizedKeys.findIndex(function (authKey) {
-        authKey.publicKey == publicKey;
-      }) == -1
-    ) {
+    const authorizedKeyIndex = ownerships[
+      ownershipIndex
+    ].authorizedKeys.findIndex(function (authKey) {
+      return authKey.publicKey == publicKey;
+    });
+    
+    if (authorizedKeyIndex == -1) {
       alert(
         "You need to create an ownership with the transaction seed as secret and authorize node public key to let nodes generate new transaction from your smart contract"
       );
@@ -57,7 +59,7 @@ window.generate_transaction = async () => {
     }
   }
 
-  content = document.querySelector("#content").value;
+  let content = document.querySelector("#content").value;
   if (file_content != "") {
     content = file_content;
   }
@@ -69,10 +71,10 @@ window.generate_transaction = async () => {
     .setContent(content);
 
   ownerships.forEach(function (ownership) {
-    secretKey = Crypto.randomSecretKey();
-    cipher = Crypto.aesEncrypt(ownership.secret, secretKey);
+    const secretKey = Crypto.randomSecretKey();
+    const cipher = Crypto.aesEncrypt(ownership.secret, secretKey);
 
-    authorizedKeys = ownership.authorizedKeys.map(function (authKey) {
+    const authorizedKeys = ownership.authorizedKeys.map(function (authKey) {
       encryptedSecretKey = Crypto.ecEncrypt(secretKey, authKey.publicKey);
       return {
         publicKey: authKey.publicKey,
@@ -113,20 +115,20 @@ window.generate_transaction = async () => {
 };
 
 window.onClickAddStorageNoncePublicKey = async () => {
-  endpoint = document.querySelector("#endpoint").value;
+  const endpoint = document.querySelector("#endpoint").value;
   const storageNonce = await archethic.network.getStorageNoncePublicKey();
-  var option = document.createElement("option");
+  const option = document.createElement("option");
   option.text = storage_nonce;
   option.value = storage_nonce;
-  var select = document.querySelector("#authorized_public_keys");
+  const select = document.querySelector("#authorized_public_keys");
   select.appendChild(option);
 };
 
 window.onClickAddTransfer = () => {
-  transfer_to = document.querySelector("#amount_address").value;
-  transferAmount = document.querySelector("#uco_amount").value;
+  const transfer_to = document.querySelector("#amount_address").value;
+  const transferAmount = document.querySelector("#uco_amount").value;
 
-  amount = parseFloat(transferAmount);
+  const amount = parseFloat(transferAmount);
   if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
     return;
   }
@@ -137,10 +139,10 @@ window.onClickAddTransfer = () => {
 
   ucoTransfers.push({ to: transfer_to, amount: toBigInt(amount) });
 
-  var option = document.createElement("option");
+  const option = document.createElement("option");
   option.text = transfer_to + ": " + transferAmount;
   option.value = transfer_to + ":" + transferAmount;
-  var select = document.querySelector("#uco_transfers");
+  const select = document.querySelector("#uco_transfers");
   select.appendChild(option);
 
   select.size += 1;
@@ -150,12 +152,12 @@ window.onClickAddTransfer = () => {
 };
 
 window.onClickAddTokenTransfer = async () => {
-  var transfer_to = document.querySelector("#token_recipient_address").value;
-  var transferAmount = document.querySelector("#token_amount").value;
-  var transferToken = document.querySelector("#token_address").value;
-  var transferTokenId = document.querySelector("#token_id").value;
+  const transfer_to = document.querySelector("#token_recipient_address").value;
+  const transferAmount = document.querySelector("#token_amount").value;
+  const transferToken = document.querySelector("#token_address").value;
+  const transferTokenId = document.querySelector("#token_id").value;
 
-  var amount = parseFloat(transferAmount);
+  const amount = parseFloat(transferAmount);
   if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
     return;
   }
@@ -168,8 +170,11 @@ window.onClickAddTokenTransfer = async () => {
     return;
   }
 
-  const { decimals } = await archethic.network.getToken(transferToken)
-    .catch(() => { return { decimals: 8 } })
+  const { decimals } = await archethic.network
+    .getToken(transferToken)
+    .catch(() => {
+      return { decimals: 8 };
+    });
 
   tokenTransfers.push({
     to: transfer_to,
@@ -178,7 +183,7 @@ window.onClickAddTokenTransfer = async () => {
     tokenId: parseInt(transferTokenId),
   });
 
-  var option = document.createElement("option");
+  const option = document.createElement("option");
   option.text =
     transfer_to.substring(0, 10) +
     ": " +
@@ -188,7 +193,7 @@ window.onClickAddTokenTransfer = async () => {
     ":" +
     transferTokenId;
   option.value = transfer_to + ":" + transferAmount + ":" + transferToken;
-  var select = document.querySelector("#token_transfers");
+  const select = document.querySelector("#token_transfers");
   select.appendChild(option);
 
   select.size += 1;
@@ -200,10 +205,10 @@ window.onClickAddTokenTransfer = async () => {
 };
 
 window.onClickAddRecipient = () => {
-  var recipient = document.querySelector("#recipient").value;
+  const recipient = document.querySelector("#recipient").value;
   recipients.push(recipient);
 
-  var option = document.createElement("option");
+  const option = document.createElement("option");
   option.text = recipient;
   option.value = recipient;
   var select = document.querySelector("#recipients");
@@ -215,7 +220,7 @@ window.onClickAddRecipient = () => {
 };
 
 window.sendTransaction = async () => {
-  endpoint = document.querySelector("#endpoint").value;
+  const endpoint = document.querySelector("#endpoint").value;
   document.querySelector("#confirmations").innerText = 0;
 
   transaction
@@ -233,23 +238,26 @@ window.sendTransaction = async () => {
     .on("sent", () => {
       document.querySelector("#success").style.display = "block";
       document.querySelector("#tx_address_link").innerText =
-        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address);
+        endpoint +
+        "/explorer/transaction/" +
+        Utils.uint8ArrayToHex(transaction.address);
       document
         .querySelector("#tx_address_link")
         .setAttribute(
           "href",
-          endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address)
+          endpoint +
+            "/explorer/transaction/" +
+            Utils.uint8ArrayToHex(transaction.address)
         );
     })
     .send();
 };
 
 window.getTransactionIndex = async () => {
-  endpoint = document.querySelector("#endpoint").value;
-  seed = document.querySelector("#seed").value;
-  curve = document.querySelector("#curve").value;
+  const seed = document.querySelector("#seed").value;
+  const curve = document.querySelector("#curve").value;
 
-  address = Crypto.deriveAddress(seed, 0, curve);
+  const address = Crypto.deriveAddress(seed, 0, curve);
   const nb = await archethic.transaction.getTransactionIndex(address);
   document.querySelector("#index").value = nb;
 };
@@ -259,7 +267,7 @@ document
   .addEventListener("change", (event) => {
     const fileList = event.target.files;
 
-    let fr = new FileReader();
+    const fr = new FileReader();
     fr.onload = function (e) {
       file_content = new Uint8Array(e.target.result);
     };
@@ -267,15 +275,15 @@ document
   });
 
 window.addOwnership = () => {
-  let ownershipIndex = ownerships.length;
+  const ownershipIndex = ownerships.length;
 
-  let ownershipEl = document.createElement("div");
+  const ownershipEl = document.createElement("div");
 
-  let secretInputLabel = document.createElement("label");
+  const secretInputLabel = document.createElement("label");
   secretInputLabel.innerText = "Enter the secret";
   secretInputLabel.setAttribute("for", "secret_" + ownershipIndex);
 
-  let secretInput = document.createElement("input");
+  const secretInput = document.createElement("input");
   secretInput.setAttribute("type", "password");
   secretInput.setAttribute("id", "secret_" + ownershipIndex);
   secretInput.setAttribute("placeholder", "Secret to host");
@@ -290,13 +298,13 @@ window.addOwnership = () => {
   ownershipEl.appendChild(document.createElement("br"));
   ownershipEl.appendChild(document.createElement("br"));
 
-  let authorizedPublicKeyLabel = document.createElement("label");
+  const authorizedPublicKeyLabel = document.createElement("label");
   authorizedPublicKeyLabel.setAttribute(
     "for",
     "authPublicKey_" + ownershipIndex
   );
 
-  let authorizedPublicKeyInput = document.createElement("input");
+  const authorizedPublicKeyInput = document.createElement("input");
   authorizedPublicKeyInput.setAttribute("type", "text");
   authorizedPublicKeyInput.setAttribute(
     "id",
@@ -308,7 +316,7 @@ window.addOwnership = () => {
   );
   authorizedPublicKeyInput.setAttribute("class", "input");
 
-  let authorizedPublicKeyButtonAdd = document.createElement("button");
+  const authorizedPublicKeyButtonAdd = document.createElement("button");
   authorizedPublicKeyButtonAdd.setAttribute("class", "button");
   authorizedPublicKeyButtonAdd.setAttribute("type", "button");
   authorizedPublicKeyButtonAdd.innerText = "Add public key";
@@ -316,7 +324,7 @@ window.addOwnership = () => {
     addPublicKey(ownershipIndex);
   });
 
-  let storageNoncePublicKeyButtonAdd = document.createElement("button");
+  const storageNoncePublicKeyButtonAdd = document.createElement("button");
   storageNoncePublicKeyButtonAdd.setAttribute("class", "button");
   storageNoncePublicKeyButtonAdd.setAttribute("type", "button");
   storageNoncePublicKeyButtonAdd.innerText = "Load storage nonce public key";
@@ -324,7 +332,7 @@ window.addOwnership = () => {
     loadStorageNoncePublicKey(ownershipIndex);
   });
 
-  let publicKeyList = document.createElement("select");
+  const publicKeyList = document.createElement("select");
   publicKeyList.setAttribute("multiple", "true");
   publicKeyList.setAttribute("class", "select");
   publicKeyList.setAttribute("id", "publicKeys_" + ownershipIndex);
@@ -341,7 +349,7 @@ window.addOwnership = () => {
 };
 
 window.addPublicKey = (ownershipIndex) => {
-  let publicKey = document.querySelector(
+  const publicKey = document.querySelector(
     "#authPublicKey_" + ownershipIndex
   ).value;
   if (publicKey == "") {
@@ -353,16 +361,15 @@ window.addPublicKey = (ownershipIndex) => {
 };
 
 window.loadStorageNoncePublicKey = async (ownershipIndex) => {
-  endpoint = document.querySelector("#endpoint").value;
-  const publicKey = await Archethic.getStorageNoncePublicKey(endpoint);
+  const publicKey = await archethic.network.getStorageNoncePublicKey();
   ownerships[ownershipIndex].authorizedKeys.push({ publicKey: publicKey });
   addPublicKeyToTheList(ownershipIndex, publicKey);
 };
 
 window.addPublicKeyToTheList = (ownershipIndex, publicKey) => {
-  var option = document.createElement("option");
+  const option = document.createElement("option");
   option.text = publicKey;
   option.value = publicKey;
-  var select = document.querySelector("#publicKeys_" + ownershipIndex);
+  const select = document.querySelector("#publicKeys_" + ownershipIndex);
   select.appendChild(option);
 };
