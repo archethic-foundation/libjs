@@ -3,9 +3,17 @@
   "version": "1.13.0",
   "description": "Archethic Javascript SDK",
   "main": "index.js",
+  "module": "dist/archethic.mjs",
+  "unpkg": "dist/archethic.js",
+  "jsdelivr": "dist/archethic.js",
   "type": "module",
+  "exports": {
+    "import": "./dist/archethic.mjs",
+    "require": "./dist/archethic.cjs"
+  },
   "scripts": {
-    "test": "mocha --require @babel/register"
+    "test": "mocha --require @babel/register",
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +35,7 @@
     "@babel/core": "^7.19.1",
     "@babel/preset-env": "^7.19.1",
     "@babel/register": "^7.18.9",
+    "esbuild": "^0.15.10",
     "mocha": "^9.1.1",
     "nock": "^13.2.9"
   },
