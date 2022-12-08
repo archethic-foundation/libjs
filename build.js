@@ -13,6 +13,7 @@ esbuild.build({
   define: {
     global: 'window'
   },
+  globalName: "Archethic",
   inject: ['./esbuild.inject.js'],
 }).catch(() => process.exit(1))
 
