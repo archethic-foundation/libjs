@@ -35,7 +35,7 @@
 
             endpoint = form.querySelector("input[name=endpoint]").value
 
-            var promiseToConnect = new Archethic.default(endpoint).connect()
+            var promiseToConnect = new Archethic(endpoint).connect()
 
             promiseToConnect
                 .then(() => {
