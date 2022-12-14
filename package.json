@@ -1,6 +1,6 @@
 {
   "name": "archethic",
-  "version": "1.14.0",
+  "version": "1.13.2",
   "description": "Archethic Javascript SDK",
   "main": "index.js",
   "module": "dist/archethic-browser.mjs",
