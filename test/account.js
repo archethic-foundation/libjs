@@ -116,7 +116,7 @@ describe("Account", () => {
     nock("http://localhost:4000")
       .post("/api", {
         query: `query {
-                    transaction(address: "${keychainTx.address}") {
+                    lastTransaction(address: "${keychainTx.address}") {
                       data {
                         ownerships {
                           secret,
@@ -131,7 +131,7 @@ describe("Account", () => {
       })
       .reply(200, {
         data: {
-          transaction: {
+          lastTransaction: {
             data: {
               ownerships: [
                 {

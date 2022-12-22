@@ -10,6 +10,13 @@
       min-height: 100vh;
       padding-bottom: 20px;
     }
+
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 10px;
+      grid-auto-rows: minmax(100px, auto);
+    }
   </style>
 </head>
 
@@ -118,7 +125,15 @@
         <div class="columns">
           <div class="column">
             <p class="mt-4 has-text-white subtitle">Services registered:</p>
-            <div id="services" class="tile is-ancestor"></div>
+            <div id="services" class="wrapper">
+
+
+
+
+            </div>
+            <div class="column">
+              <button class="button" onClick="addRandomServiceToKeychain()">Add a random service</button>
+            </div>
           </div>
         </div>
       </div>

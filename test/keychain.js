@@ -11,21 +11,33 @@ describe("keychain to DID", () => {
     const seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
 
     const keychain = new Keychain(seed)
-    keychain.addService("uco", "m/650'/0/0")
+    keychain
+      .addService("uco", "m/650'/0/0")
+      .addService("nft1", "m/650'/1/0")
+      .addService("nft2", "m/650'/2/0")
+      .removeService("nft2")
 
-    const {publicKey} = keychain.deriveKeypair("uco")
- 
+    const { publicKey: publicKeyUco } = keychain.deriveKeypair("uco")
+    const { publicKey: publicKeyNft1 } = keychain.deriveKeypair("nft1")
+
+
     const address = deriveAddress(seed, 0)
     const address_hex = uint8ArrayToHex(address)
 
-    const { id, verificationMethod }= keychain.toDID()    
+    const { id, verificationMethod } = keychain.toDID()
     assert.equal(id, `did:archethic:${address_hex}`)
 
     const expected = [
       {
         id: `did:archethic:${address_hex}#uco`,
         type: "JsonWebKey2020",
-        publicKeyJwk: keyToJWK(publicKey, "uco"),
+        publicKeyJwk: keyToJWK(publicKeyUco, "uco"),
+        controller: `did:archethic:${address_hex}`
+      },
+      {
+        id: `did:archethic:${address_hex}#nft1`,
+        type: "JsonWebKey2020",
+        publicKeyJwk: keyToJWK(publicKeyNft1, "nft1"),
         controller: `did:archethic:${address_hex}`
       }
     ]
@@ -35,7 +47,7 @@ describe("keychain to DID", () => {
 })
 
 describe("keychain encode", () => {
-  it ("should encode the keychain into a binary", () => {
+  it("should encode the keychain into a binary", () => {
     const keychain = new Keychain("myseed")
     keychain.addService("uco", "m/650'/0/0")
 
@@ -80,6 +92,16 @@ describe("keychain encode", () => {
       }
     }, services)
   })
+
+  it("should encode/decode multiple services", () => {
+    const keychain = new Keychain("myseed")
+    keychain.addService("uco", "m/650'/0/0")
+    keychain.addService("nft1", "m/650'/1/0")
+
+    const keychain2 = Keychain.decode(keychain.encode())
+
+    assert.deepStrictEqual(keychain, keychain2)
+  })
 })
 
 describe("buildTransaction", () => {
@@ -93,7 +115,7 @@ describe("buildTransaction", () => {
 
     keychain.buildTransaction(tx, "uco", 0)
 
-    const {publicKey} = keychain.deriveKeypair("uco")
+    const { publicKey } = keychain.deriveKeypair("uco")
     const address = keychain.deriveAddress("uco", 1)
 
     assert.deepStrictEqual(tx.address, address)

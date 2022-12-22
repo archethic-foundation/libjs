@@ -12,6 +12,13 @@ document
     archethic = new Archethic(this.value);
   });
 
+
+// This function creates 2 transactions:
+//
+//  - the KEYCHAIN transaction (with a difficult random seed)
+//
+//  - the KEYCHAIN_ACCESS transaction (with the given seed)
+//      contains a ownership to the KEYCHAIN
 window.createKeychain = async () => {
   await archethic.connect();
   const seed = document.querySelector("#accessSeed").value;
@@ -64,57 +71,11 @@ window.getKeychain = async () => {
   const seed = document.querySelector("#accessSeed").value;
 
   archethic.account.getKeychain(seed).then((keychain) => {
-    const { seed, services } = keychain;
+    const { seed } = keychain;
+
     document.querySelector("#keychainSeed2").innerText = Utils.uint8ArrayToHex(seed);
 
-    let servicesContainer = document.querySelector("#services");
-
-    for (service in services) {
-      const { derivationPath } = services[service];
-
-      var serviceContainer = document.createElement("div");
-      serviceContainer.classList = "tile is-parent";
-
-      var serviceBox = document.createElement("div");
-      serviceBox.classList = "title is-child box";
-
-      var serviceNameEl = document.createElement("p");
-      serviceNameEl.innerText = service;
-      serviceNameEl.classList = "title";
-      serviceBox.appendChild(serviceNameEl);
-
-      serviceContainer.appendChild(serviceBox);
-
-      var serviceDerivationPathEl = document.createElement("p");
-      serviceDerivationPathEl.innerText =
-        "Derivation path: " + services[service].derivationPath;
-      serviceDerivationPathEl.classList = "subtitle";
-      serviceBox.appendChild(serviceDerivationPathEl);
-
-      var serviceDetails = document.createElement("div");
-      serviceDetails.classList = "content";
-
-      if (derivationPath.startsWith("m/650")) {
-        var serviceAddressEl = document.createElement("p");
-        serviceAddressEl.classList = "is-size-6";
-        const address = keychain.deriveAddress(service, 0);
-
-        var serviceAddressLink = document.createElement("a");
-        serviceAddressLink.innerText = "Address: " + Utils.uint8ArrayToHex(address);
-        serviceAddressLink.setAttribute(
-          "href",
-          endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(address)
-        );
-        serviceAddressLink.setAttribute("target", "_blank");
-
-        serviceAddressEl.appendChild(serviceAddressLink);
-        serviceDetails.appendChild(serviceAddressEl);
-      }
-
-      serviceBox.appendChild(serviceDetails);
-
-      servicesContainer.appendChild(serviceContainer);
-    }
+    displayServices(keychain)
   });
 
   document.querySelector("#keychainInfo").style.display = "block";
@@ -165,4 +126,99 @@ window.sendTransaction = async () => {
         );
     })
     .send();
+}
+
+window.addRandomServiceToKeychain = async () => {
+  await archethic.connect();
+
+  const accessSeed = document.querySelector("#accessSeed").value;
+  archethic.account.getKeychain(accessSeed)
+    .then((keychain) => {
+      const randString = Math.random().toString(16).substr(2, 8);
+      const randInteger = Math.random().toString().substr(2, 3);
+      keychain.addService(randString, `m/650'/${randInteger}/0`);
+
+      return archethic.updateKeychain(keychain)
+        .then(() => {
+          displayServices(keychain)
+        })
+    })
+    .catch((e) => {
+      console.error(e);
+      throw e;
+    });
+};
+
+window.removeServiceFromKeychain = async (serviceName) => {
+  await archethic.connect();
+
+  const accessSeed = document.querySelector("#accessSeed").value;
+  archethic.account.getKeychain(accessSeed)
+    .then((keychain) => {
+      keychain.removeService(serviceName)
+
+      return archethic.updateKeychain(keychain)
+        .then(() => {
+          displayServices(keychain)
+        })
+    })
+    .catch((e) => {
+      console.error(e);
+      throw e;
+    });
+};
+
+
+function displayServices(keychain) {
+  let servicesContainer = document.querySelector("#services");
+  servicesContainer.innerHTML = ""
+
+  for (service in keychain.services) {
+    const { derivationPath } = keychain.services[service];
+
+    var serviceContainer = document.createElement("div");
+    var serviceBox = document.createElement("div");
+    serviceBox.classList = "title is-child box";
+
+    var serviceNameEl = document.createElement("p");
+    serviceNameEl.innerText = service;
+    serviceNameEl.classList = "title";
+    serviceBox.appendChild(serviceNameEl);
+
+    serviceContainer.appendChild(serviceBox);
+
+    var serviceDerivationPathEl = document.createElement("p");
+    serviceDerivationPathEl.innerText = "Derivation path: " + derivationPath;
+    serviceDerivationPathEl.classList = "subtitle";
+    serviceBox.appendChild(serviceDerivationPathEl);
+
+    var serviceDetails = document.createElement("div");
+    serviceDetails.classList = "content";
+
+    if (derivationPath.startsWith("m/650")) {
+      var serviceAddressEl = document.createElement("p");
+      serviceAddressEl.classList = "is-size-6";
+      const address = keychain.deriveAddress(service, 0);
+
+      var serviceAddressLink = document.createElement("a");
+      serviceAddressLink.innerText = "Address: " + Utils.uint8ArrayToHex(address);
+      serviceAddressLink.setAttribute(
+        "href",
+        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(address)
+      );
+      serviceAddressLink.setAttribute("target", "_blank");
+
+      var removeBtn = document.createElement("button");
+      removeBtn.innerText = "Remove";
+      removeBtn.setAttribute("onClick", `removeServiceFromKeychain("${service}");`);
+
+      serviceAddressEl.appendChild(serviceAddressLink);
+      serviceDetails.appendChild(serviceAddressEl);
+      serviceDetails.appendChild(removeBtn);
+    }
+
+    serviceBox.appendChild(serviceDetails);
+
+    servicesContainer.appendChild(serviceContainer);
+  }
 }
