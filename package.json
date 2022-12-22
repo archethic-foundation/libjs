@@ -1,14 +1,14 @@
 {
   "name": "archethic",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "description": "Archethic Javascript SDK",
   "main": "index.js",
-  "module": "dist/archethic.mjs",
+  "module": "dist/archethic-browser.mjs",
   "unpkg": "dist/archethic.js",
   "jsdelivr": "dist/archethic.js",
   "type": "module",
   "exports": {
-    "import": "./dist/archethic.mjs",
+    "import": "./dist/archethic-node.mjs",
     "require": "./dist/archethic.cjs"
   },
   "scripts": {
@@ -59,6 +59,7 @@
     "ws": "^8.5.0"
   },
   "browser": {
+    "archethic": "./dist/archethic-browser.mjs",
     "crypto": "crypto-browserify",
     "stream": "stream-browserify",
     "buffer-xor": "buffer-xor"

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- This example demonstrates how to use the Archethic JavaScript SDK without any build system -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example: AE Browser Connect</title>
+    <!-- Load the SDK -->
+    <script src="../../dist/archethic.js"></script>
+</head>
+
+<body>
+    <h1>Connect to the Archethic via the JavaScript SDK</h1>
+
+    <form action="#" onsubmit="return connect(this);">
+        <label>Endpoint:<input name="endpoint" value="http://localhost:4000" /></label>
+        <button type="submit">Connect</button>
+        <span>
+            Status: <span id="status"></span>
+        </span>
+    </form>
+
+    <script type="text/javascript">
+        function displayStatus(status) {
+            document.getElementById("status").innerText = status
+        }
+
+        displayStatus("DISCONNECTED")
+
+        function connect(form) {
+            displayStatus("CONNECTING")
+
+            endpoint = form.querySelector("input[name=endpoint]").value
+
+            var promiseToConnect = new Archethic(endpoint).connect()
+
+            promiseToConnect
+                .then(() => {
+                    displayStatus("CONNECTED")
+                })
+                .catch((a) => {
+                    displayStatus(`DISCONNECTED (${a.message})`)
+                })
+
+            return false
+        }
+    </script>
+
+</body>
+
+</html>
