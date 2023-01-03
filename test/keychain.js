@@ -1,5 +1,6 @@
 import assert from 'assert'
 
+import Archethic from "../index.js";
 import Keychain, { keyToJWK } from "../lib/keychain.js"
 import { uint8ArrayToHex, concatUint8Arrays } from "../lib/utils.js"
 import { deriveAddress, verify } from "../lib/crypto.js"
@@ -10,7 +11,8 @@ describe("keychain to DID", () => {
   it("should encode the key material metadata", () => {
     const seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
 
-    const keychain = new Keychain(seed)
+    const archethic = new Archethic("http://localhost:4000");
+    const keychain = new Keychain(archethic, seed)
     keychain
       .addService("uco", "m/650'/0/0")
       .addService("nft1", "m/650'/1/0")
@@ -48,7 +50,8 @@ describe("keychain to DID", () => {
 
 describe("keychain encode", () => {
   it("should encode the keychain into a binary", () => {
-    const keychain = new Keychain("myseed")
+    const archethic = new Archethic("http://localhost:4000");
+    const keychain = new Keychain(archethic, "myseed")
     keychain.addService("uco", "m/650'/0/0")
 
     const expectedBinary = concatUint8Arrays([
@@ -81,7 +84,8 @@ describe("keychain encode", () => {
       Uint8Array.from([0])  //SHA256 hash algo
     ])
 
-    const { seed, services } = Keychain.decode(binary)
+    const archethic = new Archethic("http://localhost:4000");
+    const { seed, services } = Keychain.decode(archethic, binary)
 
     assert.deepStrictEqual(new TextEncoder().encode("myseed"), seed)
     assert.deepStrictEqual({
@@ -94,11 +98,12 @@ describe("keychain encode", () => {
   })
 
   it("should encode/decode multiple services", () => {
-    const keychain = new Keychain("myseed")
+    const archethic = new Archethic("http://localhost:4000");
+    const keychain = new Keychain(archethic, "myseed")
     keychain.addService("uco", "m/650'/0/0")
     keychain.addService("nft1", "m/650'/1/0")
 
-    const keychain2 = Keychain.decode(keychain.encode())
+    const keychain2 = Keychain.decode(archethic, keychain.encode())
 
     assert.deepStrictEqual(keychain, keychain2)
   })
@@ -106,7 +111,8 @@ describe("keychain encode", () => {
 
 describe("buildTransaction", () => {
   it("should build the transaction and the related signature", () => {
-    const keychain = new Keychain("seed")
+    const archethic = new Archethic("http://localhost:4000");
+    const keychain = new Keychain(archethic, "seed")
     keychain.addService("uco", "m/650'/0/0")
 
     const tx = new TransactionBuilder()

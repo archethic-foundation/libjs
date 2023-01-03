@@ -1,4 +1,4 @@
-import Archethic, { Crypto, Utils } from 'archethic'
+import Archethic, { Crypto, Utils } from 'archethic';
 import Keychain from '../../lib/keychain';
 
 const { toBigInt } = Utils
@@ -28,7 +28,7 @@ window.createKeychain = async () => {
 
   const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
 
-  const keychain = new Keychain(Crypto.randomSecretKey())
+  const keychain = new Keychain(archethic, Crypto.randomSecretKey())
     .addService("uco", "m/650'/0/0")
     .addAuthorizedPublicKey(publicKey)
 
@@ -142,7 +142,7 @@ window.addRandomServiceToKeychain = async () => {
       const randInteger = Math.random().toString().substr(2, 3);
       keychain.addService(randString, `m/650'/${randInteger}/0`);
 
-      return archethic.updateKeychain(keychain)
+      return keychain.update()
         .then(() => {
           displayServices(keychain)
         })
@@ -160,7 +160,7 @@ window.removeServiceFromKeychain = async (serviceName) => {
     .then((keychain) => {
       keychain.removeService(serviceName)
 
-      return archethic.updateKeychain(keychain)
+      return keychain.update()
         .then(() => {
           displayServices(keychain)
         })
@@ -185,7 +185,7 @@ window.addAuthorizedKeyToKeyChain = async () => {
     .then((keychain) => {
       keychain.addAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
 
-      return archethic.updateKeychain(keychain)
+      return keychain.update()
         .then(() => {
           displayAuthorizedPublicKeys(keychain);
         });
@@ -203,7 +203,7 @@ window.removeAuthorizedPublicKey = async (humanReadablePublicKey) => {
     .then((keychain) => {
       keychain.removeAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
 
-      return archethic.updateKeychain(keychain)
+      return keychain.update()
         .then(() => {
           displayAuthorizedPublicKeys(keychain);
         });

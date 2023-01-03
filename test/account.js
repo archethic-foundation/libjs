@@ -1,8 +1,7 @@
 import Keychain from "../lib/keychain.js";
 import Account from "../lib/account.js";
 import Archethic from "../index.js";
-import { hexToUint8Array } from "../lib/utils.js";
-import { deriveKeyPair, deriveAddress, randomSecretKey } from "../lib/crypto.js";
+import { deriveKeyPair, randomSecretKey } from "../lib/crypto.js";
 
 import assert from "assert";
 import nock from "nock";
@@ -15,7 +14,7 @@ describe("Account", () => {
     const { publicKey } = deriveKeyPair("accessSeed", 0);
     const authorizedPublicKeys = [publicKey];
 
-    const expectedKeychain = new Keychain(randomSecretKey())
+    const expectedKeychain = new Keychain(archethic, randomSecretKey())
       .addService("uco", "m/650'/0/0")
       .addAuthorizedPublicKey(authorizedPublicKeys[0])
 
@@ -74,7 +73,7 @@ describe("Account", () => {
     const account = new Account(archethic);
     const { publicKey } = deriveKeyPair("seed", 0);
 
-    const expectedKeychain = new Keychain(randomSecretKey())
+    const expectedKeychain = new Keychain(archethic, randomSecretKey())
       .addService("uco", "m/650'/0/0")
       .addAuthorizedPublicKey(publicKey)
 
