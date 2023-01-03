@@ -44,4 +44,37 @@ export default class Archethic {
       return this.requestNode(call);
     }
   }
+
+  // TODO: move into keychain.js by passing `this` in ctor?
+  // Write a new keychain transaction in the network
+  async updateKeychain(keychain, timeoutSeconds = 5) {
+    const keychainGenesisAddress = Crypto.deriveAddress(keychain.seed, 0);
+    const transactionChainIndex = await this.transaction.getTransactionIndex(keychainGenesisAddress);
+
+    const aesKey = Crypto.randomSecretKey();
+
+    return new Promise((resolve, reject) => {
+      new this.transaction.builder(this)
+        .setType("keychain")
+        .setContent(JSON.stringify(keychain.toDID()))
+        .addOwnership(
+          Crypto.aesEncrypt(keychain.encode(), aesKey),
+          keychain.authorizedPublicKeys.map(publicKey => {
+            return { publicKey: publicKey, encryptedSecretKey: Crypto.ecEncrypt(aesKey, publicKey) }
+          })
+        )
+        .build(keychain.seed, transactionChainIndex)
+        .originSign(Utils.originPrivateKey)
+        .on("confirmation", (confirmations, maxConfirmations, sender) => {
+          resolve();
+        })
+        .on("error", (context, reason) => {
+          reject(reason);
+        })
+        .on("timeout", (nbConf) => {
+          reject(new Error("timeout"));
+        })
+        .send(timeoutSeconds);
+    })
+  }
 }

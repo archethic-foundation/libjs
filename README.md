@@ -45,15 +45,16 @@ Creates a new transaction to build a keychain by embedding the on-chain encrypte
 - `keychain` The keychain to create
 
 ```js
-import Archethic, { Crypto } from 'archethic';
+import Archethic from "archethic";
+import { Crypto } from "archethic";
 
-const archethic = new Archethic("https://testnet.archethic.net");
 const accessSeed = "myseed";
 const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
-const keychain = new Keychain(archethic, Crypto.randomSecretKey())
+const keychain = new Keychain(Crypto.randomSecretKey())
   .addService("uco", "m/650'/0/0")
   .addAuthorizedPublicKey(publicKey);
   
+const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.account.newKeychainTransaction(keychain);
 
 // The transaction can then be signed with origin private key
