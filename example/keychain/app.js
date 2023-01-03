@@ -36,7 +36,7 @@ window.createKeychain = async () => {
   const keychainAddress = Crypto.deriveAddress(keychain.seed, 1);
 
   archethic.account
-    .newKeychainTransaction(keychain)
+    .newKeychainTransaction(keychain, 0)
     .originSign(originPrivateKey)
     .on("confirmation", (confirmations, maxConfirmations, sender) => {
       document.querySelector("#keychainSeed1").innerText = Utils.uint8ArrayToHex(keychain.seed);
@@ -133,86 +133,60 @@ window.sendTransaction = async () => {
 }
 
 window.addRandomServiceToKeychain = async () => {
-  await archethic.connect();
+  const randString = Math.random().toString(16).substr(2, 8);
+  const randInteger = Math.random().toString().substr(2, 3);
 
-  const accessSeed = document.querySelector("#accessSeed").value;
-  archethic.account.getKeychain(accessSeed)
-    .then((keychain) => {
-      const randString = Math.random().toString(16).substr(2, 8);
-      const randInteger = Math.random().toString().substr(2, 3);
-      keychain.addService(randString, `m/650'/${randInteger}/0`);
-
-      return archethic.updateKeychain(keychain)
-        .then(() => {
-          displayServices(keychain)
-        })
-    })
-    .catch((e) => {
-      console.error(e);
-    });
+  updateKeychain(keychain => {
+    keychain.addService(randString, `m/650'/${randInteger}/0`);
+  });
 };
 
 window.removeServiceFromKeychain = async (serviceName) => {
-  await archethic.connect();
-
-  const accessSeed = document.querySelector("#accessSeed").value;
-  archethic.account.getKeychain(accessSeed)
-    .then((keychain) => {
-      keychain.removeService(serviceName)
-
-      return archethic.updateKeychain(keychain)
-        .then(() => {
-          displayServices(keychain)
-        })
-    })
-    .catch((e) => {
-      console.error(e);
-    });
+  updateKeychain(keychain => {
+    keychain.removeService(serviceName)
+  });
 };
 
 window.addAuthorizedKeyToKeyChain = async () => {
-  await archethic.connect();
-
+  // get the value from input and clean it
   $input = document.querySelector("#authorizedPublicKeysToAdd")
-  $seed = document.querySelector("#accessSeed")
-
   const humanReadablePublicKey = $input.value;
-  const accessSeed = $seed.value;
-
   $input.value = "";
 
-  archethic.account.getKeychain(accessSeed)
-    .then((keychain) => {
-      keychain.addAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
+  updateKeychain(keychain => {
+    keychain.addAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
+  });
 
-      return archethic.updateKeychain(keychain)
-        .then(() => {
-          displayAuthorizedPublicKeys(keychain);
-        });
-    })
-    .catch((e) => {
-      console.error(e);
-    });
 };
 
 window.removeAuthorizedPublicKey = async (humanReadablePublicKey) => {
-  await archethic.connect();
-
-  const accessSeed = document.querySelector("#accessSeed").value;
-  archethic.account.getKeychain(accessSeed)
-    .then((keychain) => {
-      keychain.removeAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
-
-      return archethic.updateKeychain(keychain)
-        .then(() => {
-          displayAuthorizedPublicKeys(keychain);
-        });
-    })
-    .catch((e) => {
-      console.error(e);
-    });
+  updateKeychain(keychain => {
+    keychain.removeAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
+  });
 };
 
+async function updateKeychain(func) {
+  await archethic.connect();
+  const accessSeed = document.querySelector("#accessSeed").value;
+
+  let keychain = await archethic.account.getKeychain(accessSeed);
+
+  // this will mutate keychain
+  func(keychain);
+
+  // determine the new transaction index
+  const keychainGenesisAddress = Crypto.deriveAddress(keychain.seed, 0);
+  const transactionChainIndex = await archethic.transaction.getTransactionIndex(keychainGenesisAddress);
+
+  archethic.account
+    .newKeychainTransaction(keychain, transactionChainIndex)
+    .originSign(Utils.originPrivateKey)
+    .on("confirmation", (confirmations, maxConfirmations, sender) => {
+      displayServices(keychain);
+      displayAuthorizedPublicKeys(keychain);
+    })
+    .send();
+}
 
 
 function displayAuthorizedPublicKeys(keychain) {

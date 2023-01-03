@@ -19,7 +19,7 @@ describe("Account", () => {
       .addService("uco", "m/650'/0/0")
       .addAuthorizedPublicKey(authorizedPublicKeys[0])
 
-    const tx = account.newKeychainTransaction(expectedKeychain);
+    const tx = account.newKeychainTransaction(expectedKeychain, 0);
     assert.equal("keychain", tx.type);
     assert.deepEqual(
       new TextDecoder().decode(tx.data.content),
@@ -79,7 +79,7 @@ describe("Account", () => {
       .addAuthorizedPublicKey(publicKey)
 
     const keychainTx = JSON.parse(
-      account.newKeychainTransaction(expectedKeychain).toJSON()
+      account.newKeychainTransaction(expectedKeychain, 0).toJSON()
     );
 
     const accessTx = JSON.parse(

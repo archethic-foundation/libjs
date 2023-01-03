@@ -38,15 +38,16 @@ If you still want to use the nearest point while being on an HTTPS website, you 
   <details>
    <summary>Account</summary>
 
-### newKeychainTransaction(keychain)
+### newKeychainTransaction(keychain, transactionChainIndex)
 
-Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
+Creates a new transaction to build (or update) a keychain by embedding the on-chain encrypted wallet.
 
 - `keychain` The keychain to create
+- `transactionChainIndex` The index of the transaction created (0 for new keychain)
 
+#### Example of keychain creation
 ```js
-import Archethic from "archethic";
-import { Crypto } from "archethic";
+import Archethic, { Crypto } from "archethic";
 
 const accessSeed = "myseed";
 const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
@@ -55,8 +56,26 @@ const keychain = new Keychain(Crypto.randomSecretKey())
   .addAuthorizedPublicKey(publicKey);
   
 const archethic = new Archethic("https://testnet.archethic.net");
-const tx = archethic.account.newKeychainTransaction(keychain);
+await archethic.connect();
+const tx = archethic.account.newKeychainTransaction(keychain, 0);
+// The transaction can then be signed with origin private key
+```
 
+#### Example of keychain update
+```js
+import Archethic, { Crypto } from "archethic";
+
+const accessSeed = "myseed";
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect();
+let keychain = await archethic.account.getKeychain(accessSeed);
+keychain.addService("mywallet", "m/650'/1/0")
+
+// determine the new transaction index
+const keychainGenesisAddress = Crypto.deriveAddress(keychain.seed, 0);
+const transactionChainIndex = await archethic.transaction.getTransactionIndex(keychainGenesisAddress);
+
+const tx = archethic.account.newKeychainTransaction(keychain, transactionChainIndex);
 // The transaction can then be signed with origin private key
 ```
 
@@ -72,9 +91,7 @@ import Archethic from "archethic";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.account.newAccessKeychainTransaction("myseed", keychainAddress);
-
 // The transaction can then be signed with origin private key
-#### getKeychain(seed, endpoint)
 ```
 
 ### getKeychain(seed)
