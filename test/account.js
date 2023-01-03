@@ -12,14 +12,14 @@ describe("Account", () => {
     const archethic = new Archethic("http://localhost:4000");
     const account = new Account(archethic);
 
-    const expectedKeychain = new Keychain("myseed").addService(
-      "uco",
-      "m/650'/0/0"
-    );
-    const authorizedPublicKeys = [
-      "000161d6cd8da68207bd01198909c139c130a3df3a8bd20f4bacb123c46354ccd52c",
-    ];
-    const tx = account.newKeychainTransaction("myseed", authorizedPublicKeys);
+    const { publicKey } = deriveKeyPair("accessSeed", 0);
+    const authorizedPublicKeys = [publicKey];
+
+    const expectedKeychain = new Keychain(randomSecretKey())
+      .addService("uco", "m/650'/0/0")
+      .addAuthorizedPublicKey(authorizedPublicKeys[0])
+
+    const tx = account.newKeychainTransaction(expectedKeychain);
     assert.equal("keychain", tx.type);
     assert.deepEqual(
       new TextDecoder().decode(tx.data.content),
@@ -29,7 +29,7 @@ describe("Account", () => {
     assert.equal(1, tx.data.ownerships.length);
     assert.equal(1, tx.data.ownerships[0].authorizedKeys.length);
     assert.deepEqual(
-      hexToUint8Array(authorizedPublicKeys[0]),
+      authorizedPublicKeys[0],
       tx.data.ownerships[0].authorizedKeys[0].publicKey
     );
   });
@@ -74,9 +74,14 @@ describe("Account", () => {
     const account = new Account(archethic);
     const { publicKey } = deriveKeyPair("seed", 0);
 
+    const expectedKeychain = new Keychain(randomSecretKey())
+      .addService("uco", "m/650'/0/0")
+      .addAuthorizedPublicKey(publicKey)
+
     const keychainTx = JSON.parse(
-      account.newKeychainTransaction("myseed", [publicKey]).toJSON()
+      account.newKeychainTransaction(expectedKeychain).toJSON()
     );
+
     const accessTx = JSON.parse(
       account.newAccessTransaction("seed", keychainTx.address).toJSON()
     );

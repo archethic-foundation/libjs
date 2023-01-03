@@ -1,4 +1,5 @@
 import Archethic, { Crypto, Utils } from 'archethic'
+import Keychain from '../../lib/keychain';
 
 const { toBigInt } = Utils
 
@@ -15,26 +16,30 @@ document
 
 // This function creates 2 transactions:
 //
-//  - the KEYCHAIN transaction (with a difficult random seed)
+//  - the KEYCHAIN transaction (with a 32B random seed)
 //
 //  - the KEYCHAIN_ACCESS transaction (with the given seed)
 //      contains a ownership to the KEYCHAIN
 window.createKeychain = async () => {
   await archethic.connect();
-  const seed = document.querySelector("#accessSeed").value;
+  const accessSeed = document.querySelector("#accessSeed").value;
 
   const originPrivateKey = Utils.originPrivateKey;
 
-  const { publicKey } = Crypto.deriveKeyPair(seed, 0);
+  const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
 
-  const keychainSeed = Crypto.randomSecretKey();
-  const keychainAddress = Crypto.deriveAddress(keychainSeed, 1);
+  const keychain = new Keychain(Crypto.randomSecretKey())
+    .addService("uco", "m/650'/0/0")
+    .addAuthorizedPublicKey(publicKey)
+
+  const accessAddress = Crypto.deriveAddress(accessSeed, 1);
+  const keychainAddress = Crypto.deriveAddress(keychain.seed, 1);
 
   archethic.account
-    .newKeychainTransaction(keychainSeed, [publicKey])
+    .newKeychainTransaction(keychain)
     .originSign(originPrivateKey)
     .on("confirmation", (confirmations, maxConfirmations, sender) => {
-      document.querySelector("#keychainSeed1").innerText = Utils.uint8ArrayToHex(keychainSeed);
+      document.querySelector("#keychainSeed1").innerText = Utils.uint8ArrayToHex(keychain.seed);
       let txEndpointLink =
         endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(keychainAddress);
       document.querySelector("#keychainTxLink").innerText = txEndpointLink;
@@ -44,10 +49,8 @@ window.createKeychain = async () => {
 
       sender.unsubscribe();
 
-      const accessAddress = Crypto.deriveAddress(seed, 1);
-
       archethic.account
-        .newAccessTransaction(seed, keychainAddress)
+        .newAccessTransaction(accessSeed, keychainAddress)
         .originSign(originPrivateKey)
         .on("confirmation", (confirmation, maxConfirmation, sender) => {
           let txEndpointLink =
@@ -75,6 +78,7 @@ window.getKeychain = async () => {
 
     document.querySelector("#keychainSeed2").innerText = Utils.uint8ArrayToHex(seed);
 
+    displayAuthorizedPublicKeys(keychain)
     displayServices(keychain)
   });
 
@@ -145,7 +149,6 @@ window.addRandomServiceToKeychain = async () => {
     })
     .catch((e) => {
       console.error(e);
-      throw e;
     });
 };
 
@@ -164,14 +167,79 @@ window.removeServiceFromKeychain = async (serviceName) => {
     })
     .catch((e) => {
       console.error(e);
-      throw e;
+    });
+};
+
+window.addAuthorizedKeyToKeyChain = async () => {
+  await archethic.connect();
+
+  $input = document.querySelector("#authorizedPublicKeysToAdd")
+  $seed = document.querySelector("#accessSeed")
+
+  const humanReadablePublicKey = $input.value;
+  const accessSeed = $seed.value;
+
+  $input.value = "";
+
+  archethic.account.getKeychain(accessSeed)
+    .then((keychain) => {
+      keychain.addAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
+
+      return archethic.updateKeychain(keychain)
+        .then(() => {
+          displayAuthorizedPublicKeys(keychain);
+        });
+    })
+    .catch((e) => {
+      console.error(e);
+    });
+};
+
+window.removeAuthorizedPublicKey = async (humanReadablePublicKey) => {
+  await archethic.connect();
+
+  const accessSeed = document.querySelector("#accessSeed").value;
+  archethic.account.getKeychain(accessSeed)
+    .then((keychain) => {
+      keychain.removeAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
+
+      return archethic.updateKeychain(keychain)
+        .then(() => {
+          displayAuthorizedPublicKeys(keychain);
+        });
+    })
+    .catch((e) => {
+      console.error(e);
     });
 };
 
 
+
+function displayAuthorizedPublicKeys(keychain) {
+  let container = document.querySelector("#authorizedPublicKeys");
+  container.innerHTML = "";
+
+  keychain.authorizedPublicKeys.forEach(publicKey => {
+    var humanReadablePublicKey = Utils.uint8ArrayToHex(publicKey);
+    var $ul = document.createElement("ul");
+
+    var $li = document.createElement("li");
+    $li.innerText = humanReadablePublicKey
+
+    var removeBtn = document.createElement("button");
+    removeBtn.innerText = "Remove";
+    removeBtn.setAttribute("onClick", `removeAuthorizedPublicKey("${humanReadablePublicKey}");`);
+    $li.appendChild(removeBtn);
+
+
+    $ul.appendChild($li);
+    container.appendChild($ul);
+  });
+}
+
 function displayServices(keychain) {
   let servicesContainer = document.querySelector("#services");
-  servicesContainer.innerHTML = ""
+  servicesContainer.innerHTML = "";
 
   for (service in keychain.services) {
     const { derivationPath } = keychain.services[service];

@@ -38,20 +38,24 @@ If you still want to use the nearest point while being on an HTTPS website, you 
   <details>
    <summary>Account</summary>
 
-### newKeychainTransaction(seed, authorizedPublicKeys)
+### newKeychainTransaction(keychain)
 
 Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
 
-- `seed` Keychain's seed
-- `authorizedPublicKeys` List of authorized public keys able to decrypt the wallet
+- `keychain` The keychain to create
 
 ```js
 import Archethic from "archethic";
+import { Crypto } from "archethic";
 
+const accessSeed = "myseed";
+const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+const keychain = new Keychain(Crypto.randomSecretKey())
+  .addService("uco", "m/650'/0/0")
+  .addAuthorizedPublicKey(publicKey);
+  
 const archethic = new Archethic("https://testnet.archethic.net");
-const tx = archethic.account.newKeychainTransaction("myseed", [
-  authorizedPublicKey,
-]);
+const tx = archethic.account.newKeychainTransaction(keychain);
 
 // The transaction can then be signed with origin private key
 ```

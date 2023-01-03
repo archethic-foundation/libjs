@@ -53,21 +53,13 @@ export default class Archethic {
 
     const aesKey = Crypto.randomSecretKey();
 
-    // TODO: add authorizedKeys to Keychain class (with add/remove method)
-    // TODO: then we'll take the authorizedKeys from there instead of last transaction
-    //
-    // get the authorized keys of last transaction (to copy them on the new)
-    // there is always only 1 secret(ownership) on a keychain transaction
-    const keychainOwnerships = await this.transaction.getTransactionOwnerships(keychainGenesisAddress, true);
-    const authorizedPublicKeys = keychainOwnerships[0].authorizedPublicKeys
-
     return new Promise((resolve, reject) => {
       new this.transaction.builder(this)
         .setType("keychain")
         .setContent(JSON.stringify(keychain.toDID()))
         .addOwnership(
           Crypto.aesEncrypt(keychain.encode(), aesKey),
-          authorizedPublicKeys.map(({ publicKey }) => {
+          keychain.authorizedPublicKeys.map(publicKey => {
             return { publicKey: publicKey, encryptedSecretKey: Crypto.ecEncrypt(aesKey, publicKey) }
           })
         )
