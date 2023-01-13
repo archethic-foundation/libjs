@@ -13,9 +13,25 @@ import assert from "assert";
 
 describe("Transaction builder", () => {
   describe("setType", () => {
-    it("should assign type", () => {
+    it("should assign type transfer", () => {
       const tx = new TransactionBuilder().setType("transfer");
       assert.strictEqual(tx.type, "transfer");
+    });
+    it("should assign type contract", () => {
+      const tx = new TransactionBuilder().setType("contract");
+      assert.strictEqual(tx.type, "contract");
+    });
+    it("should assign type data", () => {
+      const tx = new TransactionBuilder().setType("data");
+      assert.strictEqual(tx.type, "data");
+    });
+    it("should assign type token", () => {
+      const tx = new TransactionBuilder().setType("token");
+      assert.strictEqual(tx.type, "token");
+    });
+    it("should assign type hosting", () => {
+      const tx = new TransactionBuilder().setType("contract");
+      assert.strictEqual(tx.type, "contract");
     });
   });
 
