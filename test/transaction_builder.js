@@ -30,8 +30,8 @@ describe("Transaction builder", () => {
       assert.strictEqual(tx.type, "token");
     });
     it("should assign type hosting", () => {
-      const tx = new TransactionBuilder().setType("contract");
-      assert.strictEqual(tx.type, "contract");
+      const tx = new TransactionBuilder().setType("hosting");
+      assert.strictEqual(tx.type, "hosting");
     });
   });
 
