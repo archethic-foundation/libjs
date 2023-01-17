@@ -914,14 +914,14 @@ Some examples are present to see how to use the SDK
 ### Keychain
 
 ```bash
-cd examples/keychain
+cd example/keychain
 npm run start
 ```
 
 ### TransactionBuilder
 
 ```bash
-cd examples/transactionBuilder
+cd example/transactionBuilder
 npm run start
 ```
 
