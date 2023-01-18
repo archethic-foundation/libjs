@@ -13,6 +13,7 @@ export default class Archethic {
     this.transaction = new Transaction(this);
     this.account = new Account(this);
     this.network = new Network(this);
+    this.nearestEndpoints = [endpoint];
   }
 
   async connect() {
