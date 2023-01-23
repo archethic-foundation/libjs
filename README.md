@@ -29,6 +29,10 @@ console.log(archethic)
 }
 ```
 
+**Note**: `archethic.connect()` is useful but not mandatory. In the case of using a website on HTTPS, making a query to a node through HTTP creates a **Mixed content** issue. To avoid this issue, we can use directly `new Archethic(httpsEndpoint)` which will be used as fallback.
+
+If you still want to use the nearest point while being on an HTTPS website, you could call a server endpoint to make the query for you.
+
 ## API
 
   <details>
@@ -859,6 +863,7 @@ const cipher = Crypto.aesEncrypt(
 ### fromBigInt(number, decimals)
 
 Convert a big int number to a x decimals number (mainly use to display token amount)
+
 - `number` Big Int number to convert to decimals number
 - `decimals` number of decimals needed (default to 8)
 
@@ -873,6 +878,7 @@ Utils.fromBigInt(12_534_500, 6);
 ### toBigInt(number, decimals)
 
 Convert a decimals number to a BigInt number
+
 - `number` decimals number to convert to Big Int number
 - `decimals` number of decimals (default to 8)
 
