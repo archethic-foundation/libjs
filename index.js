@@ -18,9 +18,14 @@ export default class Archethic {
 
   async connect() {
     const nodes = await getNearestEndpoints(this.endpoint);
-    this.nearestEndpoints = nodes.map(({ ip, port }) => {
+
+    let nearestEndpoints = nodes.map(({ ip, port }) => {
       return `http://${ip}:${port}`;
     });
+
+    nearestEndpoints.push(this.endpoint.origin) // Add the main endpoint as fallback
+
+    this.nearestEndpoints = [...new Set(nearestEndpoints)]
 
     return this;
   }
