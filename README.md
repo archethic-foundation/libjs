@@ -625,6 +625,30 @@ console.log(token);
 }
 ```
 
+### getBalance(address)
+
+Query a node to fetch the last balance of the given address
+
+- `address` is the address of the account to get the balance from
+
+```js
+import Archethic from "archethic"
+const archethic = new Archethic("https://testnet.archethic.net");
+
+await archethic.connect()
+
+const balance = await archethic.network.getBalance(accountAddress);
+console.log(balance)
+{
+  uco: 100000000,
+  tokens: [{
+    address: '209DFA0C.....',
+    tokenId: 'ABD829FD.....',
+    amount: 100000000
+  }]
+}
+```
+
 ### addOriginKey(originPublicKey, certificate)
 
 Query a node to add a new origin public to be authorized to sign transaction with the corresponding private key (see OriginSign).
