@@ -33,6 +33,16 @@ describe("Transaction builder", () => {
       const tx = new TransactionBuilder().setType("hosting");
       assert.strictEqual(tx.type, "hosting");
     });
+
+    it("should assign type code proposal", () => {
+      const tx = new TransactionBuilder().setType("code_proposal");
+      assert.strictEqual(tx.type, "code_proposal");
+    });
+
+    it("should assign type code validation", () => {
+      const tx = new TransactionBuilder().setType("code_validation");
+      assert.strictEqual(tx.type, "code_validation");
+    });
   });
 
   describe("setCode", () => {
