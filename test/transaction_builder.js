@@ -39,9 +39,9 @@ describe("Transaction builder", () => {
       assert.strictEqual(tx.type, "code_proposal");
     });
 
-    it("should assign type code validation", () => {
-      const tx = new TransactionBuilder().setType("code_validation");
-      assert.strictEqual(tx.type, "code_validation");
+    it("should assign type code approval", () => {
+      const tx = new TransactionBuilder().setType("code_approval");
+      assert.strictEqual(tx.type, "code_approval");
     });
   });
 
