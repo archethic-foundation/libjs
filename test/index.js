@@ -1,5 +1,6 @@
 import Archethic from "../index.js";
 import * as API from "../lib/api.js";
+import Endpoint from "../lib/endpoint.js";
 
 import assert from "assert";
 import nock from "nock";
@@ -9,7 +10,7 @@ describe("Archethic", () => {
     const archethic = new Archethic("http://localhost:4000");
     assert.deepStrictEqual(
       archethic.endpoint,
-      new URL("http://localhost:4000")
+      Endpoint.build("http://localhost:4000")
     );
 
     assert.notEqual(archethic.network, undefined);
