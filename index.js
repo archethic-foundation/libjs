@@ -1,7 +1,8 @@
 import Account from "./lib/account.js";
 import { getNearestEndpoints } from "./lib/api.js";
+import { ArchethicRPCClient } from "./lib/api/wallet_rpc.js";
 import * as Crypto from "./lib/crypto.js";
-import Endpoint from "./lib/endpoint.js";
+import { Endpoint, WalletRPCEndpoint } from "./lib/endpoint.js";
 import Network from "./lib/network.js";
 import Transaction from "./lib/transaction.js";
 import * as Utils from "./lib/utils.js";
@@ -11,6 +12,9 @@ export { Utils, Crypto };
 export default class Archethic {
   constructor(endpoint) {
     this.endpoint = Endpoint.build(endpoint);
+    if (this.endpoint instanceof WalletRPCEndpoint) {
+      this.rpcWallet = ArchethicRPCClient.instance
+    }
 
     this.transaction = new Transaction(this);
     this.account = new Account(this);
@@ -19,9 +23,8 @@ export default class Archethic {
   }
 
   async connect() {
-    if (this.endpoint.isRpcAvailable) {
+    if (this.endpoint instanceof WalletRPCEndpoint) {
       await this.endpoint.resolve()
-      this.rpcWallet = this.endpoint.rpcClient
     }
 
     const nodes = await getNearestEndpoints(this.endpoint.nodeEndpoint);
