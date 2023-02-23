@@ -1,4 +1,5 @@
-import Archethic, { Utils, Crypto } from "archethic";
+import Archethic, { Utils, Crypto } from '../../index.js'
+
 
 const { toBigInt } = Utils;
 
@@ -50,7 +51,7 @@ window.generate_transaction = async () => {
     ].authorizedKeys.findIndex(function (authKey) {
       return authKey.publicKey == publicKey;
     });
-    
+
     if (authorizedKeyIndex == -1) {
       alert(
         "You need to create an ownership with the transaction seed as secret and authorize node public key to let nodes generate new transaction from your smart contract"
@@ -246,8 +247,8 @@ window.sendTransaction = async () => {
         .setAttribute(
           "href",
           endpoint +
-            "/explorer/transaction/" +
-            Utils.uint8ArrayToHex(transaction.address)
+          "/explorer/transaction/" +
+          Utils.uint8ArrayToHex(transaction.address)
         );
     })
     .send();

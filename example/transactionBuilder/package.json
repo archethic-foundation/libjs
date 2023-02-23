@@ -2,14 +2,9 @@
   "name": "archethic-tx-builder",
   "version": "0.1.0",
   "scripts": {
-    "start": "npm run build && http-server",
     "build": "./build.js"
   },
-  "dependencies": {
-    "archethic": "file:../.."
-  },
   "devDependencies": {
-    "esbuild": "^0.15.8",
-    "http-server": "^14.1.1"
+    "esbuild": "^0.15.8"
   }
 }

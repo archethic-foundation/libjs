@@ -1,6 +1,7 @@
-import { Crypto, Utils } from 'archethic'
+import { Utils, Crypto } from '../../index.js'
 
-window.generatePublicKey = function() {
+
+window.generatePublicKey = function () {
   seed = document.querySelector("#seed").value;
   index = parseInt(document.querySelector("#index").value);
   curve = document.querySelector("#curve").value;

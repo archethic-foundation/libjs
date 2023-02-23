@@ -1,5 +1,6 @@
-import Archethic, { Crypto, Utils } from 'archethic'
+import Archethic, { Utils, Crypto } from '../../index.js'
 import Keychain from '../../lib/keychain';
+
 
 const { toBigInt } = Utils
 
