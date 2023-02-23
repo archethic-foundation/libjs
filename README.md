@@ -38,21 +38,44 @@ If you still want to use the nearest point while being on an HTTPS website, you 
   <details>
    <summary>Account</summary>
 
-### newKeychainTransaction(seed, authorizedPublicKeys)
+### newKeychainTransaction(keychain, transactionChainIndex)
 
-Creates a new transaction to build a keychain by embedding the on-chain encrypted wallet.
+Creates a new transaction to build (or update) a keychain by embedding the on-chain encrypted wallet.
 
-- `seed` Keychain's seed
-- `authorizedPublicKeys` List of authorized public keys able to decrypt the wallet
+- `keychain` The keychain to create
+- `transactionChainIndex` The index of the transaction created (0 for new keychain)
 
+#### Example of keychain creation
 ```js
-import Archethic from "archethic";
+import Archethic, { Crypto } from "archethic";
 
+const accessSeed = "myseed";
+const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+const keychain = new Keychain(Crypto.randomSecretKey())
+  .addService("uco", "m/650'/0/0")
+  .addAuthorizedPublicKey(publicKey);
+  
 const archethic = new Archethic("https://testnet.archethic.net");
-const tx = archethic.account.newKeychainTransaction("myseed", [
-  authorizedPublicKey,
-]);
+await archethic.connect();
+const tx = archethic.account.newKeychainTransaction(keychain, 0);
+// The transaction can then be signed with origin private key
+```
 
+#### Example of keychain update
+```js
+import Archethic, { Crypto } from "archethic";
+
+const accessSeed = "myseed";
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect();
+let keychain = await archethic.account.getKeychain(accessSeed);
+keychain.addService("mywallet", "m/650'/1/0")
+
+// determine the new transaction index
+const keychainGenesisAddress = Crypto.deriveAddress(keychain.seed, 0);
+const transactionChainIndex = await archethic.transaction.getTransactionIndex(keychainGenesisAddress);
+
+const tx = archethic.account.newKeychainTransaction(keychain, transactionChainIndex);
 // The transaction can then be signed with origin private key
 ```
 
@@ -68,9 +91,7 @@ import Archethic from "archethic";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.account.newAccessKeychainTransaction("myseed", keychainAddress);
-
 // The transaction can then be signed with origin private key
-#### getKeychain(seed, endpoint)
 ```
 
 ### getKeychain(seed)
@@ -90,6 +111,7 @@ console.log(keychain)
 {
   version: 1,
   seed: "masterKeychainSeed",
+  authorizedPublicKeys: [ Uint8Array(34) ],
   services: {
     uco: {
       derivationPath: "m/650'/0/0"
@@ -203,6 +225,7 @@ console.log(keychain)
 {
   version: 1,
   seed: "mymasterseed",
+  authorizedPublicKeys: [ Uint8Array(34) ],
   services: {
     uco: {
       derivationPath: "m/650'/0/0",
@@ -216,6 +239,58 @@ console.log(keychain)
     }
   }
 }
+```
+
+#### removeService(name)
+
+Remove a service from the keychain
+
+- `name`: Name of the service to add
+
+```js
+import Archethic from "archethic";
+
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect();
+
+const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+keychain.removeService("nft1");
+```
+
+#### addAuthorizedPublicKey(publicKey)
+
+Authorize a key to access the keychain
+
+- `publicKey`: The public key (type: Uint8Array)
+
+```js
+import Archethic from "archethic";
+
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect();
+
+const accessSeed = "myseed";
+const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+keychain.addAuthorizedPublicKey(publicKey);
+```
+
+#### removeAuthorizedPublicKey(publicKey)
+
+Unauthorized a key to access the keychain
+
+- `publicKey`: The public key (type: Uint8aArray)
+
+```js
+import Archethic from "archethic";
+
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect();
+
+const accessSeed = "myseed";
+const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+keychain.removeAuthorizedPublicKey(publicKey);
 ```
 
   </details>
