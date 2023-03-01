@@ -47,6 +47,19 @@ describe("Keychain", () => {
     })
   })
 
+  describe("derivation", () => {
+    describe("should derive keys for a given service with suffix", () => {
+      const seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
+      const keychain = new Keychain(seed)
+      keychain.addService("uco", "m/650'/0/0")
+
+      const { publicKey: publicKeyUco } = keychain.deriveKeypair("uco")
+      const { publicKey: extendedPublicKeyUco } = keychain.deriveKeypair("uco", 0, "extended")
+
+      assert.notDeepStrictEqual(publicKeyUco, extendedPublicKeyUco)
+    })
+  })
+
   describe("encoding", () => {
     it("should encode the keychain into a binary", () => {
       const keychain = new Keychain("myseed")

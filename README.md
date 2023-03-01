@@ -122,7 +122,7 @@ console.log(keychain)
 
 **Once retreived the keychain provide the following methods:**
 
-#### buildTransaction(tx, service, index)
+#### buildTransaction(tx, service, index, suffix)
 
 Generate `address`, `previousPublicKey`, `previousSignature` of the transaction and
 serialize it using a custom binary protocol, based on the derivation path, curve and hash algo of the service given in param.
@@ -130,6 +130,7 @@ serialize it using a custom binary protocol, based on the derivation path, curve
 - `tx` is an instance of `TransactionBuilder`
 - `service` is the service name to use for getting the derivation path, the curve and the hash algo
 - `index` is the number of transactions in the chain, to generate the actual and the next public key (see the cryptography section)
+- `suffix`: Additional information to add to a service derivation path (default to empty)
 
 Return is the signed `TransactionBuilder`. Notice that the function also sign the `TransactionBuilder` given in param, so getting the return is not mandatory
 
@@ -147,12 +148,13 @@ const index = archethic.transaction.getTransactionIndex(
 /*const signedTx =*/ keychain.buildTransaction(tx, "uco", index);
 ```
 
-#### deriveAddress(service, index)
+#### deriveAddress(service, index, suffix)
 
 Derive an address for the given service at the index given
 
 - `service`: Service name to identify the derivation path to use
 - `index`: Chain index to derive (default to 0)
+- `suffix`: Additional information to add to a service derivation path (default to empty)
 
 ```js
 import Archethic from "archethic";
@@ -164,12 +166,13 @@ const keychain = await archethic.account.getKeychain(accessKeychainSeed);
 const genesisUCOAddress = keychain.deriveAddress("uco", 0);
 ```
 
-#### deriveKeypair(service, index)
+#### deriveKeypair(service, index, suffix)
 
 Derive a keypair for the given service at the index given
 
 - `service`: Service name to identify the derivation path to use
 - `index`: Chain index to derive (default to 0)
+- `suffix`: Additional information to add to a service derivation path (default to empty)
 
 ```js
 import Archethic from "archethic";
