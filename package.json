@@ -3,12 +3,9 @@
     "version": "1.15.0",
     "description": "Archethic Javascript SDK",
     "main": "index.js",
-    "module": "dist/archethic-browser.mjs",
     "unpkg": "dist/archethic.js",
     "jsdelivr": "dist/archethic.js",
-    "browser": "dist/archethic.js",
     "type": "module",
-    "exports": "./dist/archethic.cjs",
     "scripts": {
         "test": "mocha --require @babel/register",
         "build": "node build.js"
