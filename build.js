@@ -18,13 +18,3 @@ esbuild.build({
     js: "Archethic = archethic.default; Archethic.Utils = archethic.Utils; Archethic.Crypto = archethic.Crypto;"
   }
 }).catch(() => process.exit(1))
-
-esbuild.build({
-  logLevel: "info",
-  entryPoints: ['index.js'],
-  bundle: true,
-  minify: false,
-  sourcemap: false,
-  format: 'cjs',
-  outfile: 'dist/archethic.cjs',
-}).catch(() => process.exit(1))
