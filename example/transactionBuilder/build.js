@@ -10,5 +10,4 @@ require('esbuild').build({
   define: {
     global: 'window'
   },
-  inject: ['./esbuild.inject.js'],
 }).catch(() => process.exit(1))

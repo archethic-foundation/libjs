@@ -1030,6 +1030,12 @@ cd example/transactionBuilder
 npm run start
 ```
 
+### Miscellaneous
+
+If you want to leverage React for your DApp, you have to rely on [react-app-rewired](https://www.npmjs.com/package/react-app-rewired) to avoid errors regarding NodeJS module not accessible in the Webpack build.
+
+You can see how resolve the issues from this [article](https://www.alchemy.com/blog/how-to-polyfill-node-core-modules-in-webpack-5)
+
 ## Licence
 
 AGPL3
