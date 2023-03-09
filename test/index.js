@@ -1,6 +1,6 @@
 import Archethic from "../index.js";
 import * as API from "../lib/api.js";
-import Endpoint from "../lib/endpoint.js";
+import { Endpoint } from "../lib/endpoint.js";
 
 import assert from "assert";
 import nock from "nock";

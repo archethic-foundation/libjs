@@ -1,4 +1,4 @@
-import Endpoint from "../lib/endpoint.js";
+import { Endpoint } from "../lib/endpoint.js";
 
 import assert from "assert";
 import { ArchethicRPCClient } from "../lib/api/wallet_rpc.js";
