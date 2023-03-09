@@ -952,6 +952,81 @@ archethic.rpcWallet.onconnectionstatechange(
 archethic.rpcWallet.unsubscribeconnectionstatechange()
 ```
 
+###  getAccounts()
+
+Reads a concise accounts list from ArchethicWallet.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.getAccounts().then(
+  (accounts) => {
+    accounts.forEach(account => {
+      console.log(`\t ${JSON.stringify(account)}`)
+    })
+  }
+)
+```
+
+###  onAccountChange(accountName, callback) : RpcSubscription
+
+Listens to an account's changes.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+
+
+const subscription = await archethic.rpcWallet.onAccountChange(
+  'account name',
+  (account) => {
+    console.log(JSON.stringify(account))
+  }
+)
+```
+
+###  unsubscribe(rpcSubscription)
+
+Stops any subscription to Wallet.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+const subscription // subscription from a previous call (onAccountChange for example)
+
+await archethic.rpcWallet.unsubscribe(subscription)
+```
+
 ###  sendTransaction(transaction)
 
 Asks ArchethicWallet to sign and send a transaction.
