@@ -833,6 +833,8 @@ query {
   }
 }
 `;
+
+const response = await archethic.network.rawGraphQLQuery(query);
 ```
 
 ### subscribeToOracleUpdates(handler)
