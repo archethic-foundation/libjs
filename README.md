@@ -808,6 +808,32 @@ console.log(oracleData)
   }
 }
 ```
+### rawGraphQLQuery(query)
+
+Query the GraphQL API of the node with a custom graphQL query that fits your needs.
+
+- `query`: The graphQL query to send to the node
+
+```js
+import Archethic from "archethic";
+
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect();
+
+const query = `
+query {
+  transactions(page:1) {
+    address
+    chainLength
+    data {
+      code
+    }
+    type
+    version
+  }
+}
+`;
+```
 
 ### subscribeToOracleUpdates(handler)
 
