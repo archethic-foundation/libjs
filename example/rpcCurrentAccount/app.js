@@ -1,7 +1,6 @@
 import Archethic from 'archethic';
 import { ArchethicRPCClient, ConnectionState, RpcRequestOrigin } from '../../lib/api/wallet_rpc';
 
-
 let accountChangesSubscription;
 
 ArchethicRPCClient.instance.setOrigin(new RpcRequestOrigin(
@@ -28,28 +27,16 @@ window.onload = function () {
   archethic = localArchethic
 }
 
-window.loadAccounts = function () {
-  console.log('Loading accounts')
-  archethic.rpcWallet.getAccounts().then(
-    (accounts) => {
-      const select = document.querySelector("select#account")
-      select.children = []
-      accounts.forEach(account => {
-        console.log(`\t ${JSON.stringify(account)}`)
-        const option = document.createElement("option");
-        option.text = `${account.name} : ${account.genesisAddress}`;
-        option.value = account.name;
-        select.appendChild(option);
-      })
-    }
-  )
+window.get_current_account = async () => {
+
+  const currentAccount = await archethic.rpcWallet.getCurrentAccount()
+
+  const currentAccountDataElement = document.querySelector("#get_account_data")
+  currentAccountDataElement.innerHTML = JSON.stringify(currentAccount)
 }
 
-window.subscribe_account = async () => {
-  const selectedAccount = document.querySelector("select#account").value
-
-  archethic.rpcWallet.onAccountChange(
-    selectedAccount,
+window.subscribe_current_account = async () => {
+  archethic.rpcWallet.onCurrentAccountChange(
     (account) => {
       const notifications = document.querySelector("#notifications")
 
@@ -66,7 +53,7 @@ window.subscribe_account = async () => {
   })
 }
 
-window.unsubscribe_account = async () => {
+window.unsubscribe_current_account = async () => {
   archethic.rpcWallet.unsubscribe(accountChangesSubscription)
 
   _updateSubscribeAccount(false)
@@ -77,12 +64,12 @@ function _updateSubscribeAccount(listening) {
 
   if (listening === true) {
     button.textContent = "Listening to account changes"
-    button.setAttribute('onclick', "unsubscribe_account()")
+    button.setAttribute('onclick', "unsubscribe_current_account()")
     button.setAttribute('class', "button")
     return
   }
 
   button.textContent = "Listen to account changes"
-  button.setAttribute('onclick', "subscribe_account()")
+  button.setAttribute('onclick', "subscribe_current_account()")
   button.setAttribute('class', "button is-warning")
 }
