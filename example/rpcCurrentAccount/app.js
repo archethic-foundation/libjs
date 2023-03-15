@@ -1,5 +1,5 @@
 import Archethic from 'archethic';
-import { ArchethicRPCClient, ConnectionState, RpcRequestOrigin } from '../../lib/api/wallet_rpc';
+import { ArchethicRPCClient, RpcRequestOrigin } from '../../lib/api/wallet_rpc';
 
 let accountChangesSubscription;
 
@@ -18,10 +18,6 @@ window.onload = function () {
     document
       .querySelector("#rpcConnectionStatus")
       .textContent = state
-
-    if (state === ConnectionState.Open) {
-      loadAccounts()
-    }
   })
   localArchethic.connect();
   archethic = localArchethic
@@ -60,7 +56,7 @@ window.unsubscribe_current_account = async () => {
 }
 
 function _updateSubscribeAccount(listening) {
-  const button = document.querySelector("#account_sub_button")
+  const button = document.querySelector("#current_account_sub_button")
 
   if (listening === true) {
     button.textContent = "Listening to account changes"
