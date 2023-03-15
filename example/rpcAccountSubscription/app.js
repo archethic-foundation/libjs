@@ -48,7 +48,7 @@ window.loadAccounts = function () {
 window.subscribe_account = async () => {
   const selectedAccount = document.querySelector("select#account").value
 
-  archethic.rpcWallet.onAccountChange(
+  archethic.rpcWallet.onAccountUpdate(
     selectedAccount,
     (account) => {
       const notifications = document.querySelector("#notifications")
