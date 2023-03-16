@@ -10,9 +10,45 @@ Official Archethic Javascript library for Node and Browser.
 npm install archethic
 ```
 
+
 ## Usage
 
+When it comes to private data manipulation, your application has two options : 
+  1. **Standalone :** store private keys on your own
+  2. **WalletRPC :** delegate sensitive operations to a Wallet application. (**recommended**, but still Alpha)
+
+The second option is strongly preferable : it preserves you from security problematics. When your web application needs to perform a sensitive operation (signing a Transaction, reading a Transaction secrets), it will asks **Archethic Wallet** application to perform it.
+That way, cryptographic secrets never leaks from the **Archethic Wallet**.
+
+The only requirement is user has to run an **Archethic Wallet** on its computer.
+
+> If your application does not perform any sensitive operation, **WalletRPC** is probably not necessary.
+
+### Using the network with WalletRPC
+
 This library aims to provide a easy way to interact with Archethic network.
+
+
+```js
+import Archethic from "archethic";
+
+const archethic = new Archethic("ws://localhost:12345") // Endpoint is the Archethic Wallet RPC server
+await archethic.connect(); // Connect to the endpoint to retrieve the nearest endpoints
+
+console.log(archethic)
+{
+   transaction: ..., // module to manage transaction
+   account: ..., // module to manage keychains and account
+   network: ..., // module to fetch information from the network
+   rpcWallet: ..., /// module to interact with WalletRPC
+}
+```
+
+
+### Using the network without WalletRPC
+
+This library aims to provide a easy way to interact with Archethic network.
+
 
 ```js
 import Archethic from "archethic";
@@ -32,6 +68,7 @@ console.log(archethic)
 **Note**: `archethic.connect()` is useful but not mandatory. In the case of using a website on HTTPS, making a query to a node through HTTP creates a **Mixed content** issue. To avoid this issue, we can use directly `new Archethic(httpsEndpoint)` which will be used as fallback.
 
 If you still want to use the nearest point while being on an HTTPS website, you could call a server endpoint to make the query for you.
+
 
 ## API
 
@@ -861,6 +898,178 @@ await archethic.network.subscribeToOracleUpdates(console.log)
 }
 ```
 
+  </details>
+
+
+  <details>
+  <summary>Wallet RPC</summary>
+
+### setOrigin(origin)
+
+Configures the DApp identity. DApp identity will be sent to WalletRPC.
+
+On operations requiring user's confirmation, that identity might be displayed.
+
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+```
+
+### onconnectionstatechange(callback)
+
+Listens to connection state changes between DApp and WalletRPC.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.onconnectionstatechange(
+  (rpcConnectionState) {
+    console.log(`WalletRPC connection state changed : ${rpcConnectionState}`)
+  }
+)
+
+// To stop listening :
+archethic.rpcWallet.unsubscribeconnectionstatechange()
+```
+
+###  getAccounts()
+
+Reads a concise accounts list from ArchethicWallet.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.getAccounts().then(
+  (accounts) => {
+    accounts.forEach(account => {
+      console.log(`\t ${JSON.stringify(account)}`)
+    })
+  }
+)
+```
+
+###  onAccountChange(accountName, callback) : RpcSubscription
+
+Listens to an account's changes.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+
+
+const subscription = await archethic.rpcWallet.onAccountChange(
+  'account name',
+  (account) => {
+    console.log(JSON.stringify(account))
+  }
+)
+```
+
+###  unsubscribe(rpcSubscription)
+
+Stops any subscription to Wallet.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+const subscription // subscription from a previous call (onAccountChange for example)
+
+await archethic.rpcWallet.unsubscribe(subscription)
+```
+
+###  sendTransaction(transaction)
+
+Asks ArchethicWallet to sign and send a transaction.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.sendTransaction(
+  {
+    type: "token",
+    version: 1,
+    data: {
+      content: "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
+      code: "",
+      ownerships:[],
+      ledger: {
+        uco: {
+          transfers: []
+        },
+        token: {
+          transfers: []
+        }
+      },
+      recipients: []
+    }
+  }
+).then((sendResult) => {
+  console.log(JSON.stringify(sendResult))
+  // { transactionAddress: "asdfasfsadf", nbConfirmations: 3, maxConfirmations: 3 }
+}).catch((sendError) => {
+  console.log(JSON.stringify(sendResult))
+})
+```
   </details>
 
   <details>
