@@ -1178,6 +1178,21 @@ const cipher = Crypto.ecEncrypt(
   "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
 );
 ```
+  
+### ecDecrypt(cipher, privateKey)
+
+Perform an ECIES decryption using a private key and an encrypted data
+
+- `cipher` Data to decrypt
+- `privateKey` Private key to derive a shared secret and for whom the content must be decrypted
+
+```js
+import { Crypto } from "archethic";
+const cipher = Crypto.ecDecrypt(
+  "dataToDecrypt",
+  "36f7753a63188eabaf4891c5724d346da58160cdc386ebf248603724d1796cd3"
+);
+```
 
 ### aesEncrypt(data, publicKey)
 
