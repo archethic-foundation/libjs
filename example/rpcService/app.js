@@ -30,8 +30,8 @@ window.onload = function () {
   archethic = localArchethic
 }
 
+
 window.generate_transaction = async () => {
-  console.log("here")
   document.querySelector("#transactionOutput").style.visibility = "hidden";
   const sendTxButton = document.querySelector("#tx_send_button")
   sendTxButton.disabled = true;
@@ -67,6 +67,20 @@ window.generate_transaction = async () => {
     document.querySelector("#error_reason").innerText = JSON.stringify(sendError);
   }).finally(() => {
     sendTxButton.disabled = false;
+  })
+};
+
+
+window.show_services = async () => {
+  let servicesContainer = document.getElementById("servicesList")
+  servicesContainer.innerHTML = ""
+  archethic.rpcWallet.getServices().then((services) => {
+    services.forEach((service) => {
+      console.log(service)
+      let serviceElement = document.createElement("li")
+      serviceElement.innerText = `curve: ${service.curve} - derivationPath: ${service.derivationPath} - hashAlgo: ${service.hashAlgo}`
+      servicesContainer.appendChild(serviceElement)
+    })
   })
 };
 
