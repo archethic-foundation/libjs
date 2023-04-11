@@ -1070,6 +1070,33 @@ archethic.rpcWallet.sendTransaction(
   console.log(JSON.stringify(sendResult))
 })
 ```
+
+### addService(name)
+Add a service in the keychain
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.addService("myService").then(
+        (result) => {
+            console.log(JSON.stringify(result))
+        }
+    )
+    .catch(
+        (error) => {
+            console.log(error)
+        }
+    )
+```
   </details>
 
   <details>
