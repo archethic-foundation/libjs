@@ -978,6 +978,32 @@ archethic.rpcWallet.getAccounts().then(
 )
 ```
 
+###  getServices()
+
+Reads a concise services list from ArchethicWallet. 
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.getServices().then(
+  (services) => {
+    accounts.forEach(service => {
+      console.log(`\t ${JSON.stringify(service)}`)
+    })
+  }
+)
+```
+
 ###  onAccountChange(accountName, callback) : RpcSubscription
 
 Listens to an account's changes.
