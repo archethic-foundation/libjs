@@ -1097,6 +1097,54 @@ archethic.rpcWallet.sendTransaction(
 })
 ```
 
+
+###  signTransactions([transaction])
+
+Asks ArchethicWallet to sign multiple transactions.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.signTransactions(
+  [{
+    type: "token",
+    version: 1,
+    data: {
+      content: "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
+      code: "",
+      ownerships:[],
+      ledger: {
+        uco: {
+          transfers: []
+        },
+        token: {
+          transfers: []
+        }
+      },
+      recipients: []
+    }
+  }]
+).then((signedResult) => {
+  console.log(JSON.stringify(signedResult))
+  signedResult.forEach((signedTransaction) => {
+    console.log(JSON.stringify(signedTransaction))
+    // {address: "000ef....", previousPublicKey: "00045b...", previousSignature: "000ef....", originSignature: "00045b..."}
+  })
+}).catch((signedError) => {
+  console.log(JSON.stringify(signedError))
+})
+```
+
 ### addService(name)
 Add a service in the keychain
 ```js
