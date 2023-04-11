@@ -1123,6 +1123,49 @@ archethic.rpcWallet.addService("myService").then(
         }
     )
 ```
+
+
+### keychainDeriveKeypair(serviceName, index, pathSuffix)
+Derive a keypair for the given service at the index given and get the public key
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.keychainDeriveKeypair("myService", 1, "suffix").then(
+        (result) => {
+            console.log(result['publicKey'])
+        })
+```
+
+### keychainDeriveAddress(serviceName, index, pathSuffix)
+Derive an address for the given service at the index given
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.keychainDeriveAddress("myService", 1, "suffix").then(
+        (result) => {
+            console.log(result['address'])
+        })
+```
   </details>
 
   <details>
