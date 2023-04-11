@@ -997,7 +997,7 @@ await archethic.rpcWallet.setOrigin(
 
 archethic.rpcWallet.getServices().then(
   (services) => {
-    accounts.forEach(service => {
+    services.forEach(service => {
       console.log(`\t ${JSON.stringify(service)}`)
     })
   }
