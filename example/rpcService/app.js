@@ -36,7 +36,6 @@ window.generate_transaction = async () => {
   const sendTxButton = document.querySelector("#tx_send_button")
   sendTxButton.disabled = true;
   let serviceName = document.getElementById("serviceName").value
-  console.log(serviceName)
   archethic.rpcWallet.addService(serviceName).then((sendResult) => {
     document.querySelector("#transactionOutput #address").innerText =
       sendResult.transactionAddress;
@@ -76,7 +75,6 @@ window.show_services = async () => {
   servicesContainer.innerHTML = ""
   archethic.rpcWallet.getServices().then((services) => {
     services.forEach((service) => {
-      console.log(service)
       let serviceElement = document.createElement("li")
       serviceElement.innerText = `curve: ${service.curve} - derivationPath: ${service.derivationPath} - hashAlgo: ${service.hashAlgo}`
       servicesContainer.appendChild(serviceElement)
