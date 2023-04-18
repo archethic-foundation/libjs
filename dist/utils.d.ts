@@ -1,0 +1,16 @@
+export declare const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
+export declare function wordArrayToUint8Array(wordArray: any): Uint8Array;
+export declare function isHex(str: string): boolean;
+export declare function hexToUint8Array(str: string): Uint8Array;
+export declare function maybeStringToUint8Array(str: string | Uint8Array): Uint8Array;
+export declare function maybeHexToUint8Array(str: string | Uint8Array): Uint8Array;
+export declare function maybeUint8ArrayToHex(bytes: Uint8Array | string): string;
+export declare function intToUint8Array(int: number): Uint8Array;
+export declare function bigIntToUint8Array(number: number): Uint8Array;
+export declare function uint8ArrayToInt(bytes: Uint8Array): number;
+export declare function toBigInt(number: number, decimal?: number): number;
+export declare function fromBigInt(number: number, decimal?: number): number;
+export declare function concatUint8Arrays(...arrays: Uint8Array[]): Uint8Array;
+export declare function uint8ArrayToHex(bytes: Uint8Array): string;
+export declare function base64url(arraybuffer: ArrayBuffer): string;
+export declare function toByteArray(number: number): Uint8Array;
