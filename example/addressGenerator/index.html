@@ -1,0 +1,42 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archethic - Address Generator</title>
+</head>
+<body>
+    <h1>Archethic Address generator</h1>
+
+    <label for="seed">Key generation seed</label> <br />
+    <input type="password" id="seed" placeholder="Enter your transaction seed" style="width: 500px" />
+    <br /><br />
+    <label for="index">Index of key to generate</label> <br />
+    <input type="number" min="0" value="0" id="index" />
+    <br />
+    <br />
+    <label for="curve">Elliptic curve</label>
+    <br />
+    <select id="curve">
+        <option value="ed25519" selected="selected">Ed25519</option>
+        <option value="P256">NIST-P256</option>
+        <option value="secp256k1">secp256k1</option>
+    </select>
+    <br />
+    <br />
+    <label for="hash">Hash algorithm</label>
+    <br />
+    <select id="hash">
+        <option value="sha256" selected="selected">SHA-256</option>
+        <option value="sha512">SHA-512</option>
+        <option value="sha3-256">SHA3-256</option>
+        <option value="sha3-512">SHA3-512</option>
+        <option value="blake2b">Blake2b</option>
+    </select>
+    <br />
+    <br />
+    <button type="button" onclick="generateAddress()">Generate address</button>
+    <p id="address"></p>
+
+    <script src="./dist/app.js"></script>
+</body>
+</html>

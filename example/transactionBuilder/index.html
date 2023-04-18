@@ -1,0 +1,145 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archethic - TransactionBuilder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <style>
+    body {
+      background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%)
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container margin-top-6">
+    <div class="columns">
+      <div class="column">
+        <h1 class="is-size-2 has-text-white">Archethic</h1>
+      </div>
+    </div>
+    <div class="columns">
+      <div class="column">
+        <h1 class="is-size-5 has-text-white">Transaction Builder</h1>
+      </div>
+    </div>
+
+    <div>
+      <form>
+        <div class="box">
+          <label for="endpoint">Node endpoint</label> <br /><br />
+          <input type="text" class="input" value="http://localhost:4000" id="endpoint" />
+        </div>
+        <div class="box">
+          <label for="seed">Enter your seed/passphrase</label>
+          <input type="password" class="input" id="seed" placeholder="TransactionChain seed" style="width: 500px"
+            onchange="getTransactionIndex()" />
+          <label for="curve">Cryptographic curve</label>
+          <select id="curve" class="select">
+            <option value="ed25519">Ed25519</option>
+            <option value="P256">P256</option>
+            <option value="secp256k1">secp256k1</option>
+          </select>
+        </div>
+        <div class="box">
+          <label for="index">Transaction index</label>
+          <input type="number" class="input" min=0 id="index" value="0" />
+        </div>
+        <div class="box">
+          <label for="type">Select a type of transaction</label>
+          <select id="type" class="select">
+            <option value="transfer">Transfer</option>
+            <option value="hosting">Hosting</option>
+            <option value="token">Token</option>
+            <option value="data">Data</option>
+            <option value="contract">Contract</option>
+            <option value="code_proposal">Code Proposal</option>
+            <option value="code_approval">Code Approval</option>
+          </select>
+        </div>
+        <div class="box">
+          <label for="code">Enter your smart contract code</label>
+          <br />
+          <textarea id="code" cols="40" rows="5" class="textarea" placeholder="Smart contract code"></textarea>
+        </div>
+        <div class="box">
+          <label for="code">Enter your content</label>
+          <br />
+          <textarea id="content" class="textarea" cols="40" rows="5" placeholder="Content to host"></textarea>
+          <br />
+          <br />
+
+          <input type="file" id="content_upload">
+          <label for="file">Choose a file</label>
+        </div>
+        <div class="box">
+          <button class="button" type="button" onClick="addOwnership()">Add an ownership</button>
+          <div id="ownerships"></div>
+        </div>
+        <div class="box">
+          <label for="amount_address">Add a UCO transfer</label>
+          <br />
+          <input type="text" class="input" id="amount_address" placeholder="Enter the address of the recipient"
+            style="width: 400px" />
+          <input type="text" class="input" id="uco_amount" placeholder="Enter the amount to send"
+            style="width: 200px" />
+          <button type="button" class="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
+          <br />
+          <select id="uco_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+        </div>
+        <div class="box">
+          <label for="token_amount_address">Add a Token transfer</label>
+          <br />
+          <input type="text" class="input" id="token_recipient_address" placeholder="Enter the address of the recipient"
+            style="width: 400px" />
+          <input type="text" class="input" id="token_amount" placeholder="Enter the amount to send"
+            style="width: 200px" />
+          <input type="text" class="input" id="token_address" placeholder="Enter the Token address to send"
+            style="width: 200px" />
+          <input type="text" class="input" id="token_id" placeholder="Enter the Token id to send" value="0"
+            style="width: 200px" />
+          <button class="button" type="button" onclick="onClickAddTokenTransfer()">Add Token Transfer</button>
+          <br />
+          <select id="token_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
+        </div>
+        <div class="box">
+          <label for="recipient">Add recipient</label>
+          <br />
+          <input type="text" class="input" id="recipient" placeholder="Enter the address of the recipient"
+            style="width: 400px" />
+          <button type="button" class="button" onclick="onClickAddRecipient()">Add recipient</button>
+          <br />
+          <select id="recipients" class="select" multiple="true" size="0" style="width: 500px;"></select>
+        </div>
+      </form>
+      <div class="column">
+        <button type="button" class="button is-warning" onclick="generate_transaction()">Generate</button>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <div class="box" style="visibility: hidden" id="transactionOutput">
+            <p>Transaction address: <span id="address"></span></p>
+            <p>Transaction fee: <span id="tx_fee"></span></p>
+            <button type="button" class="button" onclick="sendTransaction()">Send</button>
+            <p id="success" style="display: none">
+              Your transaction has been sent to the network. <br />
+              You can verify it at <a id="tx_address_link" target="_blank"></a>
+            </p>
+            <p id="confirmed" style="display: none">
+              Transaction confirmed with <span id="confirmations"></span> replications out of <span
+                id="maxConfirmations"></span>
+            </p>
+            <p id="transaction_error" style="display: none; color: red">
+              Error during transaction validation : <span id="error_reason"></span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script src="dist/app.js"></script>
+</body>
+
+</html>
