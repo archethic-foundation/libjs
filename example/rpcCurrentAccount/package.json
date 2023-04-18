@@ -1,5 +1,5 @@
 {
-  "name": "archethic-rpc-keychain",
+  "name": "archethic-rpc-keychain-current",
   "version": "0.1.0",
   "scripts": {
     "start": "npm run build && http-server",
