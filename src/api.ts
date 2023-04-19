@@ -9,7 +9,7 @@ import TransactionBuilder from "./transaction_builder.js";
  * @param query
  * @param endpoint
  */
-export async function rawGraphQLQuery(query: string, endpoint: string) {
+export async function rawGraphQLQuery(query: string, endpoint: string) : Promise<any> {
     const url = new URL("/api", endpoint);
     return fetch(url, {
         method: "POST",
