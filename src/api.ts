@@ -337,7 +337,7 @@ export async function subscribeToOracleUpdates(endpoint: string, handler: Functi
  * @param endpoint The Archethic API endpoint
  * @param address The address to get the balance of
  */
-export async function getBalance(endpoint: string, address: string | Uint8Array) {
+export async function getBalance(address: string | Uint8Array, endpoint: string) : Promise<Balance> {
 
     address = maybeUint8ArrayToHex(address)
 
