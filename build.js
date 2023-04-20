@@ -4,7 +4,7 @@ import esbuild from "esbuild"
 
 // browser bundle
 esbuild.build({
-  entryPoints: ['./src/index.js'],
+  entryPoints: ['./dist/index.js'],
   bundle: true,
   minify: true,
   sourcemap: true,

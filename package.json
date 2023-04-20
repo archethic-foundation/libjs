@@ -5,12 +5,15 @@
     "main": "./dist/index.js",
     "browser": "./dist/archethic.browser.js",
     "unpkg":  "dist/archethic.browser.js",
-    "jsdelivr": "./dist/index.js",
+    "jsdelivr": "./dist/archethic.browser.js",
     "types": "./dist/index.d.ts",
     "type": "module",
+    "files": ["dist"],
     "scripts": {
         "test": "jest",
-        "build": "tsc ; node build.js"
+        "build": "tsc && node build.js",
+        "prepublishOnly": "npm run build",
+        "postpublish": "rm -r dist"
     },
     "repository": {
         "type": "git",
