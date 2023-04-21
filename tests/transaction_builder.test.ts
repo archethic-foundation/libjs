@@ -513,4 +513,32 @@ describe("Transaction builder", () => {
 
         });
     });
+
+
+    describe("toRPC", () => {
+        it("should return a transaction object for RPC", () => {
+
+            const tx = new TransactionBuilder("transfer")
+                .addUCOTransfer(
+                    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+                    toBigInt(0.2193)
+                )
+                .setContent("Hello world")
+
+            const txRPC = tx.toRPC();
+
+            // @ts-ignore
+            expect(txRPC.version).toStrictEqual(1);
+            // @ts-ignore
+            expect(txRPC.data.ledger.uco.transfers[0]).toStrictEqual(
+                {
+                    to: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+                    amount: toBigInt(0.2193),
+                }
+            );
+            // @ts-ignore
+            expect(txRPC.data.content).toStrictEqual("Hello world");
+
+        });
+    });
 });
