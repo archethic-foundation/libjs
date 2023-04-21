@@ -320,12 +320,16 @@ export class ArchethicRPCClient {
      * ```
      * @returns {Promise<SignedTransaction[]>}
      */
-    async signTransactions(transactions: object[]) : Promise<SignedTransaction[]> {
+    async signTransactions(serviceName: string, pathSuffix: string, transactions: object[]) : Promise<SignedTransaction[]> {
         this._ensuresConnectionAlive();
 
         return this.client?.request(
             'signTransactions',
-            new RpcRequest(this.origin, transactions),
+            new RpcRequest(this.origin, {
+                serviceName: serviceName,
+                pathSuffix: pathSuffix,
+                transactions: transactions
+            }),
         ).then(
             (result) => {
                 return result['signedTxs'];
