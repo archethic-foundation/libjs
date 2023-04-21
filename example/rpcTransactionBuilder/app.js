@@ -1,4 +1,4 @@
-import Archethic, { Utils } from 'archethic';
+import Archethic, { Utils } from '../../dist/index';
 import { ArchethicRPCClient } from '../../dist/api/wallet_rpc';
 
 const { toBigInt } = Utils;
@@ -61,26 +61,7 @@ window.generate_transaction = async () => {
 
   let sendTxButton = document.querySelector("#tx_send_button")
   sendTxButton.disabled = true;
-  archethic.rpcWallet.sendTransaction(
-    {
-      type: document.querySelector("#type").value,
-      version: 1,
-      data: {
-        content: document.querySelector("#content").value,
-        code: document.querySelector("#code").value,
-        ownerships: ownerships,
-        recipients: recipients,
-        ledger: {
-          uco: {
-            transfers: ucoTransfers,
-          },
-          token: {
-            transfers: tokenTransfers,
-          }
-        }
-      }
-    }
-  ).then((sendResult) => {
+  archethic.rpcWallet.sendTransaction(txBuilder).then((sendResult) => {
     document.querySelector("#transactionOutput #address").innerText =
       sendResult.transactionAddress;
     document.querySelector("#transactionOutput").style.visibility = "visible";
