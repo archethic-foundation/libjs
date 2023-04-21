@@ -10,4 +10,4 @@ export declare function getToken(tokenAddress: string | Uint8Array, endpoint: st
 export declare function addOriginKey(originPublicKey: string, certificate: string, endpoint: string): Promise<any>;
 export declare function getOracleData(endpoint: string, timestamp?: undefined | number): Promise<OracleData>;
 export declare function subscribeToOracleUpdates(endpoint: string, handler: Function): Promise<any>;
-export declare function getBalance(endpoint: string, address: string | Uint8Array): Promise<Balance>;
+export declare function getBalance(address: string | Uint8Array, endpoint: string): Promise<Balance>;

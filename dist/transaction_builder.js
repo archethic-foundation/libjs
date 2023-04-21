@@ -2,17 +2,28 @@ import { Curve, HashAlgorithm, UserTypeTransaction } from "./types.js";
 import { bigIntToUint8Array, concatUint8Arrays, intToUint8Array, maybeHexToUint8Array, maybeStringToUint8Array, toByteArray, uint8ArrayToHex } from "./utils.js";
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 const VERSION = 1;
-const txTypes = {
-    "keychain_access": 254,
-    "keychain": 255,
-    "transfer": 253,
-    "hosting": 252,
-    "token": 251,
-    "data": 250,
-    "contract": 249,
-    "code_proposal": 5,
-    "code_approval": 6
-};
+function getTransactionTypeId(type) {
+    switch (type) {
+        case UserTypeTransaction.keychain:
+            return 255;
+        case UserTypeTransaction.keychain_access:
+            return 254;
+        case UserTypeTransaction.transfer:
+            return 253;
+        case UserTypeTransaction.hosting:
+            return 252;
+        case UserTypeTransaction.token:
+            return 251;
+        case UserTypeTransaction.data:
+            return 250;
+        case UserTypeTransaction.contract:
+            return 249;
+        case UserTypeTransaction.code_proposal:
+            return 5;
+        case UserTypeTransaction.code_approval:
+            return 6;
+    }
+}
 export default class TransactionBuilder {
     version;
     type;
@@ -175,7 +186,7 @@ export default class TransactionBuilder {
         const bufUCOTransferLength = Uint8Array.from(toByteArray(this.data.ledger.uco.transfers.length));
         const bufTokenTransferLength = Uint8Array.from(toByteArray(this.data.ledger.token.transfers.length));
         const bufRecipientLength = Uint8Array.from(toByteArray(this.data.recipients.length));
-        return concatUint8Arrays(intToUint8Array(VERSION), this.address, Uint8Array.from([txTypes[this.type]]), bufCodeSize, this.data.code, bufContentSize, this.data.content, Uint8Array.from([bufOwnershipLength.length]), bufOwnershipLength, concatUint8Arrays(...ownershipsBuffer), Uint8Array.from([bufUCOTransferLength.length]), bufUCOTransferLength, concatUint8Arrays(...ucoTransfersBuffers), Uint8Array.from([bufTokenTransferLength.length]), bufTokenTransferLength, concatUint8Arrays(...tokenTransfersBuffers), Uint8Array.from([bufRecipientLength.length]), bufRecipientLength, concatUint8Arrays(...this.data.recipients));
+        return concatUint8Arrays(intToUint8Array(VERSION), this.address, Uint8Array.from([getTransactionTypeId(this.type)]), bufCodeSize, this.data.code, bufContentSize, this.data.content, Uint8Array.from([bufOwnershipLength.length]), bufOwnershipLength, concatUint8Arrays(...ownershipsBuffer), Uint8Array.from([bufUCOTransferLength.length]), bufUCOTransferLength, concatUint8Arrays(...ucoTransfersBuffers), Uint8Array.from([bufTokenTransferLength.length]), bufTokenTransferLength, concatUint8Arrays(...tokenTransfersBuffers), Uint8Array.from([bufRecipientLength.length]), bufRecipientLength, concatUint8Arrays(...this.data.recipients));
     }
     toJSON() {
         return JSON.stringify({

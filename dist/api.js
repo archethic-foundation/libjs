@@ -263,7 +263,7 @@ export async function subscribeToOracleUpdates(endpoint, handler) {
         handler(result.data.oracleUpdate);
     });
 }
-export async function getBalance(endpoint, address) {
+export async function getBalance(address, endpoint) {
     address = maybeUint8ArrayToHex(address);
     const url = new URL("/api", endpoint);
     return fetch(url, {
