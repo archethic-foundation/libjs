@@ -19,18 +19,27 @@ import {deriveAddress, deriveKeyPair, sign} from "./crypto.js";
 
 const VERSION = 1
 
-const txTypes = {
-    //User based transaction types
-    "keychain_access": 254,
-    "keychain": 255,
-    "transfer": 253,
-    "hosting": 252,
-    "token": 251,
-    "data": 250,
-    "contract": 249,
-    //Network based transaction types
-    "code_proposal": 5,
-    "code_approval": 6
+function getTransactionTypeId(type:  UserTypeTransaction) : number {
+    switch (type) {
+        case UserTypeTransaction.keychain:
+            return 255
+        case UserTypeTransaction.keychain_access:
+            return 254
+        case UserTypeTransaction.transfer:
+            return 253
+        case UserTypeTransaction.hosting:
+            return 252
+        case UserTypeTransaction.token:
+            return 251
+        case UserTypeTransaction.data:
+            return 250
+        case UserTypeTransaction.contract:
+            return 249
+        case UserTypeTransaction.code_proposal:
+            return 5
+        case UserTypeTransaction.code_approval:
+            return 6
+    }
 }
 
 
@@ -333,7 +342,7 @@ export default class TransactionBuilder {
         return concatUint8Arrays(
             intToUint8Array(VERSION),
             this.address,
-            Uint8Array.from([txTypes[this.type]]),
+            Uint8Array.from([getTransactionTypeId(this.type)]),
             bufCodeSize,
             this.data.code,
             bufContentSize,
