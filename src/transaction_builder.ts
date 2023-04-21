@@ -366,7 +366,7 @@ export default class TransactionBuilder {
     /**
      * Convert the transaction in JSON
      */
-    toJSON() {
+    toJSON() : string {
         return JSON.stringify({
             version: this.version,
             address: uint8ArrayToHex(this.address),
@@ -412,5 +412,52 @@ export default class TransactionBuilder {
             previousSignature: uint8ArrayToHex(this.previousSignature),
             originSignature: this.originSignature && uint8ArrayToHex(this.originSignature)
         })
+    }
+
+    /**
+     * Convert the transaction in RPC transaction format
+     */
+    toRPC() : object {
+        return {
+            version: this.version,
+            type: this.type,
+            data: {
+                content: new TextDecoder().decode(this.data.content),
+                code: new TextDecoder().decode(this.data.code),
+                ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
+                    return {
+                        secret: uint8ArrayToHex(secret),
+                        // TODO : authorizedPublicKeys or authorizedKeys ?
+                        authorizedKeys: authorizedPublicKeys.map(({ publicKey, encryptedSecretKey }) => {
+                            return {
+                                publicKey: uint8ArrayToHex(publicKey),
+                                encryptedSecretKey: uint8ArrayToHex(encryptedSecretKey)
+                            }
+                        })
+                    }
+                }),
+                ledger: {
+                    uco: {
+                        transfers: this.data.ledger.uco.transfers.map((t) => {
+                            return {
+                                to: uint8ArrayToHex(t.to),
+                                amount: t.amount
+                            }
+                        })
+                    },
+                    token: {
+                        transfers: this.data.ledger.token.transfers.map((t) => {
+                            return {
+                                to: uint8ArrayToHex(t.to),
+                                amount: t.amount,
+                                tokenAddress: uint8ArrayToHex(t.tokenAddress),
+                                tokenId: t.tokenId
+                            }
+                        })
+                    }
+                },
+                recipients: this.data.recipients.map(uint8ArrayToHex)
+            },
+        }
     }
 }
