@@ -10,6 +10,8 @@ import {
     SignedTransaction
 } from "./types.js";
 import {Service} from "../types";
+import TransactionBuilder from "../transaction_builder";
+import {ExtendedTransactionBuilder} from "../transaction";
 
 export class RpcRequest {
     private origin: RpcRequestOrigin;
@@ -257,36 +259,14 @@ export class ArchethicRPCClient {
      * Signs and sends a Transaction in one of the Keychain services.
      *
      *
-     * @param {Object} transaction Object is a raw transaction. For example, a NFT creation transaction would look like this :
-     * ```
-     * {
-     *  "type": "token",
-     *  "version": 1,
-     *  "data": {
-     *  	"content": "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
-     *  	"code": "",
-     *  	"ownerships":[],
-     *  	"ledger": {
-     *  		"uco": {
-     *  			"transfers": []
-     *  		},
-     *  		"token": {
-     *  			"transfers": []
-     *  		}
-     *  	},
-     *  	"recipients": []
-     *  }
-     * }
-     * ```
-     *
+     * @param {TransactionBuilder | ExtendedTransactionBuilder} transaction Transaction to sign and send.
      * @returns {Promise<TransactionSuccess>}
      */
-    async sendTransaction(transaction: Object) : Promise<TransactionSuccess> {
+    async sendTransaction(transaction: TransactionBuilder | ExtendedTransactionBuilder) : Promise<TransactionSuccess> {
         this._ensuresConnectionAlive();
-
         return this.client?.request(
             'sendTransaction',
-            new RpcRequest(this.origin, transaction),
+            new RpcRequest(this.origin, transaction.toRPC()),
         )
             .then(
                 (result) => {
@@ -297,42 +277,29 @@ export class ArchethicRPCClient {
 
     /**
      * Signs many transactions.
-     * @param {Array<Object>} transactions where Object is a raw transaction. For example, a NFT creation transaction would look like this :
-     * ```
-     * {
-     *  "type": "token",
-     *  "version": 1,
-     *  "data": {
-     *  	"content": "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
-     *  	"code": "",
-     *  	"ownerships":[],
-     *  	"ledger": {
-     *  		"uco": {
-     *  			"transfers": []
-     *  		},
-     *  		"token": {
-     *  			"transfers": []
-     *  		}
-     *  	},
-     *  	"recipients": []
-     *  }
-     * }
-     * ```
+     * @param {TransactionBuilder[] | ExtendedTransactionBuilder[]} transactions Transactions to sign.
+     * @param {string} serviceName Name of the service to use.
+     * @param {string} pathSuffix Path suffix to use.
      * @returns {Promise<SignedTransaction[]>}
      */
-    async signTransactions(serviceName: string, pathSuffix: string, transactions: object[]) : Promise<SignedTransaction[]> {
+    async signTransactions(serviceName: string, pathSuffix: string, transactions: TransactionBuilder[] | ExtendedTransactionBuilder[]) : Promise<TransactionBuilder[] | ExtendedTransactionBuilder[]> {
         this._ensuresConnectionAlive();
-
-        return this.client?.request(
+        const txs = transactions.map((tx) => tx.toRPC())
+        return this.client!.request(
             'signTransactions',
             new RpcRequest(this.origin, {
                 serviceName: serviceName,
                 pathSuffix: pathSuffix,
-                transactions: transactions
+                transactions: txs
             }),
         ).then(
-            (result) => {
-                return result['signedTxs'];
+            (result: {signedTxs: SignedTransaction[]}) => {
+                for (let i = 0; i < result.signedTxs.length; i++) {
+                    transactions[i].setAddress(result.signedTxs[i].address);
+                    transactions[i].setPreviousSignatureAndPreviousPublicKey(result.signedTxs[i].previousSignature, result.signedTxs[i].previousPublicKey);
+                    transactions[i].setOriginSign(result.signedTxs[i].originSignature);
+                }
+                return transactions
             }
         )
     }
