@@ -978,6 +978,32 @@ archethic.rpcWallet.getAccounts().then(
 )
 ```
 
+###  getServices()
+
+Reads a concise services list from ArchethicWallet. 
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.getServices().then(
+  (services) => {
+    services.forEach(service => {
+      console.log(`\t ${JSON.stringify(service)}`)
+    })
+  }
+)
+```
+
 ###  onAccountChange(accountName, callback) : RpcSubscription
 
 Listens to an account's changes.
@@ -1069,6 +1095,124 @@ archethic.rpcWallet.sendTransaction(
 }).catch((sendError) => {
   console.log(JSON.stringify(sendResult))
 })
+```
+
+
+###  signTransactions([transaction])
+
+Asks ArchethicWallet to sign multiple transactions.
+
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.signTransactions(
+  [{
+    type: "token",
+    version: 1,
+    data: {
+      content: "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
+      code: "",
+      ownerships:[],
+      ledger: {
+        uco: {
+          transfers: []
+        },
+        token: {
+          transfers: []
+        }
+      },
+      recipients: []
+    }
+  }]
+).then((signedResult) => {
+  console.log(JSON.stringify(signedResult))
+  signedResult.forEach((signedTransaction) => {
+    console.log(JSON.stringify(signedTransaction))
+    // {address: "000ef....", previousPublicKey: "00045b...", previousSignature: "000ef....", originSignature: "00045b..."}
+  })
+}).catch((signedError) => {
+  console.log(JSON.stringify(signedError))
+})
+```
+
+### addService(name)
+Add a service in the keychain
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.addService("myService").then(
+        (result) => {
+            console.log(JSON.stringify(result))
+        }
+    )
+    .catch(
+        (error) => {
+            console.log(error)
+        }
+    )
+```
+
+
+### keychainDeriveKeypair(serviceName, index, pathSuffix)
+Derive a keypair for the given service at the index given and get the public key
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.keychainDeriveKeypair("myService", 1, "suffix").then(
+        (result) => {
+            console.log(result['publicKey'])
+        })
+```
+
+### keychainDeriveAddress(serviceName, index, pathSuffix)
+Derive an address for the given service at the index given
+```js
+import Archethic from "archethic"
+
+const archethic = new Archethic("ws://localhost:12345")
+await archethic.connect()
+
+await archethic.rpcWallet.setOrigin(
+  new RpcRequestOrigin(
+    "My DApp",
+    "https://great_app.com",
+  )
+)
+
+archethic.rpcWallet.keychainDeriveAddress("myService", 1, "suffix").then(
+        (result) => {
+            console.log(result['address'])
+        })
 ```
   </details>
 

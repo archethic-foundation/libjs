@@ -1,11 +1,11 @@
 import Archethic from 'archethic';
-import { ArchethicRPCClient, RpcRequestOrigin } from '../../lib/api/wallet_rpc';
+import { ArchethicRPCClient } from '../../dist/api/wallet_rpc';
 
 let accountChangesSubscription;
 
-ArchethicRPCClient.instance.setOrigin(new RpcRequestOrigin(
-  'Wallet RPC example application',
-))
+ArchethicRPCClient.instance.setOrigin(
+    {name: 'Wallet RPC example application'},
+)
 
 /** @type {Archethic | undefined} */
 let archethic = undefined

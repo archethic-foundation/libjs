@@ -30,7 +30,7 @@ window.generate_transaction = async () => {
   const index = document.querySelector("#index").value;
   const curve = document.querySelector("#curve").value;
   const endpoint = document.querySelector("#endpoint").value;
-  const originPrivateKey = Utils.originPrivateKey;
+  const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
 
   const code = document.querySelector("#code").value;
   if (code != "") {
@@ -64,7 +64,7 @@ window.generate_transaction = async () => {
     content = file_content;
   }
 
-  txBuilder = archethic.transaction
+  let txBuilder = archethic.transaction
     .new()
     .setType(document.querySelector("#type").value)
     .setCode(document.querySelector("#code").value)
@@ -75,7 +75,7 @@ window.generate_transaction = async () => {
     const cipher = Crypto.aesEncrypt(ownership.secret, secretKey);
 
     const authorizedKeys = ownership.authorizedKeys.map(function (authKey) {
-      encryptedSecretKey = Crypto.ecEncrypt(secretKey, authKey.publicKey);
+      let encryptedSecretKey = Crypto.ecEncrypt(secretKey, authKey.publicKey);
       return {
         publicKey: authKey.publicKey,
         encryptedSecretKey: encryptedSecretKey,
@@ -101,7 +101,7 @@ window.generate_transaction = async () => {
   recipients.forEach(function (recipient) {
     txBuilder.addRecipient(recipient);
   });
-
+  console.log(originPrivateKey)
   transaction = txBuilder
     .build(seed, parseInt(index), curve)
     .originSign(originPrivateKey);

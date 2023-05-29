@@ -1,12 +1,12 @@
 import Archethic from 'archethic';
-import { ArchethicRPCClient, ConnectionState, RpcRequestOrigin } from '../../lib/api/wallet_rpc';
-
+import { ArchethicRPCClient } from '../../dist/api/wallet_rpc';
+import { ConnectionState } from "../../dist/api/types"
 
 let accountChangesSubscription;
 
-ArchethicRPCClient.instance.setOrigin(new RpcRequestOrigin(
-  'Wallet RPC example application',
-))
+ArchethicRPCClient.instance.setOrigin({
+  name: 'Wallet RPC example application'
+})
 
 /** @type {Archethic | undefined} */
 let archethic = undefined
@@ -33,7 +33,7 @@ window.loadAccounts = function () {
   archethic.rpcWallet.getAccounts().then(
     (accounts) => {
       const select = document.querySelector("select#account")
-      select.children = []
+      select.innerHTML = ""
       accounts.forEach(account => {
         console.log(`\t ${JSON.stringify(account)}`)
         const option = document.createElement("option");

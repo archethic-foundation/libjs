@@ -1,5 +1,5 @@
 import Archethic, { Crypto, Utils } from 'archethic'
-import Keychain from '../../lib/keychain';
+import Keychain from '../../src/keychain';
 
 const { toBigInt } = Utils
 
@@ -214,8 +214,9 @@ function displayAuthorizedPublicKeys(keychain) {
 function displayServices(keychain) {
   let servicesContainer = document.querySelector("#services");
   servicesContainer.innerHTML = "";
-
-  for (service in keychain.services) {
+  console.log(keychain)
+  console.log(keychain.services)
+  for (let service in keychain.services) {
     const { derivationPath } = keychain.services[service];
 
     var serviceContainer = document.createElement("div");

@@ -1,9 +1,9 @@
 import { Crypto, Utils } from 'archethic'
 
 window.generatePublicKey = function() {
-  seed = document.querySelector("#seed").value;
-  index = parseInt(document.querySelector("#index").value);
-  curve = document.querySelector("#curve").value;
+  let seed = document.querySelector("#seed").value;
+  let index = parseInt(document.querySelector("#index").value);
+  let curve = document.querySelector("#curve").value;
 
   if (seed == "" || Number.isNaN(index)) {
     return;
