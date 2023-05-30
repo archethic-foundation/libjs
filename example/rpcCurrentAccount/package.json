@@ -6,7 +6,7 @@
     "build": "./build.js"
   },
   "dependencies": {
-    "archethic": "file:../.."
+    "archethic": "1.16.2"
   },
   "devDependencies": {
     "esbuild": "^0.15.8",
