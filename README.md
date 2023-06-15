@@ -1221,50 +1221,6 @@ archethic.rpcWallet.keychainDeriveAddress("myService", 1, "suffix").then(
 
   <br />
 
-It supports the Archethic Cryptography rules which are:
-
-- Algorithm identification: keys are prepared by metadata bytes to indicate the curve used and the origin of the generation, and hashes are prepended by a byte to indicate the hash algorithm used.
-  Those information help during the verification
-
-  ```
-
-      Ed25519   Software Origin   Public key
-        |          |              |
-        |  |-------|              |
-        |  |   |------------------|
-        |  |   |
-      <<0, 0, 106, 58, 193, 73, 144, 121, 104, 101, 53, 140, 125, 240, 52, 222, 35, 181,
-      13, 81, 241, 114, 227, 205, 51, 167, 139, 100, 176, 111, 68, 234, 206, 72>>
-
-       NIST P-256  Software Origin   Public key
-        |            |              |
-        |  |---------|              |
-        |  |  |----------------------
-        |  |  |
-      <<1, 0, 4, 7, 161, 46, 148, 183, 43, 175, 150, 13, 39, 6, 158, 100, 2, 46, 167,
-       101, 222, 82, 108, 56, 71, 28, 192, 188, 104, 154, 182, 87, 11, 218, 58, 107,
-      222, 154, 48, 222, 193, 176, 88, 174, 1, 6, 154, 72, 28, 217, 222, 147, 106,
-      73, 150, 128, 209, 93, 99, 115, 17, 39, 96, 47, 203, 104, 34>>
-  ```
-
-- Key derivation:
-
-  To be able to retrieve previous public key, the Archethic network designs the key derivation through a seed (passphrase) and an index(number of
-  previous public keys/transactions).
-  The procedure is described as follows:
-
-  ```
-  The seed generates a master key and an entropy used in the child keys generation.
-
-                                                             / (256 bytes) Next private key
-                        (256 bytes) Master key  --> HMAC-512
-                      /                              Key: Master entropy,
-    seed --> HASH-512                                Data: Master key + index)
-                      \
-                       (256 bytes) Master entropy
-
-  ```
-
 ### deriveKeyPair(seed, index, curve)
 
 It creates a new keypair into hexadecimal format
