@@ -1,11 +1,13 @@
 {
     "name": "archethic",
-    "version": "1.16.2",
+    "version": "1.17.0",
     "description": "Archethic Javascript SDK",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "type": "module",
-    "files": ["dist"],
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "test": "jest",
         "build": "tsc && node build.js",
