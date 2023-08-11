@@ -67,7 +67,15 @@ describe("Network", () => {
                 jsonrpc: "2.0",
                 result: { transaction_address: "transaction_address", status: "pending" }
             });
-        await archethic.network.addOriginKey("01103109", "mycertificate");
+        await archethic.network.addOriginKey("01103109", "mycertificate").then((response) => {
+            expect(response.transaction_address).toBe("transaction_address")
+            expect(response.status).toBe("pending")
+        })
+    });
+
+    it("should return type errors", async () => {
+        //@ts-ignore
+        expect(archethic.network.addOriginKey(1, "mycertificate")).rejects.toThrow(Error)
     });
 
     it("should call a contract function", async () => {
@@ -90,12 +98,15 @@ describe("Network", () => {
                 jsonrpc: "2.0",
                 result: 5
             });
-        await archethic.rpcNode?.callFunction("c", "fun", ["1", "2"]);
+        await archethic.rpcNode?.callFunction("c", "fun", ["1", "2"]).then((response) => {
+            expect(response).toBe(5)
+        })
     });
 
     it("estimate transaction fee", async () => {
         const tx = archethic.transaction.new()
         tx.setType("data")
+        tx.setContent("content")
         tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065")
 
 
@@ -124,7 +135,13 @@ describe("Network", () => {
                     }
                 }
             });
-        await archethic.rpcNode?.getTransactionFee(tx);
+        await archethic.rpcNode?.getTransactionFee(tx).then(
+            (result) => {
+                expect(result.fee).toBe(0.555)
+                expect(result.rates.eur).toBe(500000000)
+                expect(result.rates.usd).toBe(600000000)
+            }
+        )
     });
 
     it("should get last oracle data", async () => {
