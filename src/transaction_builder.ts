@@ -4,7 +4,8 @@ import {
     Curve,
     HashAlgorithm,
     TransactionData,
-    UserTypeTransaction
+    UserTypeTransaction,
+    TransactionRPC
 } from "./types.js"
 import {
     bigIntToUint8Array,
@@ -15,11 +16,11 @@ import {
     toByteArray,
     uint8ArrayToHex
 } from "./utils.js";
-import {deriveAddress, deriveKeyPair, sign} from "./crypto.js";
+import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 
 const VERSION = 1
 
-function getTransactionTypeId(type:  UserTypeTransaction) : number {
+function getTransactionTypeId(type: UserTypeTransaction): number {
     switch (type) {
         case UserTypeTransaction.keychain:
             return 255
@@ -117,7 +118,7 @@ export default class TransactionBuilder {
      * @param {string | Uint8Array} secret Secret encrypted (hexadecimal or binary buffer)
      * @param {AuthorizedKeyUserInput[]} authorizedKeys List of authorized keys
      */
-    addOwnership(secret: string | Uint8Array , authorizedKeys: AuthorizedKeyUserInput[]) {
+    addOwnership(secret: string | Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]) {
         secret = maybeStringToUint8Array(secret)
 
         if (!Array.isArray(authorizedKeys)) {
@@ -234,10 +235,10 @@ export default class TransactionBuilder {
      * @param {string} hashAlgo Hash algorithm to use for the address generation
      */
     build(seed: string | Uint8Array, index: number, curve: string = "ed25519", hashAlgo: string = "sha256") {
-        if(!Object.keys(Curve).includes(curve)) {
+        if (!Object.keys(Curve).includes(curve)) {
             throw "Curve must be one of " + Object.keys(Curve).map(t => `'${t}'`).join(", ")
         }
-        if(!Object.keys(HashAlgorithm).includes(hashAlgo)) {
+        if (!Object.keys(HashAlgorithm).includes(hashAlgo)) {
             throw "Hash algorithm must be one of " + Object.keys(HashAlgorithm).map(t => `'${t}'`).join(", ")
         }
 
@@ -316,14 +317,14 @@ export default class TransactionBuilder {
             )
         })
 
-        const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
+        const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
             return concatUint8Arrays(
                 transfer.to,
                 bigIntToUint8Array(transfer.amount)
             )
         })
 
-        const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
+        const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
             const bufTokenId = Uint8Array.from(toByteArray(transfer.tokenId))
             return concatUint8Arrays(
                 transfer.tokenAddress,
@@ -361,12 +362,61 @@ export default class TransactionBuilder {
             concatUint8Arrays(...this.data.recipients)
         )
     }
-
+    /**
+     * Convert the transaction to expected Node RPC format
+     */
+    toNodeRPC(): TransactionRPC {
+        return {
+            version: this.version,
+            address: uint8ArrayToHex(this.address),
+            type: this.type,
+            data: {
+                content: uint8ArrayToHex(this.data.content),
+                code: new TextDecoder().decode(this.data.code),
+                ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
+                    return {
+                        secret: uint8ArrayToHex(secret),
+                        // TODO : authorizedPublicKeys or authorizedKeys ?
+                        authorizedKeys: authorizedPublicKeys.map(({ publicKey, encryptedSecretKey }) => {
+                            return {
+                                publicKey: uint8ArrayToHex(publicKey),
+                                encryptedSecretKey: uint8ArrayToHex(encryptedSecretKey)
+                            }
+                        })
+                    }
+                }),
+                ledger: {
+                    uco: {
+                        transfers: this.data.ledger.uco.transfers.map((t) => {
+                            return {
+                                to: uint8ArrayToHex(t.to),
+                                amount: t.amount
+                            }
+                        })
+                    },
+                    token: {
+                        transfers: this.data.ledger.token.transfers.map((t) => {
+                            return {
+                                to: uint8ArrayToHex(t.to),
+                                amount: t.amount,
+                                tokenAddress: uint8ArrayToHex(t.tokenAddress),
+                                tokenId: t.tokenId
+                            }
+                        })
+                    }
+                },
+                recipients: this.data.recipients.map(uint8ArrayToHex)
+            },
+            previousPublicKey: uint8ArrayToHex(this.previousPublicKey),
+            previousSignature: uint8ArrayToHex(this.previousSignature),
+            originSignature: this.originSignature && uint8ArrayToHex(this.originSignature)
+        }
+    }
 
     /**
      * Convert the transaction in JSON
      */
-    toJSON() : string {
+    toJSON(): string {
         return JSON.stringify({
             version: this.version,
             address: uint8ArrayToHex(this.address),
@@ -417,7 +467,7 @@ export default class TransactionBuilder {
     /**
      * Convert the transaction in RPC transaction format
      */
-    toRPC() : object {
+    toRPC(): object {
         return {
             version: this.version,
             type: this.type,

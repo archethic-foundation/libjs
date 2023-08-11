@@ -1,3 +1,34 @@
+import { TransactionFee, TransactionRPC } from '../types'
+
+export type NodeRpcMethods = {
+    contract_fun(params: {
+        contract: string,
+        function: string,
+        args?: any[]
+    }): any,
+    estimate_transaction_fee(params: TransactionRPC): TransactionFee,
+    send_transaction(params: TransactionRPC): TransactionRpcResponse,
+    simulate_contract_execution(params: TransactionRPC): ContractSimulationResponse,
+    add_origin_key(params: AddOriginKeyRpc): TransactionRpcResponse
+}
+
+export type AddOriginKeyRpc = {
+    certificate: string,
+    origin_public_key: string,
+}
+
+export type TransactionRpcResponse = {
+    transaction_address: string,
+    status: string
+}
+
+export type ContractSimulationResponse = {
+    recipient_address: string,
+    valid: boolean,
+    error?: string
+}
+
+
 export enum ConnectionState {
     Closed = 'WalletRPCConnection_closed',
     Closing = 'WalletRPCConnection_closing',
