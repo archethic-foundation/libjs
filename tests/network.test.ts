@@ -1,5 +1,4 @@
-const nock = require("nock");
-
+import nock from "nock";
 import Archethic from "../src/index";
 import Network from "../src/network";
 
@@ -48,11 +47,9 @@ describe("Network", () => {
         expect(publicKey).toBe("publicKey");
     });
 
-    // TODO fix this test
     it("should add an origin key", async () => {
-        let id = undefined;
         nock("http://127.0.0.1:4000", {
-            headers: {
+            reqheaders: {
                 "content-type": "application/json",
             }
         })
@@ -71,6 +68,63 @@ describe("Network", () => {
                 result: { transaction_address: "transaction_address", status: "pending" }
             });
         await archethic.network.addOriginKey("01103109", "mycertificate");
+    });
+
+    it("should call a contract function", async () => {
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "contract_fun",
+                    "params": { contract: "c", function: "fun", args: ["1", "2"] }
+                }
+            )
+
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: 5
+            });
+        await archethic.rpcNode?.callFunction("c", "fun", ["1", "2"]);
+    });
+
+    it("estimate transaction fee", async () => {
+        const tx = archethic.transaction.new()
+        tx.setType("data")
+        tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065")
+
+
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "estimate_transaction_fee",
+                    "params": tx.toNodeRPC()
+                }
+            )
+
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: {
+                    fee: 0.555,
+                    rates: {
+                        eur: 500000000,
+                        usd: 600000000,
+                    }
+                }
+            });
+        await archethic.rpcNode?.getTransactionFee(tx);
     });
 
     it("should get last oracle data", async () => {

@@ -1,3 +1,4 @@
+import fetch from "cross-fetch";
 import { JSONRPCClient, TypedJSONRPCClient } from "json-rpc-2.0";
 import { AddOriginKeyRpc, NodeRpcMethods, TransactionRpcResponse, ContractSimulationResponse } from "./types";
 import Archethic from "..";
