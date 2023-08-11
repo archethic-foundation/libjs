@@ -6,8 +6,8 @@ import Network from "../src/network";
 let archethic: Archethic;
 
 describe("Network", () => {
-    beforeAll(async () => {
-        nock("http://localhost:4000", {})
+    beforeEach(async () => {
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     nearestEndpoints {
@@ -18,16 +18,17 @@ describe("Network", () => {
             })
             .reply(200, {
                 data: {
-                    nearestEndpoints: [{ ip: "localhost", port: 4000 }],
+                    nearestEndpoints: [{ ip: "127.0.0.1", port: 4000 }],
                 },
             });
 
-        archethic = new Archethic("http://localhost:4000");
+        archethic = new Archethic("http://127.0.0.1:4000");
+
         await archethic.connect();
     });
 
     it("should list the storage nonce public key", async () => {
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     sharedSecrets {
@@ -43,25 +44,37 @@ describe("Network", () => {
                 },
             });
 
-        const network = new Network(archethic);
-        const publicKey = await network.getStorageNoncePublicKey();
+        const publicKey = await archethic.network.getStorageNoncePublicKey();
         expect(publicKey).toBe("publicKey");
     });
 
+    // TODO fix this test
     it("should add an origin key", async () => {
-        nock("http://localhost:4000", {})
-            .post("/api/origin_key", {
-                origin_public_key: "01103109",
-                certificate: "mycertificate",
-            })
-            .reply(201, { transactionAddress: "addr", status: "pending" });
+        let id = undefined;
+        nock("http://127.0.0.1:4000", {
+            headers: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "add_origin_key",
+                    "params": { "certificate": "mycertificate", "origin_public_key": "01103109" }
+                }
+            )
 
-        const network = new Network(archethic);
-        await network.addOriginKey("01103109", "mycertificate");
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: { transaction_address: "transaction_address", status: "pending" }
+            });
+        await archethic.network.addOriginKey("01103109", "mycertificate");
     });
 
     it("should get last oracle data", async () => {
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     oracleData {
@@ -89,6 +102,8 @@ describe("Network", () => {
                 },
             });
 
+
+
         const network = new Network(archethic);
         const {
             services: {
@@ -97,10 +112,10 @@ describe("Network", () => {
         } = await network.getOracleData();
 
         expect(eurPrice).toBe(0.2);
-     });
+    });
 
     it("should get oracle data at time", async () => {
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     oracleData(timestamp: 102910921) {
@@ -149,7 +164,7 @@ describe("Network", () => {
             type: 'fungible'
         }
 
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     token(address: "1234") {
