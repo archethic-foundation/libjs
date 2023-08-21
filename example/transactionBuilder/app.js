@@ -50,7 +50,7 @@ window.generate_transaction = async () => {
     ].authorizedKeys.findIndex(function (authKey) {
       return authKey.publicKey == publicKey;
     });
-    
+
     if (authorizedKeyIndex == -1) {
       alert(
         "You need to create an ownership with the transaction seed as secret and authorize node public key to let nodes generate new transaction from your smart contract"
@@ -101,7 +101,7 @@ window.generate_transaction = async () => {
   recipients.forEach(function (recipient) {
     txBuilder.addRecipient(recipient);
   });
-  console.log(originPrivateKey)
+
   transaction = txBuilder
     .build(seed, parseInt(index), curve)
     .originSign(originPrivateKey);
@@ -246,8 +246,8 @@ window.sendTransaction = async () => {
         .setAttribute(
           "href",
           endpoint +
-            "/explorer/transaction/" +
-            Utils.uint8ArrayToHex(transaction.address)
+          "/explorer/transaction/" +
+          Utils.uint8ArrayToHex(transaction.address)
         );
     })
     .send();

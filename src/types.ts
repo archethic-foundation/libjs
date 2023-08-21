@@ -110,7 +110,7 @@ type UcoTransfer = {
 }
 
 export type Recipient = {
-    to: Uint8Array,
+    address: Uint8Array,
     action?: string,
     args?: any[]
 }
@@ -212,7 +212,7 @@ type OwnershipRPC = {
 };
 
 type RecipientRPC = {
-    to: string;
+    address: string;
     action?: string;
     args?: any[];
 };

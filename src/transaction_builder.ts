@@ -195,9 +195,9 @@ export default class TransactionBuilder {
      * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
      */
     addRecipient(to: string | Uint8Array) {
-        to = maybeHexToUint8Array(to)
+        const address = maybeHexToUint8Array(to)
 
-        this.data.recipients.push({ to })
+        this.data.recipients.push({ address })
         return this
     }
 
@@ -208,9 +208,9 @@ export default class TransactionBuilder {
      * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
      */
     addRecipientForNamedAction(to: string | Uint8Array, action: string, args: any[]) {
-        to = maybeHexToUint8Array(to)
+        const address = maybeHexToUint8Array(to)
 
-        this.data.recipients.push({ to, action, args })
+        this.data.recipients.push({ address, action, args })
         return this
     }
 
@@ -348,13 +348,13 @@ export default class TransactionBuilder {
             )
         })
 
-        const recipientsBuffer = this.data.recipients.map(({ to, action, args }) => {
+        const recipientsBuffer = this.data.recipients.map(({ address, action, args }) => {
             if (action == undefined || args == undefined) {
                 return concatUint8Arrays(
                     // 0 = unnamed action
                     Uint8Array.from([0]),
                     // address
-                    to)
+                    address)
             } else {
                 const jsonArgs = JSON.stringify(args)
                 const bufJsonLength = toByteArray(jsonArgs.length)
@@ -363,7 +363,7 @@ export default class TransactionBuilder {
                     // 1 = named action
                     Uint8Array.from([1]),
                     // address
-                    to,
+                    address,
                     // action
                     Uint8Array.from([action.length]),
                     new TextEncoder().encode(action),
@@ -448,9 +448,9 @@ export default class TransactionBuilder {
                         })
                     }
                 },
-                recipients: this.data.recipients.map(({ to, action, args }) => {
+                recipients: this.data.recipients.map(({ address, action, args }) => {
                     return {
-                        to: uint8ArrayToHex(to),
+                        address: uint8ArrayToHex(address),
                         action: action,
                         args: args
                     }
@@ -514,9 +514,9 @@ export default class TransactionBuilder {
                         })
                     }
                 },
-                recipients: this.data.recipients.map(({ to, action, args }) => {
+                recipients: this.data.recipients.map(({ address, action, args }) => {
                     return {
-                        to: uint8ArrayToHex(to),
+                        address: uint8ArrayToHex(address),
                         action: action,
                         args: args
                     }
