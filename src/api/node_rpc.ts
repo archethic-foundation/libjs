@@ -16,15 +16,15 @@ export class NodeRPCClient {
 
   /**
      *
-     * @param {string} contract
-     * @param {string} function_name
-     * @param {any[]}   args
+     * @param {string} contractAddress
+     * @param {string} functionName
+     * @param {any[]}  args
      * @returns {Promise<void>}
      */
-  async callFunction(contract: string, function_name: string, args: any[]) {
+  async callFunction(contractAddress: string, functionName: string, args: any[]) {
     return this.client.request("contract_fun", {
-      contract,
-      function: function_name,
+      contract: contractAddress,
+      function: functionName,
       args
     });
   }
