@@ -1,5 +1,5 @@
 import TransactionBuilder from "../src/transaction_builder";
-import {deriveAddress, deriveKeyPair, sign, verify} from "../src/crypto"
+import { deriveAddress, deriveKeyPair, sign, verify } from "../src/crypto"
 import {
     bigIntToUint8Array,
     concatUint8Arrays,
@@ -8,7 +8,7 @@ import {
     toBigInt,
     uint8ArrayToHex,
 } from "../src/utils";
-import {Curve} from "../src/types";
+import { Curve } from "../src/types";
 
 // all assert should be transformed to jest expect
 describe("Transaction builder", () => {
@@ -50,7 +50,8 @@ describe("Transaction builder", () => {
             const tx = new TransactionBuilder("transfer").setCode(
                 "my smart contract code"
             );
-            expect(new TextDecoder().decode(tx.data.code)).toBe("my smart contract code"); });
+            expect(new TextDecoder().decode(tx.data.code)).toBe("my smart contract code");
+        });
     });
 
     describe("setContent", () => {
@@ -183,7 +184,7 @@ describe("Transaction builder", () => {
 
             const expected_binary = concatUint8Arrays(
                 //Version
-                intToUint8Array(1),
+                intToUint8Array(2),
                 tx.address,
                 Uint8Array.from([253]),
                 //Code size
@@ -241,9 +242,143 @@ describe("Transaction builder", () => {
                 Uint8Array.from([1]),
                 // Nb of recipients
                 Uint8Array.from([1]),
+                // 0 = unnamed recipient
+                Uint8Array.from([0]),
                 hexToUint8Array(
                     "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
                 ),
+            );
+            expect(payload).toEqual(expected_binary);
+
+        });
+
+        it("should generate binary encoding of the transaction before signing with named action", () => {
+            const code = `
+              condition inherit: [
+                uco_transferred: 0.020
+              ]
+
+              actions triggered by: transaction do
+                  set_type transfer
+                  add_uco_ledger to: "000056E763190B28B4CF9AAF3324CF379F27DE9EF7850209FB59AA002D71BA09788A", amount: 0.020
+              end
+            `;
+
+            const content =
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet leo egestas, lobortis lectus a, dignissim orci.";
+
+            const secret = "mysecret";
+
+            const tx = new TransactionBuilder("transfer")
+                .addOwnership(secret, [
+                    {
+                        publicKey:
+                            "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+                        encryptedSecretKey:
+                            "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88",
+                    },
+                ])
+                .addUCOTransfer(
+                    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+                    toBigInt(0.202)
+                )
+                .addTokenTransfer(
+                    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+                    toBigInt(100),
+                    "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+                )
+                .setCode(code)
+                .setContent(content)
+                .addRecipientForNamedAction(
+                    "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88",
+                    "vote_for_mayor",
+                    ["Ms. Smith"]
+                );
+
+            const keypair = deriveKeyPair("seed", 0);
+
+            tx.address = deriveAddress("seed", 1);
+            tx.previousPublicKey = keypair.publicKey;
+
+            const payload = tx.previousSignaturePayload();
+
+            const expected_binary = concatUint8Arrays(
+                //Version
+                intToUint8Array(2),
+                tx.address,
+                Uint8Array.from([253]),
+                //Code size
+                intToUint8Array(code.length),
+                new TextEncoder().encode(code),
+                //Content size
+                intToUint8Array(content.length),
+                new TextEncoder().encode(content),
+                // Nb of byte to encode nb of ownerships
+                Uint8Array.from([1]),
+                //Nb of ownerships
+                Uint8Array.from([1]),
+                //Secret size
+                intToUint8Array(secret.length),
+                new TextEncoder().encode(secret),
+                // Nb of byte to encode nb of authorized keys
+                Uint8Array.from([1]),
+                // Nb of authorized keys
+                Uint8Array.from([1]),
+                // Authorized keys encoding
+                concatUint8Arrays(
+                    hexToUint8Array(
+                        "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
+                    ),
+                    hexToUint8Array(
+                        "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+                    ),
+                ),
+                // Nb of byte to encode nb of uco transfers
+                Uint8Array.from([1]),
+                // Nb of uco transfers
+                Uint8Array.from([1]),
+                concatUint8Arrays(
+                    hexToUint8Array(
+                        "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
+                    ),
+                    bigIntToUint8Array(toBigInt(0.202)),
+                ),
+                // Nb of byte to encode nb of Token transfers
+                Uint8Array.from([1]),
+                // Nb of Token transfers
+                Uint8Array.from([1]),
+                concatUint8Arrays(
+                    hexToUint8Array(
+                        "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+                    ),
+                    hexToUint8Array(
+                        "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
+                    ),
+                    bigIntToUint8Array(toBigInt(100)),
+                    Uint8Array.from([1]),
+                    Uint8Array.from([0]),
+                ),
+                // Nb of byte to encode nb of recipients
+                Uint8Array.from([1]),
+                // Nb of recipients
+                Uint8Array.from([1]),
+                // 1 = named recipient
+                Uint8Array.from([1]),
+                hexToUint8Array(
+                    "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+                ),
+                // action
+                // action size on 1 byte
+                Uint8Array.from([14]),
+                // action value
+                new TextEncoder().encode("vote_for_mayor"),
+                // args
+                // args size bytes
+                Uint8Array.from([1]),
+                // args size
+                Uint8Array.from([13]),
+                // args value
+                new TextEncoder().encode("[\"Ms. Smith\"]"),
             );
             expect(payload).toEqual(expected_binary);
 
@@ -365,7 +500,7 @@ describe("Transaction builder", () => {
             const payload = tx.originSignaturePayload();
             const expected_binary = concatUint8Arrays(
                 //Version
-                intToUint8Array(1),
+                intToUint8Array(2),
                 tx.address,
                 Uint8Array.from([253]),
                 //Code size
@@ -429,6 +564,8 @@ describe("Transaction builder", () => {
                 Uint8Array.from([1]),
                 // Nb of recipients
                 Uint8Array.from([1]),
+                // 0 = unnamed recipient
+                Uint8Array.from([0]),
                 hexToUint8Array(
                     "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
                 ),
@@ -528,7 +665,7 @@ describe("Transaction builder", () => {
             const txRPC = tx.toRPC();
 
             // @ts-ignore
-            expect(txRPC.version).toStrictEqual(1);
+            expect(txRPC.version).toStrictEqual(2);
             // @ts-ignore
             expect(txRPC.data.ledger.uco.transfers[0]).toStrictEqual(
                 {

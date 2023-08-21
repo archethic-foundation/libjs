@@ -395,9 +395,14 @@ Add a token transfer to the `data.ledger.token.transfers` section of the transac
 
 #### addRecipient(to)
 
-Add a recipient (for non UCO transfers, ie. smart contract interaction) to the `data.recipient` section of the transaction
+ Adds a recipient to call the smart contract's "transaction" action.
+  - `to` is the contract's address in hexadecimal or Uint8Array
 
-- `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient)
+#### AddRecipientForNamedAction(to, action, args)
+  Adds a recipient to call a specific smart contract's action.
+  - `to` is the contract's address in hexadecimal or Uint8Array
+  - `action` is the name of the action
+  - `args` is the list of arguments for the action (must contain only JSON valid data)
 
 #### build(seed, index, curve, hashAlgo)
 

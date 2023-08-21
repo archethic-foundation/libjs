@@ -248,11 +248,6 @@ export class ArchethicRPCClient {
             'getEndpoint',
             new RpcRequest(this.origin)
         )
-            .then(
-                (value) => {
-                    return value;
-                }
-            )
     }
 
     /**
@@ -266,13 +261,8 @@ export class ArchethicRPCClient {
         this._ensuresConnectionAlive();
         return this.client?.request(
             'sendTransaction',
-            new RpcRequest(this.origin, transaction.toRPC()),
+            new RpcRequest(this.origin, transaction.toRPC())
         )
-            .then(
-                (result) => {
-                    return result;
-                }
-            )
     }
 
     /**
@@ -316,10 +306,6 @@ export class ArchethicRPCClient {
         return this.client?.request(
             'addService',
             new RpcRequest(this.origin, { name: name })
-        ).then(
-            (result) => {
-                return result
-            }
         )
     }
 
@@ -352,10 +338,6 @@ export class ArchethicRPCClient {
         return this.client?.request(
             'getCurrentAccount',
             new RpcRequest(this.origin),
-        ).then(
-            (result) => {
-                return result
-            }
         )
     }
 
@@ -395,10 +377,6 @@ export class ArchethicRPCClient {
                 index: index,
                 pathSuffix: pathSuffix
             })
-        ).then(
-            (result) => {
-                return result
-            }
         )
     }
 
@@ -420,10 +398,6 @@ export class ArchethicRPCClient {
                 index: index,
                 pathSuffix: pathSuffix
             })
-        ).then(
-            (result) => {
-                return result
-            }
         )
     }
 

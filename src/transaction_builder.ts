@@ -18,7 +18,7 @@ import {
 } from "./utils.js";
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 
-const VERSION = 1
+const VERSION = 2
 
 function getTransactionTypeId(type: UserTypeTransaction): number {
     switch (type) {
@@ -197,7 +197,20 @@ export default class TransactionBuilder {
     addRecipient(to: string | Uint8Array) {
         to = maybeHexToUint8Array(to)
 
-        this.data.recipients.push(to)
+        this.data.recipients.push({ to })
+        return this
+    }
+
+    /**
+     * Add recipient to the transaction (with a named action)
+     * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
+     * @param {string} action The named action
+     * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
+     */
+    addRecipientForNamedAction(to: string | Uint8Array, action: string, args: any[]) {
+        to = maybeHexToUint8Array(to)
+
+        this.data.recipients.push({ to, action, args })
         return this
     }
 
@@ -299,7 +312,7 @@ export default class TransactionBuilder {
 
         const ownershipsBuffer = this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
 
-            const bufAuthKeyLength = Uint8Array.from(toByteArray(authorizedPublicKeys.length))
+            const bufAuthKeyLength = toByteArray(authorizedPublicKeys.length)
             const authorizedKeysBuffer = [Uint8Array.from([bufAuthKeyLength.length]), bufAuthKeyLength]
 
             // Sort authorized public key by alphabethic order
@@ -325,7 +338,7 @@ export default class TransactionBuilder {
         })
 
         const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
-            const bufTokenId = Uint8Array.from(toByteArray(transfer.tokenId))
+            const bufTokenId = toByteArray(transfer.tokenId)
             return concatUint8Arrays(
                 transfer.tokenAddress,
                 transfer.to,
@@ -335,10 +348,38 @@ export default class TransactionBuilder {
             )
         })
 
-        const bufOwnershipLength = Uint8Array.from(toByteArray(this.data.ownerships.length))
-        const bufUCOTransferLength = Uint8Array.from(toByteArray(this.data.ledger.uco.transfers.length))
-        const bufTokenTransferLength = Uint8Array.from(toByteArray(this.data.ledger.token.transfers.length))
-        const bufRecipientLength = Uint8Array.from(toByteArray(this.data.recipients.length))
+        const recipientsBuffer = this.data.recipients.map(({ to, action, args }) => {
+            if (action == undefined || args == undefined) {
+                return concatUint8Arrays(
+                    // 0 = unnamed action
+                    Uint8Array.from([0]),
+                    // address
+                    to)
+            } else {
+                const jsonArgs = JSON.stringify(args)
+                const bufJsonLength = toByteArray(jsonArgs.length)
+
+                return concatUint8Arrays(
+                    // 1 = named action
+                    Uint8Array.from([1]),
+                    // address
+                    to,
+                    // action
+                    Uint8Array.from([action.length]),
+                    new TextEncoder().encode(action),
+                    // args
+                    Uint8Array.from([bufJsonLength.length]),
+                    bufJsonLength,
+                    new TextEncoder().encode(jsonArgs),
+                )
+
+            }
+        })
+
+        const bufOwnershipLength = toByteArray(this.data.ownerships.length)
+        const bufUCOTransferLength = toByteArray(this.data.ledger.uco.transfers.length)
+        const bufTokenTransferLength = toByteArray(this.data.ledger.token.transfers.length)
+        const bufRecipientLength = toByteArray(this.data.recipients.length)
 
         return concatUint8Arrays(
             intToUint8Array(VERSION),
@@ -350,20 +391,22 @@ export default class TransactionBuilder {
             this.data.content,
             Uint8Array.from([bufOwnershipLength.length]),
             bufOwnershipLength,
-            concatUint8Arrays(...ownershipsBuffer),
+            ...ownershipsBuffer,
             Uint8Array.from([bufUCOTransferLength.length]),
             bufUCOTransferLength,
-            concatUint8Arrays(...ucoTransfersBuffers),
+            ...ucoTransfersBuffers,
             Uint8Array.from([bufTokenTransferLength.length]),
             bufTokenTransferLength,
-            concatUint8Arrays(...tokenTransfersBuffers),
+            ...tokenTransfersBuffers,
             Uint8Array.from([bufRecipientLength.length]),
             bufRecipientLength,
-            concatUint8Arrays(...this.data.recipients)
+            ...recipientsBuffer
         )
     }
+
     /**
-     * Convert the transaction to expected Node RPC format
+     * JSON RPC API SEND_TRANSACTION
+     * content is hexadecimal
      */
     toNodeRPC(): TransactionRPC {
         return {
@@ -405,7 +448,13 @@ export default class TransactionBuilder {
                         })
                     }
                 },
-                recipients: this.data.recipients.map(uint8ArrayToHex)
+                recipients: this.data.recipients.map(({ to, action, args }) => {
+                    return {
+                        to: uint8ArrayToHex(to),
+                        action: action,
+                        args: args
+                    }
+                })
             },
             previousPublicKey: uint8ArrayToHex(this.previousPublicKey),
             previousSignature: uint8ArrayToHex(this.previousSignature),
@@ -414,58 +463,17 @@ export default class TransactionBuilder {
     }
 
     /**
-     * Convert the transaction in JSON
+     * REST API (deprecated, replaced by JSON RPC API)
+     * content is hexadecimal
      */
     toJSON(): string {
-        return JSON.stringify({
-            version: this.version,
-            address: uint8ArrayToHex(this.address),
-            type: this.type,
-            data: {
-                content: uint8ArrayToHex(this.data.content),
-                code: new TextDecoder().decode(this.data.code),
-                ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
-                    return {
-                        secret: uint8ArrayToHex(secret),
-                        // TODO : authorizedPublicKeys or authorizedKeys ?
-                        authorizedKeys: authorizedPublicKeys.map(({ publicKey, encryptedSecretKey }) => {
-                            return {
-                                publicKey: uint8ArrayToHex(publicKey),
-                                encryptedSecretKey: uint8ArrayToHex(encryptedSecretKey)
-                            }
-                        })
-                    }
-                }),
-                ledger: {
-                    uco: {
-                        transfers: this.data.ledger.uco.transfers.map((t) => {
-                            return {
-                                to: uint8ArrayToHex(t.to),
-                                amount: t.amount
-                            }
-                        })
-                    },
-                    token: {
-                        transfers: this.data.ledger.token.transfers.map((t) => {
-                            return {
-                                to: uint8ArrayToHex(t.to),
-                                amount: t.amount,
-                                tokenAddress: uint8ArrayToHex(t.tokenAddress),
-                                tokenId: t.tokenId
-                            }
-                        })
-                    }
-                },
-                recipients: this.data.recipients.map(uint8ArrayToHex)
-            },
-            previousPublicKey: uint8ArrayToHex(this.previousPublicKey),
-            previousSignature: uint8ArrayToHex(this.previousSignature),
-            originSignature: this.originSignature && uint8ArrayToHex(this.originSignature)
-        })
+        return JSON.stringify(this.toNodeRPC())
     }
 
     /**
-     * Convert the transaction in RPC transaction format
+     * Wallet RPC API
+     * content is normal
+     * only transaction payload (no address/public key/signatures)
      */
     toRPC(): object {
         return {
@@ -506,7 +514,13 @@ export default class TransactionBuilder {
                         })
                     }
                 },
-                recipients: this.data.recipients.map(uint8ArrayToHex)
+                recipients: this.data.recipients.map(({ to, action, args }) => {
+                    return {
+                        to: uint8ArrayToHex(to),
+                        action: action,
+                        args: args
+                    }
+                })
             },
         }
     }

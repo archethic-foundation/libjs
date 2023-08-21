@@ -81,7 +81,7 @@ export type TransactionData = {
     content: Uint8Array,
     ledger: Ledger,
     ownerships: Ownership[],
-    recipients: Uint8Array[],
+    recipients: Recipient[],
 }
 
 type Ledger = {
@@ -107,6 +107,12 @@ type UcoLedger = {
 type UcoTransfer = {
     amount: number,
     to: Uint8Array,
+}
+
+export type Recipient = {
+    to: Uint8Array,
+    action?: string,
+    args?: any[]
 }
 
 export type Ownership = {
@@ -205,6 +211,12 @@ type OwnershipRPC = {
     }[];
 };
 
+type RecipientRPC = {
+    to: string;
+    action?: string;
+    args?: any[];
+};
+
 export type TransactionRPC = {
     version: number;
     address: string;
@@ -221,7 +233,7 @@ export type TransactionRPC = {
                 transfers: TokenTransferRPC[];
             };
         };
-        recipients: string[];
+        recipients: RecipientRPC[];
     };
     previousPublicKey: string;
     previousSignature: string;
