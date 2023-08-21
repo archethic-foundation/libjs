@@ -98,8 +98,12 @@ window.generate_transaction = async () => {
     );
   });
 
-  recipients.forEach(function (recipient) {
-    txBuilder.addRecipient(recipient);
+  recipients.forEach(function ({ address, action, args }) {
+    if (action == undefined && args == undefined) {
+      txBuilder.addRecipient(address);
+    } else {
+      txBuilder.addRecipientForNamedAction(address, action, args);
+    }
   });
 
   transaction = txBuilder
@@ -205,18 +209,55 @@ window.onClickAddTokenTransfer = async () => {
 };
 
 window.onClickAddRecipient = () => {
-  const recipient = document.querySelector("#recipient").value;
-  recipients.push(recipient);
+  const $address = document.querySelector("#recipient");
+  const $action = document.querySelector("#action");
+  const $argsJson = document.querySelector("#args_json");
+  const $argsJsonErr = document.querySelector("#args_json_error");
+  const $list = document.querySelector("#recipients");
 
-  const option = document.createElement("option");
-  option.text = recipient;
-  option.value = recipient;
-  var select = document.querySelector("#recipients");
-  select.appendChild(option);
+  const address = $address.value
+  const action = $action.value
+  const argsJson = $argsJson.value
 
-  select.size += 1;
+  if (address == "")
+    return
 
-  document.querySelector("#recipient").value = "";
+  $argsJsonErr.textContent = "";
+
+  if (action == "" && argsJson == "") {
+    // update state
+    recipients.push({ address });
+
+    // update list
+    if ($list.textContent != "")
+      $list.textContent = $list.textContent + '\n'
+    $list.textContent = $list.textContent + address
+
+    // reset form
+    $address.value = '';
+    $action.value = '';
+    $argsJson.value = '';
+  }
+  else {
+    try {
+      const args = JSON.parse(argsJson)
+      // update state
+      recipients.push({ address, action, args });
+
+      // update list
+      if ($list.textContent != "")
+        $list.textContent = $list.textContent + '\n'
+      $list.textContent = $list.textContent + `${address} - ${action} - ${argsJson}`
+
+      // reset form
+      $address.value = '';
+      $action.value = '';
+      $argsJson.value = '';
+    } catch (e) {
+      $argsJsonErr.textContent = "Invalid JSON:" + e.message
+    }
+  }
+
 };
 
 window.sendTransaction = async () => {
