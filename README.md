@@ -13,7 +13,7 @@ npm install archethic
 
 ## Usage
 
-When it comes to private data manipulation, your application has two options : 
+When it comes to private data manipulation, your application has two options :
   1. **Standalone :** store private keys on your own
   2. **WalletRPC :** delegate sensitive operations to a Wallet application. (**recommended**, but still Alpha)
 
@@ -91,7 +91,7 @@ const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
 const keychain = new Keychain(Crypto.randomSecretKey())
   .addService("uco", "m/650'/0/0")
   .addAuthorizedPublicKey(publicKey);
-  
+
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
 const tx = archethic.account.newKeychainTransaction(keychain, 0);
@@ -740,6 +740,24 @@ console.log(token);
 }
 ```
 
+### callFunction(contractAddress, functionName, args)
+
+Call a Smart Contract's exported function with given args.
+
+- `contractAddress` is the address of the contract (usually latest or genesis)
+- `functionName` is the exported function to call
+- `args` is the list of arguments to call the function with
+
+```js
+import Archethic from "archethic"
+const archethic = new Archethic("https://testnet.archethic.net");
+await archethic.connect()
+
+const response = await archethic.rpcNode?.callFunction("0000AB...CD", "add", [1, 2])
+console.log(response)
+3
+```
+
 ### getBalance(address)
 
 Query a node to fetch the last balance of the given address
@@ -980,7 +998,7 @@ archethic.rpcWallet.getAccounts().then(
 
 ###  getServices()
 
-Reads a concise services list from ArchethicWallet. 
+Reads a concise services list from ArchethicWallet.
 
 ```js
 import Archethic from "archethic"
@@ -1278,7 +1296,7 @@ const cipher = Crypto.ecEncrypt(
   "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
 );
 ```
-  
+
 ### ecDecrypt(cipher, privateKey)
 
 Perform an ECIES decryption using a private key and an encrypted data
@@ -1310,7 +1328,7 @@ const cipher = Crypto.aesEncrypt(
 ```
 
   </details>
-  
+
   <details>
   <summary>Utils</summary>
 
@@ -1360,7 +1378,7 @@ tx.originSign(originPrivateKey)
 ```
 
   </details>
-  
+
 ## Running the tests
 
 ```bash

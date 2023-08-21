@@ -1,18 +1,20 @@
 import * as Crypto from "./crypto.js";
 import * as Utils from "./utils.js";
 import * as Api from "./api.js";
-import {DirectEndpoint, Endpoint, WalletRPCEndpoint} from "./endpoint.js";
-import {ArchethicRPCClient} from "./api/wallet_rpc.js";
+import { DirectEndpoint, Endpoint, WalletRPCEndpoint } from "./endpoint.js";
+import { ArchethicRPCClient } from "./api/wallet_rpc.js";
+import { NodeRPCClient } from "./api/node_rpc.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
 import Account from "./account.js";
 
-export {Utils, Crypto};
+export { Utils, Crypto };
 
 export default class Archethic {
 
     endpoint: DirectEndpoint | WalletRPCEndpoint;
     rpcWallet: ArchethicRPCClient | undefined;
+    rpcNode: NodeRPCClient | undefined;
     transaction: Transaction;
     nearestEndpoints: Set<string>;
     account: Account;
@@ -27,6 +29,7 @@ export default class Archethic {
         this.network = new Network(this);
         this.nearestEndpoints = new Set<string>();
         this.transaction = new Transaction(this);
+        this.rpcNode = new NodeRPCClient(this);
     }
 
     async connect() {
@@ -38,7 +41,7 @@ export default class Archethic {
 
         let nearestEndpoints = nodes.map(({ ip, port }) => {
             return `http://${ip}:${port}`;
-        } )
+        })
 
         nearestEndpoints.push(this.endpoint.origin.toString()) // Add the main endpoint as fallback
 
@@ -46,13 +49,12 @@ export default class Archethic {
         return this;
     }
 
-    async requestNode(call: (endpoint: string) => Promise<any>) : Promise<any>  {
+    async requestNode(call: (endpoint: string) => Promise<any>): Promise<any> {
         const node = this.nearestEndpoints.values().next().value;
 
         try {
             return await call(node);
         } catch (err) {
-            console.error(err);
             this.nearestEndpoints.delete(node);
             if (this.nearestEndpoints.size == 0) {
                 throw "Cannot reach Archethic node";

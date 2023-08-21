@@ -1,4 +1,4 @@
-import {JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient} from "json-rpc-2.0";
+import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
 import {
     AccountIdentity,
     ConnectionState,
@@ -9,9 +9,9 @@ import {
     TransactionSuccess,
     SignedTransaction
 } from "./types.js";
-import {Service} from "../types";
+import { Service } from "../types";
 import TransactionBuilder from "../transaction_builder";
-import {ExtendedTransactionBuilder} from "../transaction";
+import { ExtendedTransactionBuilder } from "../transaction";
 
 export class RpcRequest {
     private origin: RpcRequestOrigin;
@@ -37,7 +37,7 @@ export class ArchethicRPCClient {
     private _rpcNotificationEventTarget: EventTarget;
     static _instance: ArchethicRPCClient;
     constructor() {
-        this.origin = {name: ''}
+        this.origin = { name: '' }
         this.client;
         this.websocket;
         this._connectionStateEventTarget = new EventTarget();
@@ -47,7 +47,7 @@ export class ArchethicRPCClient {
     /**
      * @return {ArchethicRPCClient}
      */
-    static get instance() : ArchethicRPCClient {
+    static get instance(): ArchethicRPCClient {
         if (!this._instance) {
             this._instance = new ArchethicRPCClient();
         }
@@ -57,7 +57,7 @@ export class ArchethicRPCClient {
     /**
      * @param {RpcRequestOrigin} origin Identifying data about the client application.
      */
-    setOrigin(origin: RpcRequestOrigin) : ArchethicRPCClient {
+    setOrigin(origin: RpcRequestOrigin): ArchethicRPCClient {
         this.origin = origin
         return this
     }
@@ -94,7 +94,7 @@ export class ArchethicRPCClient {
             this.client.addMethod(
                 'addSubscriptionNotification',
                 (request) => {
-                    const notification: RpcNotification =  {
+                    const notification: RpcNotification = {
                         subscriptionId: request['subscriptionId'],
                         data: request['data']
                     }
@@ -131,14 +131,14 @@ export class ArchethicRPCClient {
     /**
      * @return {Promise<void>}
      */
-    async close() : Promise<void> {
+    async close(): Promise<void> {
         this.websocket?.close()
         this.client = undefined
         this.websocket = undefined
         this._dispatchConnectionState()
     }
 
-    _ensuresConnectionAlive() : void {
+    _ensuresConnectionAlive(): void {
         if (this.client == null || this.connectionState != ConnectionState.Open) throw new Error('RPC connection must be alive.')
     }
 
@@ -149,7 +149,7 @@ export class ArchethicRPCClient {
      * @param {function(AccountUpdate)} listener
      * @return {Promise<RpcSubscription>} created subscription
      */
-    onAccountUpdate(accountName: string, listener: Function) : PromiseLike<RpcSubscription> | undefined {
+    onAccountUpdate(accountName: string, listener: Function): PromiseLike<RpcSubscription> | undefined {
         return this._subscribe(
             'subscribeAccount',
             {
@@ -167,7 +167,7 @@ export class ArchethicRPCClient {
      * @param {function(AccountUpdate)} listener
      * @return {Promise<RpcSubscription>} created subscription
      */
-    _subscribe(method: string, data: object, listener: Function) :  PromiseLike<RpcSubscription> | undefined {
+    _subscribe(method: string, data: object, listener: Function): PromiseLike<RpcSubscription> | undefined {
         this._ensuresConnectionAlive();
 
         return this.client?.request(
@@ -204,7 +204,7 @@ export class ArchethicRPCClient {
     /**
      * @return {ConnectionState}
      */
-    get connectionState() : ConnectionState {
+    get connectionState(): ConnectionState {
         const state = this.websocket?.readyState
         switch (state) {
             case WebSocket.CLOSING:
@@ -221,7 +221,7 @@ export class ArchethicRPCClient {
      * @param {function(String)} listener
      * @return {ArchethicRPCClient}
      */
-    onconnectionstatechange(listener: Function) : ArchethicRPCClient  {
+    onconnectionstatechange(listener: Function): ArchethicRPCClient {
         this._connectionStateEventTarget.addEventListener(ConnectionState.Connecting, () => { listener(ConnectionState.Connecting) })
         this._connectionStateEventTarget.addEventListener(ConnectionState.Open, () => { listener(ConnectionState.Open) })
         this._connectionStateEventTarget.addEventListener(ConnectionState.Closed, () => { listener(ConnectionState.Closed) })
@@ -241,7 +241,7 @@ export class ArchethicRPCClient {
     /**
      * @return {Promise<Endpoint>} Keychain endpoint URL.
      */
-    async getEndpoint() : Promise<Endpoint> {
+    async getEndpoint(): Promise<Endpoint> {
         this._ensuresConnectionAlive();
 
         return this.client?.request(
@@ -262,7 +262,7 @@ export class ArchethicRPCClient {
      * @param {TransactionBuilder | ExtendedTransactionBuilder} transaction Transaction to sign and send.
      * @returns {Promise<TransactionSuccess>}
      */
-    async sendTransaction(transaction: TransactionBuilder | ExtendedTransactionBuilder) : Promise<TransactionSuccess> {
+    async sendTransaction(transaction: TransactionBuilder | ExtendedTransactionBuilder): Promise<TransactionSuccess> {
         this._ensuresConnectionAlive();
         return this.client?.request(
             'sendTransaction',
@@ -282,7 +282,7 @@ export class ArchethicRPCClient {
      * @param {string} pathSuffix Path suffix to use.
      * @returns {Promise<SignedTransaction[]>}
      */
-    async signTransactions(serviceName: string, pathSuffix: string, transactions: TransactionBuilder[] | ExtendedTransactionBuilder[]) : Promise<TransactionBuilder[] | ExtendedTransactionBuilder[]> {
+    async signTransactions(serviceName: string, pathSuffix: string, transactions: TransactionBuilder[] | ExtendedTransactionBuilder[]): Promise<TransactionBuilder[] | ExtendedTransactionBuilder[]> {
         this._ensuresConnectionAlive();
         const txs = transactions.map((tx) => tx.toRPC())
         return this.client!.request(
@@ -293,7 +293,7 @@ export class ArchethicRPCClient {
                 transactions: txs
             }),
         ).then(
-            (result: {signedTxs: SignedTransaction[]}) => {
+            (result: { signedTxs: SignedTransaction[] }) => {
                 for (let i = 0; i < result.signedTxs.length; i++) {
                     transactions[i].setAddress(result.signedTxs[i].address);
                     transactions[i].setPreviousSignatureAndPreviousPublicKey(result.signedTxs[i].previousSignature, result.signedTxs[i].previousPublicKey);
@@ -310,12 +310,12 @@ export class ArchethicRPCClient {
      * @param {String} name Name of the service to be added
      * @returns {Promise<TransactionSuccess>}
      */
-    async addService(name: string) : Promise<TransactionSuccess> {
+    async addService(name: string): Promise<TransactionSuccess> {
         this._ensuresConnectionAlive()
 
         return this.client?.request(
             'addService',
-            new RpcRequest(this.origin, {name: name})
+            new RpcRequest(this.origin, { name: name })
         ).then(
             (result) => {
                 return result
@@ -328,7 +328,7 @@ export class ArchethicRPCClient {
      *
      * @returns {Promise<AccountIdentity[]>}
      */
-    async getAccounts() : Promise<AccountIdentity[]> {
+    async getAccounts(): Promise<AccountIdentity[]> {
         this._ensuresConnectionAlive();
 
         return this.client?.request(
@@ -346,7 +346,7 @@ export class ArchethicRPCClient {
      *
      * @returns {Promise<AccountIdentity>}
      */
-    async getCurrentAccount() : Promise<AccountIdentity> {
+    async getCurrentAccount(): Promise<AccountIdentity> {
         this._ensuresConnectionAlive();
 
         return this.client?.request(
@@ -364,7 +364,7 @@ export class ArchethicRPCClient {
      *
      * @returns {Promise<Service[]>}
      */
-    async getServices() : Promise<Service[]> {
+    async getServices(): Promise<Service[]> {
         this._ensuresConnectionAlive()
 
         return this.client?.request(
@@ -385,7 +385,7 @@ export class ArchethicRPCClient {
      * @param {String} pathSuffix
      * @returns {Promise<{"publicKey": string}>}
      */
-    async keychainDeriveKeypair(serviceName: string, index = 0, pathSuffix = "") : Promise<{"publicKey": string}> {
+    async keychainDeriveKeypair(serviceName: string, index = 0, pathSuffix = ""): Promise<{ "publicKey": string }> {
         this._ensuresConnectionAlive()
 
         return this.client?.request(
@@ -410,7 +410,7 @@ export class ArchethicRPCClient {
      * @param {String} pathSuffix
      * @returns {Promise<{"address": string}>}
      */
-    async keychainDeriveAddress(serviceName: string, index: number = 0, pathSuffix: string = "") : Promise<{"address": string}> {
+    async keychainDeriveAddress(serviceName: string, index: number = 0, pathSuffix: string = ""): Promise<{ "address": string }> {
         this._ensuresConnectionAlive()
 
         return this.client?.request(
@@ -434,7 +434,7 @@ export class ArchethicRPCClient {
      * @param {function(AccountUpdate)} listener
      * @return {Promise<RpcSubscription>} created subscription
      */
-    onCurrentAccountChange(listener: Function) : PromiseLike<RpcSubscription> | undefined {
+    onCurrentAccountChange(listener: Function): PromiseLike<RpcSubscription> | undefined {
         return this._subscribe(
             'subscribeCurrentAccount',
             {},

@@ -1,13 +1,12 @@
-const nock = require("nock");
-
+import nock from "nock";
 import Archethic from "../src/index";
 import Network from "../src/network";
 
 let archethic: Archethic;
 
 describe("Network", () => {
-    beforeAll(async () => {
-        nock("http://localhost:4000", {})
+    beforeEach(async () => {
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     nearestEndpoints {
@@ -18,16 +17,17 @@ describe("Network", () => {
             })
             .reply(200, {
                 data: {
-                    nearestEndpoints: [{ ip: "localhost", port: 4000 }],
+                    nearestEndpoints: [{ ip: "127.0.0.1", port: 4000 }],
                 },
             });
 
-        archethic = new Archethic("http://localhost:4000");
+        archethic = new Archethic("http://127.0.0.1:4000");
+
         await archethic.connect();
     });
 
     it("should list the storage nonce public key", async () => {
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     sharedSecrets {
@@ -43,25 +43,109 @@ describe("Network", () => {
                 },
             });
 
-        const network = new Network(archethic);
-        const publicKey = await network.getStorageNoncePublicKey();
+        const publicKey = await archethic.network.getStorageNoncePublicKey();
         expect(publicKey).toBe("publicKey");
     });
 
     it("should add an origin key", async () => {
-        nock("http://localhost:4000", {})
-            .post("/api/origin_key", {
-                origin_public_key: "01103109",
-                certificate: "mycertificate",
-            })
-            .reply(201, { transactionAddress: "addr", status: "pending" });
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "add_origin_key",
+                    "params": { "certificate": "mycertificate", "origin_public_key": "01103109" }
+                }
+            )
 
-        const network = new Network(archethic);
-        await network.addOriginKey("01103109", "mycertificate");
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: { transaction_address: "transaction_address", status: "pending" }
+            });
+        await archethic.network.addOriginKey("01103109", "mycertificate").then((response) => {
+            expect(response.transaction_address).toBe("transaction_address")
+            expect(response.status).toBe("pending")
+        })
+    });
+
+    it("should return type errors", async () => {
+        //@ts-ignore
+        expect(archethic.network.addOriginKey(1, "mycertificate")).rejects.toThrow(Error)
+    });
+
+    it("should call a contract function", async () => {
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "contract_fun",
+                    "params": { contract: "c", function: "fun", args: ["1", "2"] }
+                }
+            )
+
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: 5
+            });
+        await archethic.rpcNode?.callFunction("c", "fun", ["1", "2"]).then((response) => {
+            expect(response).toBe(5)
+        })
+    });
+
+    it("estimate transaction fee", async () => {
+        const tx = archethic.transaction.new()
+        tx.setType("data")
+        tx.setContent("content")
+        tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065")
+
+
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "estimate_transaction_fee",
+                    "params": tx.toNodeRPC()
+                }
+            )
+
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: {
+                    fee: 0.555,
+                    rates: {
+                        eur: 500000000,
+                        usd: 600000000,
+                    }
+                }
+            });
+        await archethic.rpcNode?.getTransactionFee(tx).then(
+            (result) => {
+                expect(result.fee).toBe(0.555)
+                expect(result.rates.eur).toBe(500000000)
+                expect(result.rates.usd).toBe(600000000)
+            }
+        )
     });
 
     it("should get last oracle data", async () => {
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     oracleData {
@@ -89,6 +173,8 @@ describe("Network", () => {
                 },
             });
 
+
+
         const network = new Network(archethic);
         const {
             services: {
@@ -97,10 +183,10 @@ describe("Network", () => {
         } = await network.getOracleData();
 
         expect(eurPrice).toBe(0.2);
-     });
+    });
 
     it("should get oracle data at time", async () => {
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     oracleData(timestamp: 102910921) {
@@ -149,7 +235,7 @@ describe("Network", () => {
             type: 'fungible'
         }
 
-        nock("http://localhost:4000", {})
+        nock("http://127.0.0.1:4000", {})
             .post("/api", {
                 query: `query {
                     token(address: "1234") {

@@ -3,7 +3,7 @@ import TransactionSender from "./transaction_sender.js";
 
 import * as API from "./api.js";
 import Archethic from "./index.js";
-import {Ownership} from "./types.js";
+import { Ownership, TransactionFee } from "./types.js";
 
 export default class Transaction {
     core: Archethic;
@@ -13,23 +13,25 @@ export default class Transaction {
 
     }
 
-    new() : ExtendedTransactionBuilder {
+    new(): ExtendedTransactionBuilder {
         return new this.builder(this.core)
     }
 
-    getTransactionIndex(address: string | Uint8Array) : Promise<number> {
+    send(tx: TransactionBuilder) {
+        return this.core.rpcNode!.sendTransaction(tx)
+    }
+
+    getTransactionIndex(address: string | Uint8Array): Promise<number> {
         return this.core.requestNode((endpoint) =>
             API.getTransactionIndex(address, endpoint)
         );
     }
 
-    getTransactionFee(tx: TransactionBuilder) {
-        return this.core.requestNode((endpoint) =>
-            API.getTransactionFee(tx, endpoint)
-        );
+    getTransactionFee(tx: TransactionBuilder): Promise<TransactionFee> {
+        return this.core.rpcNode!.getTransactionFee(tx)
     }
 
-    getTransactionOwnerships(address: string | Uint8Array, last = false) : Promise<Ownership[]> {
+    getTransactionOwnerships(address: string | Uint8Array, last = false): Promise<Ownership[]> {
         return this.core.requestNode((endpoint) =>
             API.getTransactionOwnerships(address, endpoint, last)
         );
@@ -42,7 +44,7 @@ export class ExtendedTransactionBuilder extends TransactionBuilder {
     constructor(core: Archethic) {
         super();
         this.core = core;
-        this.sender = new TransactionSender();
+        this.sender = new TransactionSender(this.core);
     }
 
     //Override TransactionSender.send to use the node resolution

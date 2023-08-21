@@ -1,8 +1,8 @@
-import fetch from "cross-fetch";
-import {maybeHexToUint8Array, maybeUint8ArrayToHex, uint8ArrayToHex} from "./utils.js";
+import { maybeUint8ArrayToHex, uint8ArrayToHex } from "./utils.js";
 import absinthe from "./api/absinthe.js";
 import TransactionBuilder from "./transaction_builder.js";
-import {AbsintheSocket} from "@absinthe/socket";
+import { AbsintheSocket } from "@absinthe/socket";
+import Archethic from "./index.js";
 
 const senderContext = "SENDER";
 
@@ -18,7 +18,10 @@ export default class TransactionSender {
     absintheSocket: AbsintheSocket | undefined;
     nbConfirmationReceived: number;
     timeout: NodeJS.Timeout | undefined;
-    constructor() {
+    core: Archethic;
+    constructor(archethic: Archethic) {
+        this.core = archethic;
+
         this.onSent = [];
         this.onConfirmation = [];
         this.onFullConfirmation = [];
@@ -26,7 +29,7 @@ export default class TransactionSender {
         this.onError = [];
         this.onTimeout = [];
 
-        this.confirmationNotifier =
+        this.confirmationNotifier = undefined;
         this.errorNotifier = undefined;
         this.absintheSocket = undefined;
 
@@ -112,24 +115,18 @@ export default class TransactionSender {
             return this;
         }
 
-        // Send transaction
-        fetch(endpoint + "/api/transaction", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: tx.toJSON(),
-        })
-            .then((response) => handleSend.call(this, timeout, response))
+        this.core.rpcNode!.sendTransaction(tx)
+            .then(() => {
+                handleSend.call(this, timeout)
+            })
             .catch((err) =>
-                this.onError.forEach((func) => func(senderContext, err, this))
+                handleError.call(this, senderContext, err)
             );
 
         return this;
     }
 
-    unsubscribe(event : string | undefined = undefined) {
+    unsubscribe(event: string | undefined = undefined) {
         if (event) {
             switch (event) {
                 case "sent":
@@ -176,7 +173,7 @@ export default class TransactionSender {
     }
 }
 
-async function waitConfirmations(address: string | Uint8Array, absintheSocket: AbsintheSocket, handler: any) : Promise<any>  {
+async function waitConfirmations(address: string | Uint8Array, absintheSocket: AbsintheSocket, handler: any): Promise<any> {
     const operation = `
     subscription {
       transactionConfirmed(address: "${maybeUint8ArrayToHex(address)}") {
@@ -198,7 +195,7 @@ async function waitConfirmations(address: string | Uint8Array, absintheSocket: A
     });
 }
 
-async function waitError(address: string | Uint8Array, absintheSocket: any, handler: Function) : Promise<unknown> {
+async function waitError(address: string | Uint8Array, absintheSocket: any, handler: Function): Promise<unknown> {
     const operation = `
     subscription {
       transactionError(address: "${maybeUint8ArrayToHex(address)}") {
@@ -251,7 +248,7 @@ function handleConfirmation(
     }
 }
 
-function handleError(this: TransactionSender,context: any, reason: any) {
+function handleError(this: TransactionSender, context: any, reason: any) {
     clearTimeout(this.timeout);
 
     // Unsubscribe to all subscriptions
@@ -261,24 +258,13 @@ function handleError(this: TransactionSender,context: any, reason: any) {
     this.onError.forEach((func) => func(context, reason, this));
 }
 
-function handleSend(this: TransactionSender, timeout: number, response: Response) {
-    if (response.status >= 200 && response.status <= 299) {
-        this.onSent.forEach((func) => func(this));
-        // Setup 1 minute timeout
-        this.timeout = setTimeout(() => {
-            absinthe.cancel(this.absintheSocket as AbsintheSocket, this.confirmationNotifier);
-            absinthe.cancel(this.absintheSocket as AbsintheSocket, this.errorNotifier);
-
-            this.onTimeout.forEach((func) => func(this.nbConfirmationReceived, this));
-        }, timeout * 1_000);
-    } else {
+function handleSend(this: TransactionSender, timeout: number) {
+    this.onSent.forEach((func) => func(this));
+    // Setup 1 minute timeout
+    this.timeout = setTimeout(() => {
         absinthe.cancel(this.absintheSocket as AbsintheSocket, this.confirmationNotifier);
         absinthe.cancel(this.absintheSocket as AbsintheSocket, this.errorNotifier);
 
-        response
-            .json()
-            .then((err) =>
-                this.onError.forEach((func) => func(senderContext, err.status, this))
-            );
-    }
+        this.onTimeout.forEach((func) => func(this.nbConfirmationReceived, this));
+    }, timeout * 1_000);
 }

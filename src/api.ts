@@ -1,15 +1,14 @@
 import fetch from "cross-fetch";
 import absinthe from "./api/absinthe.js";
-import {maybeUint8ArrayToHex} from "./utils.js";
-import {Balance, NearestEndpoint, OracleData, Ownership, Token, TransactionFee} from "./types.js";
-import TransactionBuilder from "./transaction_builder.js";
+import { maybeUint8ArrayToHex } from "./utils.js";
+import { Balance, NearestEndpoint, OracleData, Ownership, Token } from "./types.js";
 
 /**
  * Send a custom query to the Archethic API
  * @param query
  * @param endpoint
  */
-export async function rawGraphQLQuery(query: string, endpoint: string) : Promise<any> {
+export async function rawGraphQLQuery(query: string, endpoint: string): Promise<any> {
     const url = new URL("/api", endpoint);
     return fetch(url, {
         method: "POST",
@@ -127,23 +126,6 @@ export async function getStorageNoncePublicKey(endpoint: string): Promise<string
         });
 }
 
-/**
- * Get the transaction fee of a transaction
- * @param tx The transaction to get the fee of
- * @param endpoint The Archethic API endpoint
- * @returns {Promise<TransactionFee>} The transaction fee
- */
-export async function getTransactionFee(tx: TransactionBuilder, endpoint: string) : Promise<TransactionFee> {
-    const url = new URL("/api/transaction_fee", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: tx.toJSON(),
-    }).then(handleResponse);
-}
 
 // The `last` flag is used to fetch the ownerships of the last transaction of the chain
 /**
@@ -224,30 +206,6 @@ export async function getToken(tokenAddress: string | Uint8Array, endpoint: stri
 }
 
 /**
- * Add an origin key
- * @param originPublicKey
- * @param certificate
- * @param endpoint
- */
-export async function addOriginKey(originPublicKey: string, certificate: string, endpoint: string) : Promise<any> {
-    originPublicKey = maybeUint8ArrayToHex(originPublicKey)
-
-
-    const url = new URL("/api/origin_key", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            origin_public_key: originPublicKey,
-            certificate: certificate,
-        }),
-    }).then(handleResponse); // TODO : find return type of addOriginKey
-}
-
-/**
  * Get Oracle data
  * @param endpoint The Archethic API endpoint
  * @param timestamp The timestamp of the data to get
@@ -294,7 +252,7 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
         .then(handleResponse)
         .then((res): OracleData => {
             if (res.data.oracleData == null) {
-                return {services: {}};
+                return { services: {} };
             } else {
                 return res.data.oracleData;
             }
@@ -307,7 +265,7 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
  * @param handler The handler to call when a new update is received
  */
 export async function subscribeToOracleUpdates(endpoint: string, handler: Function): Promise<any> {
-    const {host, protocol} = new URL(endpoint);
+    const { host, protocol } = new URL(endpoint);
     const ws_protocol = protocol == "https:" ? "wss" : "ws";
 
     const absintheSocket = absinthe.create(`${ws_protocol}://${host}/socket`);
@@ -337,7 +295,7 @@ export async function subscribeToOracleUpdates(endpoint: string, handler: Functi
  * @param endpoint The Archethic API endpoint
  * @param address The address to get the balance of
  */
-export async function getBalance(address: string | Uint8Array, endpoint: string) : Promise<Balance> {
+export async function getBalance(address: string | Uint8Array, endpoint: string): Promise<Balance> {
 
     address = maybeUint8ArrayToHex(address)
 
@@ -364,7 +322,7 @@ export async function getBalance(address: string | Uint8Array, endpoint: string)
         .then(handleResponse)
         .then((res): Balance => {
             if (res.errors || res.data == null) {
-                return {uco: 0, token: []};
+                return { uco: 0, token: [] };
             } else {
                 return res.data.balance;
             }

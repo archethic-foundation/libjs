@@ -59,7 +59,7 @@ type TokenBalance = {
     tokenId: number,
 }
 
-export type Token ={
+export type Token = {
     id: number,
     name: string,
     type: string,
@@ -184,6 +184,49 @@ export type Keypair = {
     publicKey: Uint8Array,
     privateKey: Uint8Array,
 }
+
+type Transfer = {
+    to: string;
+    amount: number;
+};
+
+type TokenTransferRPC = {
+    to: string;
+    amount: number;
+    tokenAddress: string;
+    tokenId: number;
+};
+
+type OwnershipRPC = {
+    secret: string;
+    authorizedKeys: {
+        publicKey: string;
+        encryptedSecretKey: string;
+    }[];
+};
+
+export type TransactionRPC = {
+    version: number;
+    address: string;
+    type: UserTypeTransaction;
+    data: {
+        content: string;
+        code: string;
+        ownerships: OwnershipRPC[];
+        ledger: {
+            uco: {
+                transfers: Transfer[];
+            };
+            token: {
+                transfers: TokenTransferRPC[];
+            };
+        };
+        recipients: string[];
+    };
+    previousPublicKey: string;
+    previousSignature: string;
+    originSignature?: string;
+};
 
 export type TransactionFee = {
     fee: number,
