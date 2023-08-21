@@ -22,17 +22,10 @@ export class NodeRPCClient {
      * @returns {Promise<void>}
      */
   async callFunction(contract: string, function_name: string, args: any[]) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const result = await this.client.request("contract_fun", {
-          contract,
-          function: function_name,
-          args
-        });
-        resolve(result);
-      } catch (err) {
-        reject(err);
-      }
+    return this.client.request("contract_fun", {
+      contract,
+      function: function_name,
+      args
     });
   }
   /**
@@ -41,14 +34,8 @@ export class NodeRPCClient {
    * @returns {Promise<TransactionFee>} The transaction fee
    */
   async getTransactionFee(tx: TransactionBuilder): Promise<TransactionFee> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const result = await this.client.request("estimate_transaction_fee", tx.toNodeRPC());
-        resolve(result);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    return this.client.request("estimate_transaction_fee", tx.toNodeRPC());
+
   }
 
   /**
@@ -57,14 +44,7 @@ export class NodeRPCClient {
    * @returns {Promise<TransactionRpcResponse>} The transaction response
    */
   async sendTransaction(tx: TransactionBuilder): Promise<TransactionRpcResponse> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const result = await this.client.request("send_transaction", tx.toNodeRPC());
-        resolve(result);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    return this.client.request("send_transaction", tx.toNodeRPC());
   }
 
   /**
@@ -73,14 +53,7 @@ export class NodeRPCClient {
   * @returns {Promise<TransactionRpcResponse>} The transaction response
   */
   async addOriginKey(origin: AddOriginKeyRpc): Promise<TransactionRpcResponse> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const result = await this.client.request("add_origin_key", origin);
-        resolve(result);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    return this.client.request("add_origin_key", origin);
   }
 
   /**
@@ -89,14 +62,7 @@ export class NodeRPCClient {
    * @returns {Promise<ContractSimulationResponse>} The simulation response
    */
   async simulateContractExecution(tx: TransactionBuilder): Promise<ContractSimulationResponse> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const result = await this.client.request("simulate_contract_execution", tx.toNodeRPC());
-        resolve(result);
-      } catch (err) {
-        reject(err);
-      }
-    });
+    return this.client.request("simulate_contract_execution", tx.toNodeRPC());
   }
 
   async handleRequest(jsonRPCRequest: any): Promise<any> {
