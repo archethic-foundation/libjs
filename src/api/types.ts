@@ -6,28 +6,44 @@ export type NodeRpcMethods = {
         function: string,
         args?: any[]
     }): any,
-    estimate_transaction_fee(params: TransactionRPC): TransactionFee,
-    send_transaction(params: TransactionRPC): TransactionRpcResponse,
-    simulate_contract_execution(params: TransactionRPC): ContractSimulationResponse,
-    add_origin_key(params: AddOriginKeyRpc): TransactionRpcResponse
+    estimate_transaction_fee(params: EstimateTransactionFeeRequest): TransactionFee,
+    send_transaction(params: SendTransactionRequest): SendTransactionResponse,
+    simulate_contract_execution(params: SimulateContractExecutionRequest): SimulateContractExecutionResponse[],
+    add_origin_key(params: AddOriginKeyRequest): AddOriginKeyResponse
 }
 
-export type AddOriginKeyRpc = {
+export type AddOriginKeyRequest = {
     certificate: string,
     origin_public_key: string,
 }
 
-export type TransactionRpcResponse = {
+export type AddOriginKeyResponse = {
     transaction_address: string,
     status: string
 }
 
-export type ContractSimulationResponse = {
+export type EstimateTransactionFeeRequest = {
+    transaction: TransactionRPC
+}
+
+export type SendTransactionRequest = {
+    transaction: TransactionRPC
+}
+
+export type SendTransactionResponse = {
+    transaction_address: string,
+    status: string
+}
+
+export type SimulateContractExecutionRequest = {
+    transaction: TransactionRPC
+}
+
+export type SimulateContractExecutionResponse = {
     recipient_address: string,
     valid: boolean,
     error?: string
 }
-
 
 export enum ConnectionState {
     Closed = 'WalletRPCConnection_closed',
@@ -88,8 +104,8 @@ export type TransactionSuccess = {
 }
 
 export type SignedTransaction = {
-    "address": string,
-    "previousPublicKey": string,
-    "previousSignature": string,
-    "originSignature": string
+    address: string,
+    previousPublicKey: string,
+    previousSignature: string,
+    originSignature: string
 }
