@@ -1,6 +1,6 @@
 import fetch from "cross-fetch";
 import { JSONRPCClient, TypedJSONRPCClient } from "json-rpc-2.0";
-import { AddOriginKeyRpc, NodeRpcMethods, TransactionRpcResponse, ContractSimulationResponse } from "./types";
+import { AddOriginKeyRequest, AddOriginKeyResponse, NodeRpcMethods, SendTransactionResponse, SimulateContractExecutionResponse } from "./types";
 import Archethic from "..";
 import TransactionBuilder from "../transaction_builder";
 import { TransactionFee } from "../types";
@@ -34,35 +34,35 @@ export class NodeRPCClient {
    * @returns {Promise<TransactionFee>} The transaction fee
    */
   async getTransactionFee(tx: TransactionBuilder): Promise<TransactionFee> {
-    return this.client.request("estimate_transaction_fee", tx.toNodeRPC());
+    return this.client.request("estimate_transaction_fee", { transaction: tx.toNodeRPC() });
 
   }
 
   /**
    * Send a transaction
    * @param tx The transaction to send
-   * @returns {Promise<TransactionRpcResponse>} The transaction response
+   * @returns {Promise<SendTransactionResponse>} The transaction response
    */
-  async sendTransaction(tx: TransactionBuilder): Promise<TransactionRpcResponse> {
-    return this.client.request("send_transaction", tx.toNodeRPC());
+  async sendTransaction(tx: TransactionBuilder): Promise<SendTransactionResponse> {
+    return this.client.request("send_transaction", { transaction: tx.toNodeRPC() });
   }
 
   /**
   * Add an origin key
-  * @param {AddOriginKeyRpc} origin
-  * @returns {Promise<TransactionRpcResponse>} The transaction response
+  * @param {AddOriginKeyRequest} origin
+  * @returns {Promise<AddOriginKeyResponse>} The transaction response
   */
-  async addOriginKey(origin: AddOriginKeyRpc): Promise<TransactionRpcResponse> {
+  async addOriginKey(origin: AddOriginKeyRequest): Promise<AddOriginKeyResponse> {
     return this.client.request("add_origin_key", origin);
   }
 
   /**
    * Simulate contract execution
    * @param tx The contract transaction to simulate
-   * @returns {Promise<ContractSimulationResponse>} The simulation response
+   * @returns {Promise<SimulateContractExecutionResponse[]>} The simulation response per recipient
    */
-  async simulateContractExecution(tx: TransactionBuilder): Promise<ContractSimulationResponse> {
-    return this.client.request("simulate_contract_execution", tx.toNodeRPC());
+  async simulateContractExecution(tx: TransactionBuilder): Promise<SimulateContractExecutionResponse[]> {
+    return this.client.request("simulate_contract_execution", { transaction: tx.toNodeRPC() });
   }
 
   async handleRequest(jsonRPCRequest: any): Promise<any> {

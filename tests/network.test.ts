@@ -120,7 +120,9 @@ describe("Network", () => {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "method": "estimate_transaction_fee",
-                    "params": tx.toNodeRPC()
+                    "params": {
+                        "transaction": tx.toNodeRPC()
+                    }
                 }
             )
 
@@ -140,6 +142,88 @@ describe("Network", () => {
                 expect(result.fee).toBe(0.555)
                 expect(result.rates.eur).toBe(500000000)
                 expect(result.rates.usd).toBe(600000000)
+            }
+        )
+    });
+
+    it("send transaction", async () => {
+        const tx = archethic.transaction.new()
+        tx.setType("data")
+        tx.setContent("content")
+        tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065")
+
+
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "send_transaction",
+                    "params": {
+                        "transaction": tx.toNodeRPC()
+                    }
+                }
+            )
+
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: {
+                    transaction_address: "0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064",
+                    status: "pending"
+                }
+            });
+        await archethic.rpcNode?.sendTransaction(tx).then(
+            (result) => {
+                expect(result.transaction_address).toBe("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064")
+                expect(result.status).toBe("pending")
+            }
+        )
+    });
+
+    it("simulate contract execution", async () => {
+        const tx = archethic.transaction.new()
+        tx.setType("data")
+        tx.setContent("content")
+        tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065")
+        tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064")
+
+
+        nock("http://127.0.0.1:4000", {
+            reqheaders: {
+                "content-type": "application/json",
+            }
+        })
+            .post("/api/rpc",
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "method": "simulate_contract_execution",
+                    "params": {
+                        "transaction": tx.toNodeRPC()
+                    }
+                }
+            )
+
+            .reply(200, {
+                id: 1,
+                jsonrpc: "2.0",
+                result: [
+                    { recipient_address: "0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065", valid: true },
+                    { recipient_address: "0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064", valid: false, error: "this is an error" },
+                ]
+            });
+        await archethic.rpcNode?.simulateContractExecution(tx).then(
+            (result) => {
+                expect(result[0].recipient_address).toBe("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065")
+                expect(result[0].valid).toBe(true)
+                expect(result[1].recipient_address).toBe("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064")
+                expect(result[1].valid).toBe(false)
+                expect(result[1].error).toBe("this is an error")
             }
         )
     });

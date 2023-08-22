@@ -1,7 +1,7 @@
 import * as API from "./api.js";
 import Archethic from "./index.js";
 import { Balance, OracleData, Token } from "./types.js";
-import { TransactionRpcResponse } from "./api/types.js";
+import { AddOriginKeyResponse } from "./api/types.js";
 
 export default class Network {
     private core: Archethic;
@@ -15,7 +15,7 @@ export default class Network {
         );
     }
 
-    async addOriginKey(originKey: string, certificate: string): Promise<TransactionRpcResponse> {
+    async addOriginKey(originKey: string, certificate: string): Promise<AddOriginKeyResponse> {
         return this.core.rpcNode!.addOriginKey({
             certificate,
             origin_public_key: originKey
