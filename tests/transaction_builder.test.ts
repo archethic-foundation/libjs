@@ -133,6 +133,29 @@ describe("Transaction builder", () => {
         });
     });
 
+    describe("addRecipientForNamedAction", () => {
+        it("should add a recipient for named action", () => {
+            const tx = new TransactionBuilder("transfer")
+                .addRecipientForNamedAction("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "vote", ["Miles"]);
+
+            expect(tx.data.recipients.length).toBe(1);
+            expect(tx.data.recipients[0].action).toBe("vote");
+            expect(tx.data.recipients[0].args!.length).toBe(1);
+            expect(tx.data.recipients[0].args![0]).toBe("Miles");
+        });
+
+        it("should throw if types are incorrect", () => {
+            const tx = new TransactionBuilder("transfer");
+
+            expect(() => {
+                // @ts-ignore
+                tx.addRecipientForNamedAction("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 1, 2)
+            }).toThrow();
+        });
+    });
+
+
+
     describe("previousSignaturePayload", () => {
         it("should generate binary encoding of the transaction before signing", () => {
             const code = `
@@ -678,4 +701,5 @@ describe("Transaction builder", () => {
 
         });
     });
+
 });

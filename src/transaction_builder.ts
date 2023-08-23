@@ -210,6 +210,14 @@ export default class TransactionBuilder {
     addRecipientForNamedAction(to: string | Uint8Array, action: string, args: any[]) {
         const address = maybeHexToUint8Array(to)
 
+        if (typeof action != 'string') {
+            throw '`action` must be a string'
+        }
+
+        if (!Array.isArray(args)) {
+            throw '`args` must be an array'
+        }
+
         this.data.recipients.push({ address, action, args })
         return this
     }
