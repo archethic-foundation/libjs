@@ -17,16 +17,16 @@ When it comes to private data manipulation, your application has two options :
   1. **Standalone :** store private keys on your own
   2. **WalletRPC :** delegate sensitive operations to a Wallet application. (**recommended**, but still Alpha)
 
-The second option is strongly preferable : it preserves you from security problematics. When your web application needs to perform a sensitive operation (signing a Transaction, reading a Transaction secrets), it will asks **Archethic Wallet** application to perform it.
-That way, cryptographic secrets never leaks from the **Archethic Wallet**.
+The second option is strongly preferable : it preserves you from security problematics. When your web application needs to perform a sensitive operation (signing a Transaction, reading a Transaction secrets), it will ask **Archethic Wallet** application to perform it.
+That way, cryptographic secrets never leak from the **Archethic Wallet**.
 
-The only requirement is user has to run an **Archethic Wallet** on its computer.
+The only requirement is user has to run an **Archethic Wallet** on their computer.
 
 > If your application does not perform any sensitive operation, **WalletRPC** is probably not necessary.
 
 ### Using the network with WalletRPC
 
-This library aims to provide a easy way to interact with Archethic network.
+This library aims to provide an easy way to interact with Archethic network.
 
 
 ```js
@@ -47,7 +47,7 @@ console.log(archethic)
 
 ### Using the network without WalletRPC
 
-This library aims to provide a easy way to interact with Archethic network.
+This library aims to provide an easy way to interact with Archethic network.
 
 
 ```js
@@ -1407,7 +1407,7 @@ npm run start
 
 If you want to leverage React for your DApp, you have to rely on [react-app-rewired](https://www.npmjs.com/package/react-app-rewired) to avoid errors regarding NodeJS module not accessible in the Webpack build.
 
-You can see how resolve the issues from this [article](https://www.alchemy.com/blog/how-to-polyfill-node-core-modules-in-webpack-5)
+You can see how to resolve the issues in this [article](https://www.alchemy.com/blog/how-to-polyfill-node-core-modules-in-webpack-5)
 
 ## Licence
 
