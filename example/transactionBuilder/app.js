@@ -102,7 +102,7 @@ window.generate_transaction = async () => {
     if (action == undefined && args == undefined) {
       txBuilder.addRecipient(address);
     } else {
-      txBuilder.addRecipientForNamedAction(address, action, args);
+      txBuilder.addRecipientWithNamedAction(address, action, args);
     }
   });
 

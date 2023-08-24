@@ -207,7 +207,7 @@ export default class TransactionBuilder {
      * @param {string} action The named action
      * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
      */
-    addRecipientForNamedAction(to: string | Uint8Array, action: string, args: any[]) {
+    addRecipientWithNamedAction(to: string | Uint8Array, action: string, args: any[]) {
         const address = maybeHexToUint8Array(to)
 
         if (typeof action != 'string') {

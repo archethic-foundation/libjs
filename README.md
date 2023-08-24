@@ -398,7 +398,7 @@ Add a token transfer to the `data.ledger.token.transfers` section of the transac
  Adds a recipient to call the smart contract's "transaction" action.
   - `to` is the contract's address in hexadecimal or Uint8Array
 
-#### AddRecipientForNamedAction(to, action, args)
+#### AddRecipientWithNamedAction(to, action, args)
   Adds a recipient to call a specific smart contract's action.
   - `to` is the contract's address in hexadecimal or Uint8Array
   - `action` is the name of the action
