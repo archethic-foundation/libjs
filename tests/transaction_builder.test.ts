@@ -133,10 +133,10 @@ describe("Transaction builder", () => {
         });
     });
 
-    describe("addRecipientWithNamedAction", () => {
+    describe("addRecipient", () => {
         it("should add a recipient for named action", () => {
             const tx = new TransactionBuilder("transfer")
-                .addRecipientWithNamedAction("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "vote", ["Miles"]);
+                .addRecipient("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "vote", ["Miles"]);
 
             expect(tx.data.recipients.length).toBe(1);
             expect(tx.data.recipients[0].action).toBe("vote");
@@ -149,7 +149,7 @@ describe("Transaction builder", () => {
 
             expect(() => {
                 // @ts-ignore
-                tx.addRecipientWithNamedAction("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 1, 2)
+                tx.addRecipient("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 1, 2)
             }).toThrow();
         });
     });
@@ -312,7 +312,7 @@ describe("Transaction builder", () => {
                 )
                 .setCode(code)
                 .setContent(content)
-                .addRecipientWithNamedAction(
+                .addRecipient(
                     "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88",
                     "vote_for_mayor",
                     ["Ms. Smith"]

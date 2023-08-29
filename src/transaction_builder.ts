@@ -193,29 +193,22 @@ export default class TransactionBuilder {
     /**
      * Add recipient to the transaction
      * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
-     */
-    addRecipient(to: string | Uint8Array) {
-        const address = maybeHexToUint8Array(to)
-
-        this.data.recipients.push({ address })
-        return this
-    }
-
-    /**
-     * Add recipient to the transaction (with a named action)
-     * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
      * @param {string} action The named action
      * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
      */
-    addRecipientWithNamedAction(to: string | Uint8Array, action: string, args: any[]) {
+    addRecipient(to: string | Uint8Array, action?: string, args?: any[]) {
         const address = maybeHexToUint8Array(to)
 
-        if (typeof action != 'string') {
+        if (action && typeof action != 'string') {
             throw '`action` must be a string'
         }
 
-        if (!Array.isArray(args)) {
+        if (args && !Array.isArray(args)) {
             throw '`args` must be an array'
+        }
+
+        if (action && !args) {
+            args = []
         }
 
         this.data.recipients.push({ address, action, args })
@@ -338,14 +331,14 @@ export default class TransactionBuilder {
             )
         })
 
-        const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
+        const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
             return concatUint8Arrays(
                 transfer.to,
                 bigIntToUint8Array(transfer.amount)
             )
         })
 
-        const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
+        const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
             const bufTokenId = toByteArray(transfer.tokenId)
             return concatUint8Arrays(
                 transfer.tokenAddress,
