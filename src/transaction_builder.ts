@@ -407,7 +407,6 @@ export default class TransactionBuilder {
 
     /**
      * JSON RPC API SEND_TRANSACTION
-     * content is hexadecimal
      */
     toNodeRPC(): TransactionRPC {
         return {
@@ -415,7 +414,7 @@ export default class TransactionBuilder {
             address: uint8ArrayToHex(this.address),
             type: this.type,
             data: {
-                content: uint8ArrayToHex(this.data.content),
+                content: new TextDecoder().decode(this.data.content),
                 code: new TextDecoder().decode(this.data.code),
                 ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
                     return {
