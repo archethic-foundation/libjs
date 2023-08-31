@@ -393,11 +393,22 @@ Add a token transfer to the `data.ledger.token.transfers` section of the transac
 - `tokenAddress` is hexadecimal encoding or Uint8Array representing the token's address to spend
 - `tokenId` is the ID of the token to send (default to: 0)
 
-#### addRecipient(to)
+#### addRecipient(to, action, args)
 
-Add a recipient (for non UCO transfers, ie. smart contract interaction) to the `data.recipient` section of the transaction
+ Adds a recipient to call the smart contract's "transaction" action.
+  - `to` is the contract's address in hexadecimal or Uint8Array
+  - `action` is the name of the action. This parameter is not mandatory
+  - `args` is the list of arguments for the action (must contain only JSON valid data). This parameter is not mandatory
 
-- `to` is hexadecimal encoding or Uint8Array representing the transaction address (recipient)
+  ```js
+import Archethic from "archethic"
+const archethic = new Archethic("https://testnet.archethic.net")
+
+const tx = archethic.transaction.new()
+  .setType("transfer")
+  .addRecipient("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
+  .addRecipient("0000bc96b1a9751d3750edb9381a55b5b4e4fb104c10b0b6c9a00433ec464637bfab", "vote", ["Dr. Who"])
+```
 
 #### build(seed, index, curve, hashAlgo)
 

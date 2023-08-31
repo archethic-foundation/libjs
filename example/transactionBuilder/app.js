@@ -17,7 +17,7 @@ archethic.connect();
 
 document
   .querySelector("#endpoint")
-  .addEventListener("change", async function () {
+  .addEventListener("change", async function() {
     archethic = new Archethic(this.value);
     archethic.connect();
   });
@@ -34,7 +34,7 @@ window.generate_transaction = async () => {
 
   const code = document.querySelector("#code").value;
   if (code != "") {
-    const ownershipIndex = ownerships.findIndex(function (ownership) {
+    const ownershipIndex = ownerships.findIndex(function(ownership) {
       return ownership.secret == seed;
     });
     if (ownershipIndex == -1) {
@@ -47,10 +47,10 @@ window.generate_transaction = async () => {
     const publicKey = await archethic.network.getStorageNoncePublicKey();
     const authorizedKeyIndex = ownerships[
       ownershipIndex
-    ].authorizedKeys.findIndex(function (authKey) {
+    ].authorizedKeys.findIndex(function(authKey) {
       return authKey.publicKey == publicKey;
     });
-    
+
     if (authorizedKeyIndex == -1) {
       alert(
         "You need to create an ownership with the transaction seed as secret and authorize node public key to let nodes generate new transaction from your smart contract"
@@ -70,11 +70,11 @@ window.generate_transaction = async () => {
     .setCode(document.querySelector("#code").value)
     .setContent(content);
 
-  ownerships.forEach(function (ownership) {
+  ownerships.forEach(function(ownership) {
     const secretKey = Crypto.randomSecretKey();
     const cipher = Crypto.aesEncrypt(ownership.secret, secretKey);
 
-    const authorizedKeys = ownership.authorizedKeys.map(function (authKey) {
+    const authorizedKeys = ownership.authorizedKeys.map(function(authKey) {
       let encryptedSecretKey = Crypto.ecEncrypt(secretKey, authKey.publicKey);
       return {
         publicKey: authKey.publicKey,
@@ -85,11 +85,11 @@ window.generate_transaction = async () => {
     txBuilder.addOwnership(cipher, authorizedKeys);
   });
 
-  ucoTransfers.forEach(function (transfer) {
+  ucoTransfers.forEach(function(transfer) {
     txBuilder.addUCOTransfer(transfer.to, transfer.amount);
   });
 
-  tokenTransfers.forEach(function (transfer) {
+  tokenTransfers.forEach(function(transfer) {
     txBuilder.addTokenTransfer(
       transfer.to,
       transfer.amount,
@@ -98,10 +98,10 @@ window.generate_transaction = async () => {
     );
   });
 
-  recipients.forEach(function (recipient) {
-    txBuilder.addRecipient(recipient);
+  recipients.forEach(function({ address, action, args }) {
+    txBuilder.addRecipient(address, action, args);
   });
-  console.log(originPrivateKey)
+
   transaction = txBuilder
     .build(seed, parseInt(index), curve)
     .originSign(originPrivateKey);
@@ -205,18 +205,55 @@ window.onClickAddTokenTransfer = async () => {
 };
 
 window.onClickAddRecipient = () => {
-  const recipient = document.querySelector("#recipient").value;
-  recipients.push(recipient);
+  const $address = document.querySelector("#recipient");
+  const $action = document.querySelector("#action");
+  const $argsJson = document.querySelector("#args_json");
+  const $argsJsonErr = document.querySelector("#args_json_error");
+  const $list = document.querySelector("#recipients");
 
-  const option = document.createElement("option");
-  option.text = recipient;
-  option.value = recipient;
-  var select = document.querySelector("#recipients");
-  select.appendChild(option);
+  const address = $address.value
+  const action = $action.value
+  const argsJson = $argsJson.value
 
-  select.size += 1;
+  if (address == "")
+    return
 
-  document.querySelector("#recipient").value = "";
+  $argsJsonErr.textContent = "";
+
+  if (action == "" && argsJson == "") {
+    // update state
+    recipients.push({ address });
+
+    // update list
+    if ($list.textContent != "")
+      $list.textContent = $list.textContent + '\n'
+    $list.textContent = $list.textContent + address
+
+    // reset form
+    $address.value = '';
+    $action.value = '';
+    $argsJson.value = '';
+  }
+  else {
+    try {
+      const args = JSON.parse(argsJson)
+      // update state
+      recipients.push({ address, action, args });
+
+      // update list
+      if ($list.textContent != "")
+        $list.textContent = $list.textContent + '\n'
+      $list.textContent = $list.textContent + `${address} - ${action} - ${argsJson}`
+
+      // reset form
+      $address.value = '';
+      $action.value = '';
+      $argsJson.value = '';
+    } catch (e) {
+      $argsJsonErr.textContent = "Invalid JSON:" + e.message
+    }
+  }
+
 };
 
 window.sendTransaction = async () => {
@@ -246,8 +283,8 @@ window.sendTransaction = async () => {
         .setAttribute(
           "href",
           endpoint +
-            "/explorer/transaction/" +
-            Utils.uint8ArrayToHex(transaction.address)
+          "/explorer/transaction/" +
+          Utils.uint8ArrayToHex(transaction.address)
         );
     })
     .send();
@@ -268,7 +305,7 @@ document
     const fileList = event.target.files;
 
     const fr = new FileReader();
-    fr.onload = function (e) {
+    fr.onload = function(e) {
       file_content = new Uint8Array(e.target.result);
     };
     fr.readAsArrayBuffer(fileList[0]);
@@ -288,7 +325,7 @@ window.addOwnership = () => {
   secretInput.setAttribute("id", "secret_" + ownershipIndex);
   secretInput.setAttribute("placeholder", "Secret to host");
   secretInput.setAttribute("class", "input");
-  secretInput.addEventListener("change", function (e) {
+  secretInput.addEventListener("change", function(e) {
     ownerships[ownershipIndex] = { secret: e.target.value, authorizedKeys: [] };
   });
 
@@ -320,7 +357,7 @@ window.addOwnership = () => {
   authorizedPublicKeyButtonAdd.setAttribute("class", "button");
   authorizedPublicKeyButtonAdd.setAttribute("type", "button");
   authorizedPublicKeyButtonAdd.innerText = "Add public key";
-  authorizedPublicKeyButtonAdd.addEventListener("click", function () {
+  authorizedPublicKeyButtonAdd.addEventListener("click", function() {
     addPublicKey(ownershipIndex);
   });
 
@@ -328,7 +365,7 @@ window.addOwnership = () => {
   storageNoncePublicKeyButtonAdd.setAttribute("class", "button");
   storageNoncePublicKeyButtonAdd.setAttribute("type", "button");
   storageNoncePublicKeyButtonAdd.innerText = "Load storage nonce public key";
-  storageNoncePublicKeyButtonAdd.addEventListener("click", function () {
+  storageNoncePublicKeyButtonAdd.addEventListener("click", function() {
     loadStorageNoncePublicKey(ownershipIndex);
   });
 

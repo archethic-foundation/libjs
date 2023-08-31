@@ -80,37 +80,43 @@
         <div class="box">
           <label for="amount_address">Add a UCO transfer</label>
           <br />
-          <input type="text" class="input" id="amount_address" placeholder="Enter the address of the recipient"
-            style="width: 400px" />
-          <input type="text" class="input" id="uco_amount" placeholder="Enter the amount to send"
-            style="width: 200px" />
-          <button type="button" class="button" onclick="onClickAddTransfer()">Add UCO Transfer</button>
+          <input type="text" class="input" id="amount_address" placeholder="Recipient's address" style="width: 400px" />
+          <input type="text" class="input" id="uco_amount" placeholder="Amount to send" style="width: 200px" />
+          <button type="button" class="button" onclick="onClickAddTransfer()">Add</button>
           <br />
           <select id="uco_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
         </div>
         <div class="box">
           <label for="token_amount_address">Add a Token transfer</label>
           <br />
-          <input type="text" class="input" id="token_recipient_address" placeholder="Enter the address of the recipient"
+          <input type="text" class="input" id="token_recipient_address" placeholder="Recipient's address"
             style="width: 400px" />
-          <input type="text" class="input" id="token_amount" placeholder="Enter the amount to send"
+          <input type="text" class="input" id="token_amount" placeholder="Amount to send" style="width: 200px" />
+          <input type="text" class="input" id="token_address" placeholder="Token address to send"
             style="width: 200px" />
-          <input type="text" class="input" id="token_address" placeholder="Enter the Token address to send"
+          <input type="text" class="input" id="token_id" placeholder="Token id to send" value="0"
             style="width: 200px" />
-          <input type="text" class="input" id="token_id" placeholder="Enter the Token id to send" value="0"
-            style="width: 200px" />
-          <button class="button" type="button" onclick="onClickAddTokenTransfer()">Add Token Transfer</button>
+          <button class="button" type="button" onclick="onClickAddTokenTransfer()">Add</button>
           <br />
           <select id="token_transfers" class="select" multiple="true" size="0" style="width: 500px;"></select>
         </div>
         <div class="box">
           <label for="recipient">Add recipient</label>
           <br />
-          <input type="text" class="input" id="recipient" placeholder="Enter the address of the recipient"
-            style="width: 400px" />
-          <button type="button" class="button" onclick="onClickAddRecipient()">Add recipient</button>
+          <input type="text" class="input" id="recipient" placeholder="Contract's address" style="width: 400px" />
           <br />
-          <select id="recipients" class="select" multiple="true" size="0" style="width: 500px;"></select>
+
+          <label for="action">Named action (optional)</label>
+          <br />
+          <input type="text" class="input" id="action" placeholder="Named action" style="width: 400px" />
+          <input type="text" class="input" id="args_json" placeholder="Name action's arguments as JSON"
+            style="width: 400px" />
+          <br />
+          <p id="args_json_error" style="color: red; margin: 1em 0 1em 0"></p>
+          <button type="button" class="button" onclick="onClickAddRecipient()">Add</button>
+          <br />
+
+          <pre id="recipients" style="margin: 2em 0 2em 0"></pre>
         </div>
       </form>
       <div class="column">
