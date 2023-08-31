@@ -10,6 +10,7 @@ esbuild.build({
   sourcemap: true,
   outfile: 'dist/archethic.browser.js',
   platform: 'browser',
+  target: "esnext",
   define: {
     global: 'window'
   },
