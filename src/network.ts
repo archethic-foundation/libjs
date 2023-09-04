@@ -22,6 +22,10 @@ export default class Network {
         });
     }
 
+    async callFunction(contractAddress: string, functionName: string, args: any[]) {
+        return this.core.rpcNode!.callFunction(contractAddress, functionName, args);
+    }
+
     async getOracleData(timestamp: number | undefined = undefined): Promise<OracleData> {
         return this.core.requestNode((endpoint) => API.getOracleData(endpoint, timestamp));
     }
