@@ -42,7 +42,7 @@
         "@absinthe/socket": "^0.2.1",
         "blakejs": "^1.2.1",
         "buffer": "^6.0.3",
-        "cross-fetch": "^3.1.5",
+        "cross-fetch": "^3.1.8",
         "crypto-js": "^4.1.1",
         "curve25519-js": "^0.0.4",
         "ed2curve": "^0.3.0",
