@@ -110,16 +110,16 @@ window.generate_transaction = async () => {
     Utils.uint8ArrayToHex(transaction.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
   const result = await archethic.transaction.getTransactionFee(transaction);
-  document.querySelector("#tx_fee").innerText = `
-    ${Utils.fromBigInt(result.fee)} UCO ($${result.rates.usd})`;
+  const amount = Utils.fromBigInt(result.fee)
+  const usdValue = (result.rates.usd * amount).toFixed(4)
+  document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
 };
 
 window.onClickAddStorageNoncePublicKey = async () => {
-  const endpoint = document.querySelector("#endpoint").value;
   const storageNonce = await archethic.network.getStorageNoncePublicKey();
   const option = document.createElement("option");
-  option.text = storage_nonce;
-  option.value = storage_nonce;
+  option.text = storageNonce;
+  option.value = storageNonce;
   const select = document.querySelector("#authorized_public_keys");
   select.appendChild(option);
 };
