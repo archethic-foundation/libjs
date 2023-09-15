@@ -11,8 +11,10 @@ import {
     bigIntToUint8Array,
     concatUint8Arrays,
     intToUint8Array,
+    isObject,
     maybeHexToUint8Array,
     maybeStringToUint8Array,
+    sortObjectKeysASC,
     toByteArray,
     uint8ArrayToHex
 } from "./utils.js";
@@ -357,7 +359,9 @@ export default class TransactionBuilder {
                     // address
                     address)
             } else {
-                const jsonArgs = JSON.stringify(args)
+                // we need to order object keys ASC because that's what elixir does
+                const orderedArgs = args.map((arg) => sortObjectKeysASC(arg))
+                const jsonArgs = JSON.stringify(orderedArgs)
                 const bufJsonLength = toByteArray(jsonArgs.length)
 
                 return concatUint8Arrays(

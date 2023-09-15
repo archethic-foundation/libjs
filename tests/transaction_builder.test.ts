@@ -406,6 +406,68 @@ describe("Transaction builder", () => {
             expect(payload).toEqual(expected_binary);
 
         });
+
+        it("should order the keys or named action args in the generated binary", () => {
+            const tx = new TransactionBuilder("transfer")
+                .addRecipient(
+                    "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88",
+                    "set_geopos",
+                    [{ "lng": 2, "lat": 1 }]
+                );
+
+            const keypair = deriveKeyPair("seed", 0);
+
+            tx.address = deriveAddress("seed", 1);
+            tx.previousPublicKey = keypair.publicKey;
+
+            const payload = tx.previousSignaturePayload();
+
+            const expected_binary = concatUint8Arrays(
+                //Version
+                intToUint8Array(2),
+                tx.address,
+                Uint8Array.from([253]),
+                //Code size
+                intToUint8Array(0),
+                //Content size
+                intToUint8Array(0),
+                // Nb of byte to encode nb of ownerships
+                Uint8Array.from([1]),
+                //Nb of ownerships
+                Uint8Array.from([0]),
+                // Nb of byte to encode nb of uco transfers
+                Uint8Array.from([1]),
+                // Nb of uco transfers
+                Uint8Array.from([0]),
+                // Nb of byte to encode nb of Token transfers
+                Uint8Array.from([1]),
+                // Nb of Token transfers
+                Uint8Array.from([0]),
+                // Nb of byte to encode nb of recipients
+                Uint8Array.from([1]),
+                // Nb of recipients
+                Uint8Array.from([1]),
+                // 1 = named recipient
+                Uint8Array.from([1]),
+                hexToUint8Array(
+                    "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
+                ),
+                // action
+                // action size on 1 byte
+                Uint8Array.from([10]),
+                // action value
+                new TextEncoder().encode("set_geopos"),
+                // args
+                // args size bytes
+                Uint8Array.from([1]),
+                // args size
+                Uint8Array.from([19]),
+                // args value
+                new TextEncoder().encode(`[{"lat":1,"lng":2}]`),
+            );
+            expect(payload).toEqual(expected_binary);
+
+        });
     });
 
     describe("setPreviousSignatureAndPreviousPublicKey", () => {
