@@ -1,4 +1,4 @@
-import {ArchethicRPCClient} from "./api/wallet_rpc.js";
+import { ArchethicRPCClient } from "./api/wallet_rpc.js";
 
 
 export class Endpoint {
@@ -6,7 +6,7 @@ export class Endpoint {
      * @param {String} endpoint
      * @return {DirectEndpoint | WalletRPCEndpoint}
      */
-    static build(endpoint: string) : DirectEndpoint | WalletRPCEndpoint {
+    static build(endpoint: string): DirectEndpoint | WalletRPCEndpoint {
         const url: URL = new URL(endpoint);
 
         if (url.protocol === 'ws:') {
@@ -27,7 +27,7 @@ export class DirectEndpoint {
     /**
      * @return {Boolean}
      */
-    get isRpcAvailable() : boolean { return false }
+    get isRpcAvailable(): boolean { return false }
 
     /**
      * @param {String} endpoint
@@ -49,7 +49,7 @@ export class WalletRPCEndpoint {
     /**
      * @return {Boolean}
      */
-    get isRpcAvailable() : boolean { return true }
+    get isRpcAvailable(): boolean { return true }
 
     /**
      * @param {String} endpoint

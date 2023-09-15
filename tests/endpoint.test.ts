@@ -1,11 +1,11 @@
-import {Endpoint, WalletRPCEndpoint} from "../src/endpoint";
+import { Endpoint, WalletRPCEndpoint } from "../src/endpoint";
 import { ArchethicRPCClient } from "../src/api/wallet_rpc";
 
 describe("Endpoint", () => {
     it("should create a non RPC endpoint", () => {
         const endpoint = Endpoint.build("http://localhost:4000");
 
-       expect(endpoint.isRpcAvailable).toBe(false)
+        expect(endpoint.isRpcAvailable).toBe(false)
         //expect(endpoint.rpcClient).toBeUndefined() Not necessary to test because typing
 
     });

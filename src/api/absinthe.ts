@@ -1,7 +1,7 @@
-import {Socket} from "phoenix";
+import { Socket } from "phoenix";
 import TransportWebSocket from "isomorphic-ws";
 //Use ES5 require, as ES6 import causes `Cannot instantiate an arrow function` error
-import {create, send, observe, AbsintheSocket, cancel, Notifier} from "@absinthe/socket";
+import { create, send, observe, AbsintheSocket, cancel, Notifier } from "@absinthe/socket";
 
 export default {
     create: absintheCreate,
@@ -10,7 +10,7 @@ export default {
     cancel: absintheCancel
 }
 
-function absintheCreate(uri: string) : AbsintheSocket  {
+function absintheCreate(uri: string): AbsintheSocket {
     const webSocket = new Socket(uri, {
         transport: TransportWebSocket,
     });
@@ -18,7 +18,7 @@ function absintheCreate(uri: string) : AbsintheSocket  {
     return create(webSocket);
 }
 
-function absintheSend(absintheSocket: AbsintheSocket , operation: string) {
+function absintheSend(absintheSocket: AbsintheSocket, operation: string) {
     return send(absintheSocket, { operation });
 }
 

@@ -106,7 +106,7 @@ describe("Account", () => {
                                 {
                                     secret: accessTx.data.ownerships[0].secret,
                                     authorizedPublicKeys:
-                                    accessTx.data.ownerships[0].authorizedKeys,
+                                        accessTx.data.ownerships[0].authorizedKeys,
                                 },
                             ],
                         },
@@ -138,7 +138,7 @@ describe("Account", () => {
                                 {
                                     secret: keychainTx.data.ownerships[0].secret,
                                     authorizedPublicKeys:
-                                    keychainTx.data.ownerships[0].authorizedKeys,
+                                        keychainTx.data.ownerships[0].authorizedKeys,
                                 },
                             ],
                         },
@@ -147,7 +147,7 @@ describe("Account", () => {
             });
 
         const keychain = await account.getKeychain("seed");
-        expect( Object.keys(keychain.services).length).toBe(1);
+        expect(Object.keys(keychain.services).length).toBe(1);
         expect(keychain.services.uco.derivationPath).toBe("m/650'/0/0");
     });
 });

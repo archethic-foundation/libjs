@@ -1,8 +1,8 @@
 import Keychain from "./keychain.js";
-import {aesDecrypt, aesEncrypt, deriveAddress, deriveKeyPair, ecDecrypt, ecEncrypt, randomSecretKey,} from "./crypto.js";
-import {maybeUint8ArrayToHex, uint8ArrayToHex} from "./utils.js";
+import { aesDecrypt, aesEncrypt, deriveAddress, deriveKeyPair, ecDecrypt, ecEncrypt, randomSecretKey, } from "./crypto.js";
+import { maybeUint8ArrayToHex, uint8ArrayToHex } from "./utils.js";
 import Archethic from "./index.js";
-import {ExtendedTransactionBuilder} from "./transaction.js";
+import { ExtendedTransactionBuilder } from "./transaction.js";
 
 export default class Account {
     core: Archethic;
@@ -10,7 +10,7 @@ export default class Account {
         this.core = core;
     }
 
-    newKeychainTransaction(keychain: Keychain, transactionChainIndex: number) : ExtendedTransactionBuilder {
+    newKeychainTransaction(keychain: Keychain, transactionChainIndex: number): ExtendedTransactionBuilder {
         const aesKey = randomSecretKey();
 
         const authorizedKeys = keychain.authorizedPublicKeys.map((key) => {
@@ -27,7 +27,7 @@ export default class Account {
             .build(keychain.seed, transactionChainIndex);
     }
 
-    newAccessTransaction(seed: string | Uint8Array, keychainAddress: string | Uint8Array) : ExtendedTransactionBuilder {
+    newAccessTransaction(seed: string | Uint8Array, keychainAddress: string | Uint8Array): ExtendedTransactionBuilder {
         const aesKey = randomSecretKey();
 
         const { publicKey } = deriveKeyPair(seed, 0);
@@ -36,7 +36,7 @@ export default class Account {
 
         const authorizedKeys = [
             {
-                publicKey: uint8ArrayToHex(publicKey) ,
+                publicKey: uint8ArrayToHex(publicKey),
                 encryptedSecretKey: uint8ArrayToHex(encryptedSecretKey),
             },
         ];

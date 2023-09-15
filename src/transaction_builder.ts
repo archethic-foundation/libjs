@@ -331,14 +331,14 @@ export default class TransactionBuilder {
             )
         })
 
-        const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
+        const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
             return concatUint8Arrays(
                 transfer.to,
                 bigIntToUint8Array(transfer.amount)
             )
         })
 
-        const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
+        const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
             const bufTokenId = toByteArray(transfer.tokenId)
             return concatUint8Arrays(
                 transfer.tokenAddress,
