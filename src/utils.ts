@@ -29,6 +29,33 @@ export function isHex(str: string) {
 }
 
 /**
+ * Check if given variable is an object
+ * @param variable
+ */
+export function isObject(variable: any) {
+    return (
+        typeof variable === 'object' &&
+        !Array.isArray(variable) &&
+        variable !== null
+    )
+}
+
+export function sortObjectKeysASC(term: any): any {
+    // array: map over elements
+    if (Array.isArray(term))
+        return term.map((item: any) => sortObjectKeysASC(item))
+
+    // object: sort and map over elements
+    if (isObject(term))
+        return Object.keys(term).sort().reduce((newObj: any, key: string) => {
+            newObj[key] = sortObjectKeysASC(term[key]);
+            return newObj;
+        }, {});
+
+    return term
+}
+
+/**
  * Convert a hex string to a Uint8Array
  * @param str
  */

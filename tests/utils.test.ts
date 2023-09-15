@@ -7,7 +7,8 @@ import {
     bigIntToUint8Array,
     toByteArray,
     toBigInt,
-    fromBigInt
+    fromBigInt,
+    sortObjectKeysASC
 } from "../src/utils.js"
 
 describe("Utils", () => {
@@ -90,6 +91,63 @@ describe("Utils", () => {
 
         it("should return decimals number with decimals passed in param", () => {
             expect(fromBigInt(12_534_500, 6)).toBe(12.5345)
+        })
+    })
+
+    describe("sortObjectKeysASC", () => {
+        it("should return the same value if not an object", () => {
+            expect(sortObjectKeysASC(1234)).toStrictEqual(1234)
+            expect(sortObjectKeysASC([])).toStrictEqual([])
+            expect(sortObjectKeysASC([1, 2])).toStrictEqual([1, 2])
+            expect(sortObjectKeysASC("")).toStrictEqual("")
+            expect(sortObjectKeysASC("abradacadabra")).toStrictEqual("abradacadabra")
+        })
+
+        it("should not change anything if already ordered", () => {
+            const a = sortObjectKeysASC({
+                a: "hello",
+                b: "world"
+            })
+            expect(Object.keys(a)).toStrictEqual(["a", "b"])
+        })
+
+        it("should reorder the keys of root level", () => {
+            const a = sortObjectKeysASC({
+                b: "world",
+                a: "hello",
+            })
+            expect(Object.keys(a)).toStrictEqual(["a", "b"])
+        })
+
+        it("should reorder the keys even nested", () => {
+            const obj = sortObjectKeysASC({
+                b: "world",
+                a: {
+                    b: [
+                        {
+                            a: 1,
+                            c: 2,
+                            b: {
+                                c: "some",
+                                a: "thing",
+                                b: "here"
+                            }
+                        }
+                    ],
+                    a: "bar",
+                    c: {
+                        b: "loulou",
+                        a: "riri",
+                        c: "fifi"
+                    }
+                },
+                c: "hello"
+            })
+            expect(Object.keys((obj))).toStrictEqual(["a", "b", "c"])
+            expect(Object.keys((obj.a))).toStrictEqual(["a", "b", "c"])
+            expect(Object.keys((obj.a.c))).toStrictEqual(["a", "b", "c"])
+            expect(Object.keys((obj.a.b[0]))).toStrictEqual(["a", "b", "c"])
+            expect(Object.keys((obj.a.b[0].b))).toStrictEqual(["a", "b", "c"])
         })
     })
 })
