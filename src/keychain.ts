@@ -7,7 +7,7 @@ import {
     uint8ArrayToInt,
     wordArrayToUint8Array
 } from "./utils.js";
-import {Curve, HashAlgorithm, Keypair, Services} from "./types.js";
+import { Curve, HashAlgorithm, Keypair, Services } from "./types.js";
 import {
     curveToID,
     deriveAddress,
@@ -51,7 +51,7 @@ export default class Keychain {
      * @param {Curve} curve
      * @param {HashAlgorithm} hashAlgo
      */
-    addService(name: string, derivationPath: string, curve : Curve = Curve.ed25519, hashAlgo: HashAlgorithm = HashAlgorithm.sha256) {
+    addService(name: string, derivationPath: string, curve: Curve = Curve.ed25519, hashAlgo: HashAlgorithm = HashAlgorithm.sha256) {
         this.services[name] = {
             derivationPath: derivationPath,
             curve: curve,
@@ -100,7 +100,7 @@ export default class Keychain {
     /**
      * Encode the keychain
      */
-    encode() : Uint8Array {
+    encode(): Uint8Array {
         let servicesBuffer = [];
         for (let service in this.services) {
             const { derivationPath, curve, hashAlgo } = this.services[service];
@@ -263,7 +263,7 @@ function deriveArchethicKeypair(
     index: number,
     curve: Curve = Curve.ed25519,
     pathSuffix: string = ""
-) : Keypair {
+): Keypair {
 
     seed = CryptoJS.lib.WordArray.create(maybeHexToUint8Array(seed))
 
@@ -283,7 +283,7 @@ function replaceDerivationPathIndex(path: string, suffix: string, index: number)
     return servicePath.concat([serviceName, `${index}`]).join("/")
 }
 
-export function keyToJWK(publicKey: Uint8Array , keyID: string) {
+export function keyToJWK(publicKey: Uint8Array, keyID: string) {
     const curveID = publicKey[0];
     const key = publicKey.slice(2, publicKey.length);
 

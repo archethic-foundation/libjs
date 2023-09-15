@@ -1,4 +1,4 @@
-import {Curve, HashAlgorithm, Keypair} from "./types.js";
+import { Curve, HashAlgorithm, Keypair } from "./types.js";
 import {
     concatUint8Arrays,
     hexToUint8Array,
@@ -33,7 +33,7 @@ const ec_secp256k1 = new EC("secp256k1")
 const SOFTWARE_ID = 1
 
 
-export function randomSecretKey() : Uint8Array {
+export function randomSecretKey(): Uint8Array {
     return wordArrayToUint8Array(CryptoJS.lib.WordArray.random(32));
 }
 
@@ -83,7 +83,7 @@ export function IDToHashAlgo(ID: number): HashAlgorithm {
  * Get the ID of a given hash algorithm
  * @params {String} hashAlgo Hash algorithm
  */
-export function hashAlgoToID(hashAlgo: HashAlgorithm) : number {
+export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
     switch (hashAlgo) {
         case HashAlgorithm.sha256:
             return 0
@@ -105,7 +105,7 @@ export function hashAlgoToID(hashAlgo: HashAlgorithm) : number {
  * @param {string | Uint8Array} content Content to hash
  * @param {HashAlgorithm} algo Hash algorithm
  */
-export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm) : Uint8Array {
+export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm): Uint8Array {
     switch (algo) {
         case HashAlgorithm.sha256: {
             const input = CryptoJS.lib.WordArray.create(content)
@@ -190,7 +190,7 @@ export function IDToCurve(ID: number): Curve {
     }
 }
 
-export function derivePrivateKey(seed: string | Uint8Array, index: number) : Uint8Array {
+export function derivePrivateKey(seed: string | Uint8Array, index: number): Uint8Array {
     //Convert seed to Uint8Array
     seed = CryptoJS.lib.WordArray.create(maybeStringToUint8Array(seed))
 
@@ -215,7 +215,7 @@ export function derivePrivateKey(seed: string | Uint8Array, index: number) : Uin
  * @param {number} index Number to identify the order of keys to generate
  * @param {String} curve Elliptic curve to use ("ed25519", "P256", "secp256k1")
  */
-export function deriveKeyPair(seed : string | Uint8Array, index: number = 0, curve = Curve.ed25519) : Keypair {
+export function deriveKeyPair(seed: string | Uint8Array, index: number = 0, curve = Curve.ed25519): Keypair {
 
     if (index < 0) {
         throw "'index' must be a positive number"
@@ -234,7 +234,7 @@ export function deriveKeyPair(seed : string | Uint8Array, index: number = 0, cur
  * @param {Curve} curve Elliptic Curve to use
  * @param {HashAlgorithm} hashAlgo Hash algorithm to use
  */
-export function deriveAddress(seed: string | Uint8Array, index: number, curve: Curve = Curve.ed25519, hashAlgo: HashAlgorithm = HashAlgorithm.sha256) : Uint8Array {
+export function deriveAddress(seed: string | Uint8Array, index: number, curve: Curve = Curve.ed25519, hashAlgo: HashAlgorithm = HashAlgorithm.sha256): Uint8Array {
     seed = maybeStringToUint8Array(seed)
     const { publicKey } = deriveKeyPair(seed, index, curve)
 
@@ -242,8 +242,8 @@ export function deriveAddress(seed: string | Uint8Array, index: number, curve: C
     const hashedPublicKey = hash(publicKey, hashAlgo)
 
     return concatUint8Arrays(
-            Uint8Array.from([curveID]),
-            Uint8Array.from(hashedPublicKey)
+        Uint8Array.from([curveID]),
+        Uint8Array.from(hashedPublicKey)
     )
 }
 
@@ -253,7 +253,7 @@ export function deriveAddress(seed: string | Uint8Array, index: number, curve: C
  * @params {String} curve Elliptic curve
  * @params {Integer} originID Origin identification
  */
-export function generateDeterministicKeyPair(pvKey: string | Uint8Array , curve: Curve, originID: number) : Keypair {
+export function generateDeterministicKeyPair(pvKey: string | Uint8Array, curve: Curve, originID: number): Keypair {
     if (typeof pvKey === "string") {
         pvKey = hexToUint8Array(pvKey)
     }
@@ -280,7 +280,7 @@ export function generateDeterministicKeyPair(pvKey: string | Uint8Array , curve:
  * @param {Curve} curve Elliptic curve
  * @returns {Object} {publicKey: Uint8Array, privateKey: Uint8Array}
  */
-function getKeypair(pvKey: string | Uint8Array , curve: Curve) : {publicKey: Uint8Array, privateKey: Uint8Array} {
+function getKeypair(pvKey: string | Uint8Array, curve: Curve): { publicKey: Uint8Array, privateKey: Uint8Array } {
     if (typeof pvKey === "string") {
         pvKey = hexToUint8Array(pvKey)
     }
@@ -330,7 +330,7 @@ function getKeypair(pvKey: string | Uint8Array , curve: Curve) : {publicKey: Uin
  * @param { string | Uint8Array } data Data to sign
  * @param { string | Uint8Array } privateKey Private key used to sign the data
  */
-export function sign(data: string | Uint8Array, privateKey: string | Uint8Array) : Uint8Array {
+export function sign(data: string | Uint8Array, privateKey: string | Uint8Array): Uint8Array {
     privateKey = maybeStringToUint8Array(privateKey);
     data = maybeStringToUint8Array(data);
 
@@ -367,7 +367,7 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
  * @param {string | Uint8Array} data Data to verify
  * @param {string | Uint8Array} publicKey Public key used to verify the signature
  */
-export function verify(sig: string | Uint8Array, data:  string | Uint8Array, publicKey:  string | Uint8Array) : boolean {
+export function verify(sig: string | Uint8Array, data: string | Uint8Array, publicKey: string | Uint8Array): boolean {
     sig = maybeStringToUint8Array(sig);
     data = maybeStringToUint8Array(data);
     publicKey = maybeStringToUint8Array(publicKey);
@@ -404,7 +404,7 @@ export function verify(sig: string | Uint8Array, data:  string | Uint8Array, pub
  * @param {string | Uint8Array} data Data to encrypt
  * @param {string | Uint8Array} publicKey Public key for the shared secret encryption
  */
-export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Array) : Uint8Array {
+export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Array): Uint8Array {
     publicKey = maybeStringToUint8Array(publicKey);
     data = maybeStringToUint8Array(data);
 
@@ -435,7 +435,7 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
             const { aesKey, iv } = deriveSecret(sharedKey)
             const { tag, encrypted } = aesAuthEncrypt(data, aesKey, iv)
 
-            return concatUint8Arrays(hexToUint8Array(ecdh.getPublic().encode("hex",  false)), tag, encrypted)
+            return concatUint8Arrays(hexToUint8Array(ecdh.getPublic().encode("hex", false)), tag, encrypted)
         }
         case 2: {
             const ecdh = ec_secp256k1.genKeyPair()
@@ -456,7 +456,7 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
     }
 }
 
-export function ecDecrypt(ciphertext : string | Uint8Array, privateKey : string | Uint8Array) : Uint8Array {
+export function ecDecrypt(ciphertext: string | Uint8Array, privateKey: string | Uint8Array): Uint8Array {
     ciphertext = maybeStringToUint8Array(ciphertext);
     privateKey = maybeStringToUint8Array(privateKey);
 
@@ -513,7 +513,7 @@ export function ecDecrypt(ciphertext : string | Uint8Array, privateKey : string 
  * @param {string | Uint8Array} data Data to encrypt
  * @param {string | Uint8Array} key Symmetric key
  */
-export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array) : Uint8Array {
+export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array): Uint8Array {
     key = maybeHexToUint8Array(key)
     data = maybeStringToUint8Array(data)
 
@@ -533,7 +533,7 @@ export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array) 
  * @param cipherText Ciphertext to decrypt
  * @param key Symmetric key
  */
-export function aesDecrypt(cipherText: string | Uint8Array, key: string | Uint8Array) : Uint8Array {
+export function aesDecrypt(cipherText: string | Uint8Array, key: string | Uint8Array): Uint8Array {
     cipherText = maybeHexToUint8Array(cipherText)
     key = maybeHexToUint8Array(key)
 
@@ -548,7 +548,7 @@ export function aesDecrypt(cipherText: string | Uint8Array, key: string | Uint8A
  * Derive a secret from a shared key
  * @param sharedKey
  */
-function deriveSecret(sharedKey: Uint8Array) : {aesKey: Uint8Array, iv: Uint8Array} {
+function deriveSecret(sharedKey: Uint8Array): { aesKey: Uint8Array, iv: Uint8Array } {
     sharedKey = CryptoJS.lib.WordArray.create(sharedKey)
     const pseudoRandomKey = CryptoJS.SHA256(sharedKey)
 
@@ -564,7 +564,7 @@ function deriveSecret(sharedKey: Uint8Array) : {aesKey: Uint8Array, iv: Uint8Arr
  * @param aesKey AES key
  * @param iv Initialization vector
  */
-function aesAuthEncrypt(data: Uint8Array , aesKey: Uint8Array, iv: Uint8Array) : {tag: Uint8Array, encrypted: Uint8Array} {
+function aesAuthEncrypt(data: Uint8Array, aesKey: Uint8Array, iv: Uint8Array): { tag: Uint8Array, encrypted: Uint8Array } {
     // Format for SJCL
     const keyBits = sjcl.codec.hex.toBits(uint8ArrayToHex(aesKey))
     const dataBits = sjcl.codec.hex.toBits(uint8ArrayToHex(data))
