@@ -6,9 +6,9 @@ import { ArchethicRPCClient } from "./api/wallet_rpc.js";
 import { NodeRPCClient } from "./api/node_rpc.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
-import Account from "./account.js";
+import Account, { Keychain } from "./account.js";
 
-export { Utils, Crypto };
+export { Utils, Crypto, Keychain };
 
 export default class Archethic {
 
