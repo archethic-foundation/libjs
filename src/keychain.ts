@@ -18,7 +18,7 @@ import {
     IDToHashAlgo
 } from "./crypto.js";
 // @ts-ignore
-import * as CryptoJS from "crypto-js";
+import CryptoJS from "crypto-js";
 
 const KEYCHAIN_ORIGIN_ID = 0;
 
