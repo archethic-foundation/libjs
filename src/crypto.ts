@@ -215,14 +215,18 @@ export function derivePrivateKey(seed: string | Uint8Array, index: number): Uint
  * @param {number} index Number to identify the order of keys to generate
  * @param {String} curve Elliptic curve to use ("ed25519", "P256", "secp256k1")
  */
-export function deriveKeyPair(seed: string | Uint8Array, index: number = 0, curve = Curve.ed25519): Keypair {
-
+export function deriveKeyPair(
+    seed: string | Uint8Array,
+    index: number = 0,
+    curve = Curve.ed25519,
+    origin_id: number = SOFTWARE_ID
+): Keypair {
     if (index < 0) {
         throw "'index' must be a positive number"
     }
 
     const pvBuf = derivePrivateKey(seed, index)
-    return generateDeterministicKeyPair(pvBuf, curve, SOFTWARE_ID)
+    return generateDeterministicKeyPair(pvBuf, curve, origin_id)
 }
 
 /**

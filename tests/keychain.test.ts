@@ -1,7 +1,9 @@
 
 import Keychain, { keyToJWK } from "../src/keychain"
-import { uint8ArrayToHex, concatUint8Arrays } from "../src/utils"
-import { deriveAddress } from "../src/crypto"
+import { uint8ArrayToHex, concatUint8Arrays, wordArrayToUint8Array } from "../src/utils"
+import { deriveAddress, deriveKeyPair, ecDecrypt, aesDecrypt } from "../src/crypto"
+// @ts-ignore
+import CryptoJS from "crypto-js";
 //import TransactionBuilder from "../lib/transaction_builder.js"
 
 
@@ -47,7 +49,7 @@ describe("Keychain", () => {
     })
 
     describe("derivation", () => {
-        describe("should derive keys for a given service with suffix", () => {
+        it("should derive keys for a given service with suffix", () => {
             const seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
             const keychain = new Keychain(seed)
             keychain.addService("uco", "m/650'/0/0")
@@ -56,6 +58,26 @@ describe("Keychain", () => {
             const { publicKey: extendedPublicKeyUco } = keychain.deriveKeypair("uco", 0, "extended")
 
             expect(publicKeyUco).not.toEqual(extendedPublicKeyUco)
+        })
+
+        it("should derive key with derivation path without index", () => {
+            const seed = new TextEncoder().encode("abcdefghijklmnopqrstuvwxyz")
+            const keychain = new Keychain(seed)
+
+            keychain.addService("uco", "m/650'/0/0")
+            const { publicKey: publicKeyWithIndex } = keychain.deriveKeypair("uco")
+
+            keychain.addService("uco", "m/650'/0")
+            const { publicKey: publicKeyWithoutIndex } = keychain.deriveKeypair("uco")
+
+            expect(publicKeyWithIndex).not.toEqual(publicKeyWithoutIndex)
+
+            const keychainSeed = CryptoJS.lib.WordArray.create(keychain.seed)
+            const hashedPath = CryptoJS.SHA256("m/650'/0")
+            const serviceSeed = wordArrayToUint8Array(CryptoJS.HmacSHA512(hashedPath, keychainSeed)).subarray(0, 32)
+            const { publicKey: normalDerivationPubKey } = deriveKeyPair(serviceSeed, 0)
+
+            expect(publicKeyWithoutIndex).toStrictEqual(normalDerivationPubKey)
         })
     })
 
