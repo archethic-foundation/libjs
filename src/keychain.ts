@@ -264,17 +264,39 @@ function deriveArchethicKeypair(
     curve: Curve = Curve.ed25519,
     pathSuffix: string = ""
 ): Keypair {
+    const extendedSeed = deriveServiceSeed(seed, derivationPath, index, pathSuffix)
 
-    seed = CryptoJS.lib.WordArray.create(maybeHexToUint8Array(seed))
-
-    //Hash the derivation path
-    const hashedPath = CryptoJS.SHA256(replaceDerivationPathIndex(derivationPath, pathSuffix, index))
-    const extendedSeed = wordArrayToUint8Array(CryptoJS.HmacSHA512(hashedPath, seed))
-        .subarray(0, 32)
-
-    return generateDeterministicKeyPair(extendedSeed, curve, KEYCHAIN_ORIGIN_ID);
+    return isPathWithIndex(derivationPath) ?
+        generateDeterministicKeyPair(extendedSeed, curve, KEYCHAIN_ORIGIN_ID) :
+        deriveKeyPair(extendedSeed, index, curve)
 }
 
+function deriveServiceSeed(
+    seed: string | Uint8Array,
+    derivationPath: string,
+    index: number,
+    pathSuffix: string = ""
+) {
+    seed = CryptoJS.lib.WordArray.create(maybeHexToUint8Array(seed))
+
+    let hashedPath = ""
+    if (isPathWithIndex(derivationPath)) {
+        //Hash the derivation path
+        hashedPath = CryptoJS.SHA256(replaceDerivationPathIndex(derivationPath, pathSuffix, index))
+    } else {
+        const path = derivationPath.split("/")
+        // @ts-ignore
+        const serviceName = path.pop().concat(pathSuffix)
+        hashedPath = CryptoJS.SHA256(path.concat([serviceName]).join("/"))
+    }
+
+    return wordArrayToUint8Array(CryptoJS.HmacSHA512(hashedPath, seed)).subarray(0, 32)
+}
+
+function isPathWithIndex(path: string) {
+    let servicePath: string[] = path.split("/")
+    return servicePath.length == 4 && servicePath[3] == "0"
+}
 
 function replaceDerivationPathIndex(path: string, suffix: string, index: number): string {
     let servicePath: string[] = path.split("/").slice(0, -1)
