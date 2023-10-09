@@ -81,6 +81,31 @@ describe("Keychain", () => {
         })
     })
 
+    describe("ecEncryptServiceSeed", () => {
+        it("should encrypt service seed", () => {
+            const keychain = new Keychain("myseed")
+            keychain.addService("uco", "m/650'/0")
+
+            const { publicKey: expectedPublicKey, privateKey: expectedPrivateKey } = keychain.deriveKeypair("uco", 0)
+
+            const { publicKey: pub1, privateKey: priv1 } = deriveKeyPair("seed1", 0)
+            const { publicKey: pub2, privateKey: priv2 } = deriveKeyPair("seed2", 0)
+
+            const { secret, authorizedPublicKeys } = keychain.ecEncryptServiceSeed("uco", [pub1, pub2])
+
+            expect(authorizedPublicKeys.length).toStrictEqual(2)
+
+            authorizedPublicKeys.forEach(({ publicKey, encryptedSecretKey }) => {
+                const priv = (publicKey == pub1) ? priv1 : priv2
+                const aesKey = ecDecrypt(encryptedSecretKey, priv)
+                const serviceSeed = aesDecrypt(secret, aesKey)
+                const { publicKey: servicePub, privateKey: servicePriv } = deriveKeyPair(serviceSeed, 0)
+                expect(servicePub).toStrictEqual(expectedPublicKey)
+                expect(servicePriv).toStrictEqual(expectedPrivateKey)
+            })
+        })
+    })
+
     describe("encoding", () => {
         it("should encode the keychain into a binary", () => {
             const keychain = new Keychain("myseed")

@@ -11,9 +11,13 @@ import { Curve, HashAlgorithm, Keypair, Services } from "./types.js";
 import {
     curveToID,
     deriveAddress,
+    deriveKeyPair,
     generateDeterministicKeyPair,
     hash,
     hashAlgoToID,
+    randomSecretKey,
+    ecEncrypt,
+    aesEncrypt,
     IDToCurve,
     IDToHashAlgo
 } from "./crypto.js";
@@ -253,9 +257,34 @@ export default class Keychain {
             verificationMethod: verificationMethods,
         };
     }
+
+    ecEncryptServiceSeed(service: string, publicKeys: string[] | Uint8Array[], pathSuffix: string = "") {
+        if (!Array.isArray(publicKeys)) {
+            throw 'Authorized keys must be an array'
+        }
+
+        if (!this.services[service]) {
+            throw "Service doesn't exist in the keychain";
+        }
+
+        const { derivationPath } = this.services[service];
+        const extendedSeed = deriveServiceSeed(this.seed, derivationPath, 0, pathSuffix)
+
+        const aesKey = randomSecretKey()
+
+        const secret = aesEncrypt(extendedSeed, aesKey)
+
+        const authorizedPublicKeys = publicKeys.map((key) => {
+            const uintKey = maybeHexToUint8Array(key)
+            return {
+                publicKey: uintKey,
+                encryptedSecretKey: ecEncrypt(aesKey, uintKey)
+            };
+        });
+
+        return { secret, authorizedPublicKeys }
+    }
 }
-
-
 
 function deriveArchethicKeypair(
     seed: string | Uint8Array,
