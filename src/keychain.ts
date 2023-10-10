@@ -8,6 +8,7 @@ import {
     wordArrayToUint8Array
 } from "./utils.js";
 import { Curve, HashAlgorithm, Keypair, Services } from "./types.js";
+import TransactionBuilder from "./transaction_builder.js";
 import {
     curveToID,
     deriveAddress,
@@ -18,6 +19,7 @@ import {
     randomSecretKey,
     ecEncrypt,
     aesEncrypt,
+    sign,
     IDToCurve,
     IDToHashAlgo
 } from "./crypto.js";
@@ -101,6 +103,34 @@ export default class Keychain {
         return this;
     }
 
+    buildTransaction(tx: TransactionBuilder, service: string, index: number, suffix: string = "") {
+        if (!this.services[service]) {
+            throw "Service doesn't exist in the keychain"
+        }
+
+        if (typeof index !== 'number' || index < 0) {
+            throw "'index' must be a positive number"
+        }
+
+        if (typeof (suffix) !== "string") {
+            throw "'suffix must be a string"
+        }
+
+        const keypair: Keypair = this.deriveKeypair(service, index, suffix)
+        const address: Uint8Array = this.deriveAddress(service, index + 1, suffix)
+
+        tx.setAddress(address)
+
+        const payloadForPreviousSignature = tx.previousSignaturePayload()
+        const previousSignature = sign(payloadForPreviousSignature, keypair.privateKey)
+
+        tx.setPreviousSignatureAndPreviousPublicKey(
+            previousSignature,
+            keypair.publicKey
+        )
+
+        return tx
+    }
     /**
      * Encode the keychain
      */
