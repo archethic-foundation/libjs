@@ -221,6 +221,29 @@ const keychain = await archethic.account.getKeychain(accessKeychainSeed);
 const { publicKey } = keychain.deriveKeypair("uco", 0);
 ```
 
+#### ecEncryptServiceSeed(service, publicKeys)
+
+Use ec encryption on the seed for the list of authorizedPublicKeys
+
+- `service`: Service name to identify the derivation path to use
+- `authorizedPublicKeys`: List of public keys to encrypt the service seed
+
+```js
+import Archethic, { Keychain, Crypto }from "archethic";
+
+const archethic = new Archethic("http://testnet.archethic.net")
+await archethic.connect()
+
+const keychain = new Keychain(Crypto.randomSecretKey())
+    .addService("uco", "m/650'/uco")
+
+const storageNonce = await archethic.network.getStorageNoncePublicKey()
+
+const { secret, authorizedPublicKeys } = keychain.ecEncryptServiceSeed("uco", [storageNonce]);
+// secret and authorizedPublicKeys can be used to create an ownership
+const tx = archethic.transaction.new().addOwnership(secret, authorizedPublicKeys)
+```
+
 #### toDID()
 
 Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
@@ -1257,6 +1280,7 @@ It creates a new keypair into hexadecimal format
 - `seed` is hexadecimal encoding or Uint8Array representing the transaction chain seed to be able to derive and generate the keys
 - `index` is the number of transactions in the chain, to generate the actual and the next public key (see below the cryptography section)
 - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1") - default to: "ed25519"
+- `origin_id` is the origin of the public key (can be 0 for "on chain wallet", 1 for "software" or 2 for "tpm") - default to: 1
 
 ```js
 import { Crypto } from "archethic";
