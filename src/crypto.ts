@@ -214,6 +214,7 @@ export function derivePrivateKey(seed: string | Uint8Array, index: number): Uint
  * @param {String} seed Keypair derivation seed
  * @param {number} index Number to identify the order of keys to generate
  * @param {String} curve Elliptic curve to use ("ed25519", "P256", "secp256k1")
+ * @param {number} origin_id Origin id of the public key (0, 1, 2) = ("on chain wallet", "software", "tpm")
  */
 export function deriveKeyPair(
     seed: string | Uint8Array,
