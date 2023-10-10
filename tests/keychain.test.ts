@@ -1,7 +1,8 @@
 
 import Keychain, { keyToJWK } from "../src/keychain"
 import { uint8ArrayToHex, concatUint8Arrays, wordArrayToUint8Array } from "../src/utils"
-import { deriveAddress, deriveKeyPair, ecDecrypt, aesDecrypt } from "../src/crypto"
+import { deriveAddress, deriveKeyPair, ecDecrypt, aesDecrypt, verify } from "../src/crypto"
+import TransactionBuilder from "../src/transaction_builder";
 // @ts-ignore
 import CryptoJS from "crypto-js";
 //import TransactionBuilder from "../lib/transaction_builder.js"
@@ -166,7 +167,7 @@ describe("Keychain", () => {
         })
     })
 
-    /*describe("buildTransaction", () => {
+    describe("buildTransaction", () => {
         it("should build the transaction and the related signature", () => {
             const keychain = new Keychain("seed")
             keychain.addService("uco", "m/650'/0/0")
@@ -180,13 +181,12 @@ describe("Keychain", () => {
             const { publicKey } = keychain.deriveKeypair("uco")
             const address = keychain.deriveAddress("uco", 1)
 
-            assert.deepStrictEqual(tx.address, address)
-            assert.deepStrictEqual(tx.previousPublicKey, publicKey)
+            expect(tx.address).toStrictEqual(address)
+            expect(tx.previousPublicKey).toStrictEqual(publicKey)
 
-            assert.strictEqual(verify(tx.previousSignature, tx.previousSignaturePayload(), tx.previousPublicKey), true)
+            expect(verify(tx.previousSignature, tx.previousSignaturePayload(), tx.previousPublicKey)).toStrictEqual(true)
         })
-    })*/
-
+    })
 })
 
 
