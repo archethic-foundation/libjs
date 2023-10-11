@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 import {useState} from "react";
 function App() {
   const [connected, setConnected] = useState(false);

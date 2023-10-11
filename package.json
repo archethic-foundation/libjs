@@ -1,5 +1,5 @@
 {
-    "name": "archethic",
+    "name": "@archethicjs/sdk",
     "version": "1.19.0",
     "description": "Archethic Javascript SDK",
     "main": "./dist/index.js",
@@ -23,7 +23,7 @@
         "transaction-chain",
         "blockchain"
     ],
-    "author": "",
+    "author": "Archethic Foundation <dev@archethic.net>",
     "license": "AGPL-3.0-or-later",
     "bugs": {
         "url": "https://github.com/archethic-foundation/libjs/issues"

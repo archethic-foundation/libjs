@@ -1,4 +1,4 @@
-import { Utils, Crypto } from 'archethic'
+import { Utils, Crypto } from '@archethicjs/sdk'
 
 window.generateAddress = function() {
   let seed = document.querySelector("#seed").value

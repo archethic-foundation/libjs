@@ -1,4 +1,4 @@
-import Archethic, { Utils, Crypto } from "archethic";
+import Archethic, { Utils, Crypto } from "@archethicjs/sdk";
 
 const { toBigInt } = Utils;
 

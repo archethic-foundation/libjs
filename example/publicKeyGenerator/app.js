@@ -1,4 +1,4 @@
-import { Crypto, Utils } from 'archethic'
+import { Crypto, Utils } from '@archethicjs/sdk'
 
 window.generatePublicKey = function() {
   let seed = document.querySelector("#seed").value;

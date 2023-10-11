@@ -1,4 +1,4 @@
-import Archethic, { Utils } from 'archethic';
+import Archethic, { Utils } from '@archethicjs/sdk';
 import { ArchethicRPCClient } from '../../dist/api/wallet_rpc';
 
 const { toBigInt } = Utils;

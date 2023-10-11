@@ -1,4 +1,4 @@
-import Archethic from 'archethic';
+import Archethic from '@archethicjs/sdk';
 import { ArchethicRPCClient } from '../../dist/api/wallet_rpc';
 import { ConnectionState } from "../../dist/api/types"
 

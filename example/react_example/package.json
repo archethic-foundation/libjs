@@ -10,7 +10,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^3.4.0",
-    "archethic": "../.."
+    "@archethicjs/sdk": "../.."
   },
   "scripts": {
     "start": "react-scripts start",

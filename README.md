@@ -7,9 +7,8 @@ Official Archethic Javascript library for Node and Browser.
 ## Installing
 
 ```bash
-npm install archethic
+npm install @archethicjs/sdk
 ```
-
 
 ## Usage
 
@@ -30,7 +29,7 @@ This library aims to provide an easy way to interact with Archethic network.
 
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("ws://localhost:12345") // Endpoint is the Archethic Wallet RPC server
 await archethic.connect(); // Connect to the endpoint to retrieve the nearest endpoints
@@ -51,7 +50,7 @@ This library aims to provide an easy way to interact with Archethic network.
 
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect(); // Connect to the endpoint to retrieve the nearest endpoints
@@ -84,7 +83,7 @@ Creates a new transaction to build (or update) a keychain by embedding the on-ch
 
 #### Example of keychain creation
 ```js
-import Archethic, { Crypto } from "archethic";
+import Archethic, { Crypto } from "@archethicjs/sdk";
 
 const accessSeed = "myseed";
 const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
@@ -100,7 +99,7 @@ const tx = archethic.account.newKeychainTransaction(keychain, 0);
 
 #### Example of keychain update
 ```js
-import Archethic, { Crypto } from "archethic";
+import Archethic, { Crypto } from "@archethicjs/sdk";
 
 const accessSeed = "myseed";
 const archethic = new Archethic("https://testnet.archethic.net");
@@ -124,7 +123,7 @@ Creates a new keychain access transaction to allow a seed and its key to access 
 - `keychainAddress` Keychain's tx address
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.account.newAccessKeychainTransaction("myseed", keychainAddress);
@@ -138,7 +137,7 @@ Retrieve a keychain from the keychain access transaction and decrypt the wallet 
 - `seed` Keychain access's seed
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 await archethic.connect()
@@ -172,7 +171,7 @@ serialize it using a custom binary protocol, based on the derivation path, curve
 Return is the signed `TransactionBuilder`. Notice that the function also sign the `TransactionBuilder` given in param, so getting the return is not mandatory
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -194,7 +193,7 @@ Derive an address for the given service at the index given
 - `suffix`: Additional information to add to a service derivation path (default to empty)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -212,7 +211,7 @@ Derive a keypair for the given service at the index given
 - `suffix`: Additional information to add to a service derivation path (default to empty)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -229,7 +228,7 @@ Use ec encryption on the seed for the list of authorizedPublicKeys
 - `authorizedPublicKeys`: List of public keys to encrypt the service seed
 
 ```js
-import Archethic, { Keychain, Crypto }from "archethic";
+import Archethic, { Keychain, Crypto } from "@archethicjs/sdk";
 
 const archethic = new Archethic("http://testnet.archethic.net")
 await archethic.connect()
@@ -249,7 +248,7 @@ const tx = archethic.transaction.new().addOwnership(secret, authorizedPublicKeys
 Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -277,7 +276,7 @@ Add a service into the keychain
 - `hashAlgo`: Hash algo
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -311,7 +310,7 @@ Remove a service from the keychain
 - `name`: Name of the service to add
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -327,7 +326,7 @@ Authorize a key to access the keychain
 - `publicKey`: The public key (type: Uint8Array)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -345,7 +344,7 @@ Unauthorized a key to access the keychain
 - `publicKey`: The public key (type: Uint8aArray)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -366,7 +365,7 @@ keychain.removeAuthorizedPublicKey(publicKey);
 To create a new transaction instance to build and to send to the network
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const txBuilder = archethic.transaction.new();
@@ -424,7 +423,7 @@ Add a token transfer to the `data.ledger.token.transfers` section of the transac
   - `args` is the list of arguments for the action (must contain only JSON valid data). This parameter is not mandatory
 
   ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 const archethic = new Archethic("https://testnet.archethic.net")
 
 const tx = archethic.transaction.new()
@@ -444,7 +443,7 @@ serialize it using a custom binary protocol.
 - `hashAlgo` is the hash algorithm to use to generate the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "bake2b") - default to "sha256"
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -464,7 +463,7 @@ Sign the transaction with an origin device private key
 - `privateKey` is hexadecimal encoding or Uint8Array representing the private key to generate the origin signature to able to perform the ProofOfWork and authorize the transaction
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -483,7 +482,7 @@ const tx = archethic.transaction
 Export the transaction generated into JSON
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -504,7 +503,7 @@ const tx = archethic.transaction
 Get an Uint8Array payload to be signed with user seed
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -526,7 +525,7 @@ Setter method for the transaction's previous signature and previous public key.
 - `prevPubKey` is hexadecimal encoding or Uint8Array previous public key of the transaction
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -548,7 +547,7 @@ tx.setPreviousSignatureAndPreviousPublicKey(prevSign, prevPubKey);
 Setter method for the transaction's address.
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -568,7 +567,7 @@ tx.setAddress(txAddress);
 Get an Uint8Array payload to be signed with the origin private key of the device.
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -588,7 +587,7 @@ const originPayload = tx.originSignaturePayload();
 Setter method for the transaction's origin signature.
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -614,7 +613,7 @@ Send a transaction to the endpoint and subscribe the node to get confirmation or
 When an update of the validation is received from the subscription, some events are triggered and associated function are called (see function **on** bellow)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -650,7 +649,7 @@ available events:
 Mutiple function can be assigned to a same event. Just call function `on` mutiple times for the same event.
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 const tx = archethic.transaction
@@ -684,7 +683,7 @@ Query a node to find the length of the chain to retrieve the transaction index
 - `address` Transaction address (in hexadecimal)
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect();
@@ -701,7 +700,7 @@ Query a node to fetch the tx fee for a given transaction
 - `tx` Generated transaction
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 const tx = ...
@@ -723,7 +722,7 @@ Query a node to find the ownerships (secrets and authorized keys) to given trans
 - `address`: Transaction's address
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 const ownerships = await archethic.transaction.getTransactionOwnerships(
@@ -755,7 +754,7 @@ Returns also `genesis` address and `id`
 - `tokenAddress` is the transaction address of the token.
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect();
@@ -783,7 +782,7 @@ Call a Smart Contract's exported function with given args.
 - `args` is the list of arguments to call the function with
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect()
 
@@ -799,7 +798,7 @@ Query a node to fetch the last balance of the given address
 - `address` is the address of the account to get the balance from
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect()
@@ -824,7 +823,7 @@ Query a node to add a new origin public to be authorized to sign transaction wit
 - `certificate` is the certificate that prove the public key is allowed to be added.
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect();
@@ -845,7 +844,7 @@ console.log(response);
 Fetch the public key of the shared storage node key
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect();
@@ -862,7 +861,7 @@ Fetch the OracleChain data
 - `timestamp`: UNIX timestamp (optional)
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 await archethic.connect()
@@ -881,7 +880,7 @@ console.log(oracleData)
 ```
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 await archethic.connect()
@@ -904,7 +903,7 @@ Query the GraphQL API of the node with a custom graphQL query that fits your nee
 - `query`: The graphQL query to send to the node
 
 ```js
-import Archethic from "archethic";
+import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
@@ -933,7 +932,7 @@ Subscribe to get the real time updates of the OracleChain
 - `handler`: Callback to handle the new data
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("https://testnet.archethic.net")
 await archethic.connect()
@@ -964,7 +963,7 @@ On operations requiring user's confirmation, that identity might be displayed.
 
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -982,7 +981,7 @@ await archethic.rpcWallet.setOrigin(
 Listens to connection state changes between DApp and WalletRPC.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1009,7 +1008,7 @@ archethic.rpcWallet.unsubscribeconnectionstatechange()
 Reads a concise accounts list from ArchethicWallet.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1035,7 +1034,7 @@ archethic.rpcWallet.getAccounts().then(
 Reads a concise services list from ArchethicWallet.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1061,7 +1060,7 @@ archethic.rpcWallet.getServices().then(
 Listens to an account's changes.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1088,7 +1087,7 @@ const subscription = await archethic.rpcWallet.onAccountChange(
 Stops any subscription to Wallet.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1110,7 +1109,7 @@ await archethic.rpcWallet.unsubscribe(subscription)
 Asks ArchethicWallet to sign and send a transaction.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1155,7 +1154,7 @@ archethic.rpcWallet.sendTransaction(
 Asks ArchethicWallet to sign multiple transactions.
 
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1200,7 +1199,7 @@ archethic.rpcWallet.signTransactions(
 ### addService(name)
 Add a service in the keychain
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1228,7 +1227,7 @@ archethic.rpcWallet.addService("myService").then(
 ### keychainDeriveKeypair(serviceName, index, pathSuffix)
 Derive a keypair for the given service at the index given and get the public key
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1249,7 +1248,7 @@ archethic.rpcWallet.keychainDeriveKeypair("myService", 1, "suffix").then(
 ### keychainDeriveAddress(serviceName, index, pathSuffix)
 Derive an address for the given service at the index given
 ```js
-import Archethic from "archethic"
+import Archethic from "@archethicjs/sdk"
 
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
@@ -1283,7 +1282,7 @@ It creates a new keypair into hexadecimal format
 - `origin_id` is the origin of the public key (can be 0 for "on chain wallet", 1 for "software" or 2 for "tpm") - default to: 1
 
 ```js
-import { Crypto } from "archethic";
+import { Crypto } from "@archethicjs/sdk";
 const { publicKey: publicKey, privateKey: privateKey } = Crypto.deriveKeyPair(
   "mysuperpassphraseorseed",
   0
@@ -1301,7 +1300,7 @@ It creates a transaction address by extract the public key from the key derivati
 - `hashAlgo` is the hash algorithm to create the address (can be "sha256", "sha512", "sha3-256", "sha3-512", "blake2b") - default to "sha256"
 
 ```js
-import { Crypto } from "archethic";
+import { Crypto } from "@archethicjs/sdk";
 const address = Crypto.deriveAddress("mysuperpassphraseorseed", 0);
 // Address: 00004195d45987f33e5dcb71edfa63438d5e6add655b216acfdd31945d58210fe5d2
 ```
@@ -1313,7 +1312,7 @@ It creates a new keypair and extract the public key into hexadecimal format
 - `curve` is the elliptic curve to use for the key generation (can be "ed25519", "P256", "secp256k1")
 
 ```js
-import { Crypto } from "archethic";
+import { Crypto } from "@archethicjs/sdk";
 const publicKey = Crypto.derivePublicKey("mysuperpassphraseorseed", 0);
 ```
 
@@ -1325,7 +1324,7 @@ Perform an ECIES encryption using a public key and a data
 - `publicKey` Public key to derive a shared secret and for whom the content must be encrypted
 
 ```js
-import { Crypto } from "archethic";
+import { Crypto } from "@archethicjs/sdk";
 const cipher = Crypto.ecEncrypt(
   "dataToEncrypt",
   "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
@@ -1340,7 +1339,7 @@ Perform an ECIES decryption using a private key and an encrypted data
 - `privateKey` Private key to derive a shared secret and for whom the content must be decrypted
 
 ```js
-import { Crypto } from "archethic";
+import { Crypto } from "@archethicjs/sdk";
 const cipher = Crypto.ecDecrypt(
   "dataToDecrypt",
   "36f7753a63188eabaf4891c5724d346da58160cdc386ebf248603724d1796cd3"
@@ -1355,7 +1354,7 @@ Perform an AES encryption using a key and a data
 - `key` Symmetric key
 
 ```js
-import { Crypto } from "archethic";
+import { Crypto } from "@archethicjs/sdk";
 const cipher = Crypto.aesEncrypt(
   "dataToEncrypt",
   "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
@@ -1375,7 +1374,7 @@ Convert a big int number to a x decimals number (mainly use to display token amo
 - `decimals` number of decimals needed (default to 8)
 
 ```js
-import { Utils } from "archethic";
+import { Utils } from "@archethicjs/sdk";
 Utils.fromBigInt(1_253_450_000);
 // 12.5345
 Utils.fromBigInt(12_534_500, 6);
@@ -1390,7 +1389,7 @@ Convert a decimals number to a BigInt number
 - `decimals` number of decimals (default to 8)
 
 ```js
-import { Utils } from "archethic";
+import { Utils } from "@archethicjs/sdk";
 Utils.toBigInt(12.5345);
 // 1_253_450_000
 Utils.toBigInt(12.5345, 6);
@@ -1402,7 +1401,7 @@ Utils.toBigInt(12.5345, 6);
 Getting the default origin Key :
 
 ```js
-import Archethic, { Utils } from "archethic"
+import Archethic, { Utils } from "@archethicjs/sdk"
 const originPrivateKey = Utils.originPrivateKey
 
 const archethic = new Archethic("https://testnet.archethic.net")
