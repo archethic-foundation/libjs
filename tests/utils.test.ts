@@ -8,7 +8,8 @@ import {
     toByteArray,
     toBigInt,
     fromBigInt,
-    sortObjectKeysASC
+    sortObjectKeysASC,
+    uint8ArrayToInt
 } from "../src/utils.js"
 
 describe("Utils", () => {
@@ -67,10 +68,32 @@ describe("Utils", () => {
     describe("toByteArray", () => {
         it("should encode an integer into a UnInt8Array", () => {
             expect(toByteArray(0)).toStrictEqual(new Uint8Array([0]))
-            expect(toByteArray(123)).toStrictEqual(new Uint8Array([123]))
-            expect(toByteArray(258)).toStrictEqual(new Uint8Array([1, 2]))
-            expect(toByteArray(65535)).toStrictEqual(new Uint8Array([255, 255]))
-            expect(toByteArray(65536)).toStrictEqual(new Uint8Array([1, 0, 0]))
+            expect(toByteArray(2 ** 8 - 1)).toStrictEqual(new Uint8Array([255]))
+            expect(toByteArray(2 ** 8)).toStrictEqual(new Uint8Array([1, 0]))
+            expect(toByteArray(2 ** 16 - 1)).toStrictEqual(new Uint8Array([255, 255]))
+            expect(toByteArray(2 ** 16)).toStrictEqual(new Uint8Array([1, 0, 0]))
+            expect(toByteArray(2 ** 24 - 1)).toStrictEqual(new Uint8Array([255, 255, 255]))
+            expect(toByteArray(2 ** 24)).toStrictEqual(new Uint8Array([1, 0, 0, 0]))
+            expect(toByteArray(2 ** 32 - 1)).toStrictEqual(new Uint8Array([255, 255, 255, 255]))
+            expect(toByteArray(2 ** 32)).toStrictEqual(new Uint8Array([1, 0, 0, 0, 0]))
+            expect(toByteArray(2 ** 40 - 1)).toStrictEqual(new Uint8Array([255, 255, 255, 255, 255]))
+            expect(toByteArray(2 ** 40)).toStrictEqual(new Uint8Array([1, 0, 0, 0, 0, 0]))
+        })
+    })
+
+    describe("uint8ArrayToInt / fromByteArray", () => {
+        it("should decode an integer from a UnInt8Array", () => {
+            expect(uint8ArrayToInt(new Uint8Array([0]))).toStrictEqual(0)
+            expect(uint8ArrayToInt(new Uint8Array([255]))).toStrictEqual(2 ** 8 - 1)
+            expect(uint8ArrayToInt(new Uint8Array([1, 0]))).toStrictEqual(2 ** 8)
+            expect(uint8ArrayToInt(new Uint8Array([255, 255]))).toStrictEqual(2 ** 16 - 1)
+            expect(uint8ArrayToInt(new Uint8Array([1, 0, 0]))).toStrictEqual(2 ** 16)
+            expect(uint8ArrayToInt(new Uint8Array([255, 255, 255]))).toStrictEqual(2 ** 24 - 1)
+            expect(uint8ArrayToInt(new Uint8Array([1, 0, 0, 0]))).toStrictEqual(2 ** 24)
+            expect(uint8ArrayToInt(new Uint8Array([255, 255, 255, 255]))).toStrictEqual(2 ** 32 - 1)
+            expect(uint8ArrayToInt(new Uint8Array([1, 0, 0, 0, 0]))).toStrictEqual(2 ** 32)
+            expect(uint8ArrayToInt(new Uint8Array([255, 255, 255, 255, 255]))).toStrictEqual(2 ** 40 - 1)
+            expect(uint8ArrayToInt(new Uint8Array([1, 0, 0, 0, 0, 0]))).toStrictEqual(2 ** 40)
         })
     })
 

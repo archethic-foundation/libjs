@@ -206,12 +206,25 @@ export function base64url(arraybuffer: ArrayBuffer): string {
  * Convert any number into a byte array
  */
 export function toByteArray(number: number): Uint8Array {
-    if (!number) return Uint8Array.from([0]);
-    const a = [];
-    a.unshift(number & 255);
+    if (number === 0) return Uint8Array.from([0]);
+
+    const arr = [];
     while (number >= 256) {
-        number = number >>> 8;
-        a.unshift(number & 255);
+        arr.push(number % 256);
+        number = Math.floor(number / 256);
     }
-    return Uint8Array.from(a);
+
+    arr.push(number % 256)
+
+    return Uint8Array.from(arr.reverse());
+}
+
+/**
+ * Alias of uint8ArrayToInt
+ *
+ * @param bytes
+ * @returns the number
+ */
+export function fromByteArray(bytes: Uint8Array): number {
+    return uint8ArrayToInt(bytes)
 }
