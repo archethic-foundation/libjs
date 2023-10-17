@@ -4,16 +4,17 @@ import {
     concatUint8Arrays,
     toBigInt,
     fromBigInt,
-    toByteArray,
-    fromByteArray,
-    sortObjectKeysASC
+    sortObjectKeysASC,
+    deserializeString,
+    serializeString,
+    nextUint8
 } from "./utils"
+
+import VarInt from "./varint"
 
 export default {
     serialize,
-    deserialize,
-    serializeVarInt,
-    deserializeVarInt
+    deserialize
 }
 
 /**
@@ -70,26 +71,26 @@ function do_serialize_v1(data: any): Uint8Array {
             return concatUint8Arrays(
                 Uint8Array.from([TYPE_INT]),
                 Uint8Array.from([sign ? 1 : 0]),
-                serializeVarInt(Math.abs(data))
+                VarInt.serialize(Math.abs(data))
             )
         } else {
             return concatUint8Arrays(
                 Uint8Array.from([TYPE_FLOAT]),
                 Uint8Array.from([sign ? 1 : 0]),
-                serializeVarInt(toBigInt(Math.abs(data)))
+                VarInt.serialize(toBigInt(Math.abs(data)))
             )
         }
     } else if (typeof data === 'string') {
         return concatUint8Arrays(
             Uint8Array.from([TYPE_STR]),
-            serializeVarInt(data.length),
+            VarInt.serialize(data.length),
             serializeString(data)
         )
     } else if (Array.isArray(data)) {
         const serializedItems = data.map((item) => do_serialize_v1(item))
         return concatUint8Arrays(
             Uint8Array.from([TYPE_LIST]),
-            serializeVarInt(data.length),
+            VarInt.serialize(data.length),
             ...serializedItems
         )
     } else if (data instanceof Map) {
@@ -102,7 +103,7 @@ function do_serialize_v1(data: any): Uint8Array {
 
         return concatUint8Arrays(
             Uint8Array.from([TYPE_MAP]),
-            serializeVarInt(data.size),
+            VarInt.serialize(data.size),
             ...serializedKeyValues
         )
     } else if (typeof data == "object") {
@@ -116,7 +117,7 @@ function do_serialize_v1(data: any): Uint8Array {
 
         return concatUint8Arrays(
             Uint8Array.from([TYPE_MAP]),
-            serializeVarInt(Object.keys(data).length),
+            VarInt.serialize(Object.keys(data).length),
             ...serializedKeyValues
         )
     } else {
@@ -134,17 +135,17 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
 
         case TYPE_INT:
             return nextUint8(iter) == 1
-                ? deserializeVarInt(iter)
-                : deserializeVarInt(iter) * -1
+                ? VarInt.deserialize(iter)
+                : VarInt.deserialize(iter) * -1
 
         case TYPE_FLOAT:
             return nextUint8(iter) == 1
-                ? fromBigInt(deserializeVarInt(iter))
-                : fromBigInt(deserializeVarInt(iter) * -1)
+                ? fromBigInt(VarInt.deserialize(iter))
+                : fromBigInt(VarInt.deserialize(iter) * -1)
 
 
         case TYPE_STR:
-            const strLen = deserializeVarInt(iter)
+            const strLen = VarInt.deserialize(iter)
 
             let bytes = []
             for (let i = 0; i < strLen; i++) {
@@ -154,7 +155,7 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
             return deserializeString(Uint8Array.from(bytes))
 
         case TYPE_LIST:
-            const listLen = deserializeVarInt(iter)
+            const listLen = VarInt.deserialize(iter)
 
             let list = []
             for (let i = 0; i < listLen; i++) {
@@ -164,7 +165,7 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
             return list
 
         case TYPE_MAP:
-            const keysLen = deserializeVarInt(iter)
+            const keysLen = VarInt.deserialize(iter)
 
             // we use a map here because keys can be of any type
             let map = new Map()
@@ -182,35 +183,4 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
 
             return map
     }
-}
-
-function nextUint8(iter: IterableIterator<[number, number]>): number {
-    return iter.next().value[1]
-}
-
-function serializeVarInt(int: number): Uint8Array {
-    const buff = toByteArray(int)
-
-    return concatUint8Arrays(
-        Uint8Array.from([buff.length]),
-        buff
-    )
-}
-
-function deserializeVarInt(iter: IterableIterator<[number, number]>): number {
-    const length = nextUint8(iter)
-
-    let bytes = []
-    for (let i = 0; i < length; i++) {
-        bytes.push(nextUint8(iter))
-    }
-
-    return fromByteArray(Uint8Array.from(bytes))
-}
-
-function serializeString(str: string): Uint8Array {
-    return new TextEncoder().encode(str)
-}
-function deserializeString(encoded_str: Uint8Array): string {
-    return new TextDecoder().decode(encoded_str)
 }
