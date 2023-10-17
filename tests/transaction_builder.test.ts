@@ -11,6 +11,8 @@ import {
 import { Curve } from "../src/types";
 import ABF from "../src/abf";
 
+const VERSION = 3
+
 // all assert should be transformed to jest expect
 describe("Transaction builder", () => {
     describe("setType", () => {
@@ -208,7 +210,7 @@ describe("Transaction builder", () => {
 
             const expected_binary = concatUint8Arrays(
                 //Version
-                intToUint8Array(2),
+                intToUint8Array(VERSION),
                 tx.address,
                 Uint8Array.from([253]),
                 //Code size
@@ -328,7 +330,7 @@ describe("Transaction builder", () => {
 
             const expected_binary = concatUint8Arrays(
                 //Version
-                intToUint8Array(2),
+                intToUint8Array(VERSION),
                 tx.address,
                 Uint8Array.from([253]),
                 //Code size
@@ -422,7 +424,7 @@ describe("Transaction builder", () => {
 
             const expected_binary = concatUint8Arrays(
                 //Version
-                intToUint8Array(2),
+                intToUint8Array(VERSION),
                 tx.address,
                 Uint8Array.from([253]),
                 //Code size
@@ -580,7 +582,7 @@ describe("Transaction builder", () => {
             const payload = tx.originSignaturePayload();
             const expected_binary = concatUint8Arrays(
                 //Version
-                intToUint8Array(2),
+                intToUint8Array(VERSION),
                 tx.address,
                 Uint8Array.from([253]),
                 //Code size
@@ -745,7 +747,7 @@ describe("Transaction builder", () => {
             const txRPC = tx.toRPC();
 
             // @ts-ignore
-            expect(txRPC.version).toStrictEqual(2);
+            expect(txRPC.version).toStrictEqual(VERSION);
             // @ts-ignore
             expect(txRPC.data.ledger.uco.transfers[0]).toStrictEqual(
                 {
