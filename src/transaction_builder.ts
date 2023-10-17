@@ -18,7 +18,7 @@ import {
     toByteArray,
     uint8ArrayToHex
 } from "./utils.js";
-import ABF from "./abf.js"
+import TE from "./typed_encoding.js"
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 
 const VERSION = 3
@@ -360,7 +360,7 @@ export default class TransactionBuilder {
                     // address
                     address)
             } else {
-                const serializedArgs = args.map((arg) => ABF.serialize(arg))
+                const serializedArgs = args.map((arg) => TE.serialize(arg))
 
                 return concatUint8Arrays(
                     // 1 = named action
