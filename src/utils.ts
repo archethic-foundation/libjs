@@ -234,3 +234,31 @@ export function toByteArray(number: number): Uint8Array {
 export function fromByteArray(bytes: Uint8Array): number {
     return uint8ArrayToInt(bytes)
 }
+
+/**
+ * Return the next Uint8 from an iterator of Uint8Array
+ * There is an assumption on success
+ * @param iter
+ * @returns
+ */
+export function nextUint8(iter: IterableIterator<[number, number]>): number {
+    return iter.next().value[1]
+}
+
+/**
+ * String to Uint8Array
+ * @param str
+ * @returns
+ */
+export function serializeString(str: string): Uint8Array {
+    return new TextEncoder().encode(str)
+}
+
+/**
+ * Uint8Array to String
+ * @param str
+ * @returns
+ */
+export function deserializeString(encoded_str: Uint8Array): string {
+    return new TextDecoder().decode(encoded_str)
+}
