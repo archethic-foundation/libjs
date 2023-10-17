@@ -21,6 +21,12 @@ describe("ABF", () => {
         expect(ABF.deserialize(ABF.serialize("hello"))).toBe("hello")
         expect(ABF.deserialize(ABF.serialize("world"))).toBe("world")
     })
+
+    it("should serialize/deserialize a list", () => {
+        expect(ABF.deserialize(ABF.serialize([]))).toStrictEqual([])
+        expect(ABF.deserialize(ABF.serialize([1, 2, 3]))).toStrictEqual([1, 2, 3])
+        expect(ABF.deserialize(ABF.serialize(["1", true, 14]))).toStrictEqual(["1", true, 14])
+    })
 })
 
 describe("VarInt", () => {

@@ -78,12 +78,17 @@ function do_serialize_v1(data: any): Uint8Array {
             )
         }
     } else if (typeof data === 'string') {
-
-
         return concatUint8Arrays(
             Uint8Array.from([TYPE_STR]),
             serializeVarInt(data.length),
             serializeString(data)
+        )
+    } else if (Array.isArray(data)) {
+        const serializedItems = data.map((item) => do_serialize_v1(item))
+        return concatUint8Arrays(
+            Uint8Array.from([TYPE_LIST]),
+            serializeVarInt(data.length),
+            ...serializedItems
         )
     } else {
         return Uint8Array.from([])
@@ -91,7 +96,7 @@ function do_serialize_v1(data: any): Uint8Array {
 
 }
 
-function do_deserialize_v1(iter: IterableIterator<[number, number]>) {
+function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
     switch (nextUint8(iter)) {
         case TYPE_NIL:
             return null
@@ -111,14 +116,25 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>) {
 
 
         case TYPE_STR:
-            const str_size = deserializeVarInt(iter)
+            const strLen = deserializeVarInt(iter)
 
             let bytes = []
-            for (let i = 0; i < str_size; i++) {
+            for (let i = 0; i < strLen; i++) {
                 bytes.push(nextUint8(iter))
             }
 
             return deserializeString(Uint8Array.from(bytes))
+
+        case TYPE_LIST:
+            const listLen = deserializeVarInt(iter)
+
+            let list = []
+            for (let i = 0; i < listLen; i++) {
+                console.log(i)
+                list.push(do_deserialize_v1(iter))
+            }
+
+            return list
 
     }
 }
