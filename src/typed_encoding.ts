@@ -20,27 +20,25 @@ export default {
  * @param data
  * @returns the data encoded
  */
-function serialize(data: any): Uint8Array {
+function serialize(data: any, version: number = 1): Uint8Array {
     // we need to order object keys ASC because that's what elixir does
     data = sortObjectKeysASC(data)
 
-    return concatUint8Arrays(
-        // version 1
-        Uint8Array.from([1]),
-        do_serialize_v1(data)
-    )
+    switch (version) {
+        default:
+            return do_serialize_v1(data)
+    }
 }
 /**
  * Deserialize an encoded data
  * @param encoded_data
  * @returns the data decoded
  */
-function deserialize(encoded_data: Uint8Array): any {
+function deserialize(encoded_data: Uint8Array, version: number = 1): any {
     const iter = encoded_data.entries()
-    const version = nextUint8(iter)
 
     switch (version) {
-        case 1:
+        default:
             return do_deserialize_v1(iter)
     }
 }
