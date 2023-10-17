@@ -27,6 +27,16 @@ describe("ABF", () => {
         expect(ABF.deserialize(ABF.serialize([1, 2, 3]))).toStrictEqual([1, 2, 3])
         expect(ABF.deserialize(ABF.serialize(["1", true, 14]))).toStrictEqual(["1", true, 14])
     })
+    it("should serialize/deserialize an object", () => {
+        expect(ABF.deserialize(ABF.serialize({}))).toStrictEqual({})
+        expect(ABF.deserialize(ABF.serialize({ a: 1, foo: "bar" }))).toStrictEqual({ a: 1, foo: "bar" })
+    })
+    it("should serialize/deserialize a map", () => {
+        let map = new Map()
+        map.set({ oooo: "iii" }, 44)
+        map.set(["aaaaa", "bbbbb"], 45)
+        expect(ABF.deserialize(ABF.serialize(map))).toStrictEqual(map)
+    })
 })
 
 describe("VarInt", () => {

@@ -90,10 +90,36 @@ function do_serialize_v1(data: any): Uint8Array {
             serializeVarInt(data.length),
             ...serializedItems
         )
-    } else {
-        return Uint8Array.from([])
-    }
+    } else if (data instanceof Map) {
+        const serializedKeyValues = []
 
+        for (let [key, value] of data.entries()) {
+            serializedKeyValues.push(do_serialize_v1(key))
+            serializedKeyValues.push(do_serialize_v1(value))
+        }
+
+        return concatUint8Arrays(
+            Uint8Array.from([TYPE_MAP]),
+            serializeVarInt(data.size),
+            ...serializedKeyValues
+        )
+    } else if (typeof data == "object") {
+        const serializedKeyValues =
+            Object.keys(data)
+                .reduce(function (acc: Uint8Array[], key: any) {
+                    acc.push(do_serialize_v1(key))
+                    acc.push(do_serialize_v1(data[key]))
+                    return acc
+                }, []);
+
+        return concatUint8Arrays(
+            Uint8Array.from([TYPE_MAP]),
+            serializeVarInt(Object.keys(data).length),
+            ...serializedKeyValues
+        )
+    } else {
+        throw new Error("Unhandled data type")
+    }
 }
 
 function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
@@ -130,12 +156,29 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
 
             let list = []
             for (let i = 0; i < listLen; i++) {
-                console.log(i)
                 list.push(do_deserialize_v1(iter))
             }
 
             return list
 
+        case TYPE_MAP:
+            const keysLen = deserializeVarInt(iter)
+
+            // we use a map here because keys can be of any type
+            let map = new Map()
+            for (let i = 0; i < keysLen; i++) {
+                map.set(do_deserialize_v1(iter), do_deserialize_v1(iter))
+            }
+
+            // then, if all keys are strings, convert it to object
+            //
+            // it's not ideal because we might have a different value from before the serialization
+            // but I doubt we can do anything about it without modifying the serialization in Elixir
+            if (Array.from(map.keys()).every(k => typeof k == "string")) {
+                return Object.fromEntries(map.entries())
+            }
+
+            return map
     }
 }
 
