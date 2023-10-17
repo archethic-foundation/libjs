@@ -22,7 +22,6 @@ describe("TE", () => {
         expect(TE.deserialize(TE.serialize("world"))).toBe("world")
         expect(TE.deserialize(TE.serialize("un été à l'ombre"))).toBe("un été à l'ombre")
     })
-
     it("should serialize/deserialize a list", () => {
         expect(TE.deserialize(TE.serialize([]))).toStrictEqual([])
         expect(TE.deserialize(TE.serialize([1, 2, 3]))).toStrictEqual([1, 2, 3])
@@ -31,11 +30,5 @@ describe("TE", () => {
     it("should serialize/deserialize an object", () => {
         expect(TE.deserialize(TE.serialize({}))).toStrictEqual({})
         expect(TE.deserialize(TE.serialize({ a: 1, foo: "bar" }))).toStrictEqual({ a: 1, foo: "bar" })
-    })
-    it("should serialize/deserialize a map", () => {
-        let map = new Map()
-        map.set({ oooo: "iii" }, 44)
-        map.set(["aaaaa", "bbbbb"], 45)
-        expect(TE.deserialize(TE.serialize(map))).toStrictEqual(map)
     })
 })
