@@ -6,9 +6,9 @@ import {
     deserializeString,
     serializeString,
     nextUint8
-} from "./utils"
+} from "./utils.js"
 
-import VarInt from "./varint"
+import VarInt from "./varint.js"
 
 export default {
     serialize,
