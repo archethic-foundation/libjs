@@ -18,6 +18,7 @@ import {
     toByteArray,
     uint8ArrayToHex
 } from "./utils.js";
+import ABF from "./abf.js"
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 
 const VERSION = 2
@@ -359,10 +360,7 @@ export default class TransactionBuilder {
                     // address
                     address)
             } else {
-                // we need to order object keys ASC because that's what elixir does
-                const orderedArgs = args.map((arg) => sortObjectKeysASC(arg))
-                const jsonArgs = JSON.stringify(orderedArgs)
-                const bufJsonLength = toByteArray(jsonArgs.length)
+                const serializedArgs = args.map((arg) => ABF.serialize(arg))
 
                 return concatUint8Arrays(
                     // 1 = named action
@@ -372,10 +370,10 @@ export default class TransactionBuilder {
                     // action
                     Uint8Array.from([action.length]),
                     new TextEncoder().encode(action),
+                    // args count
+                    Uint8Array.from([serializedArgs.length]),
                     // args
-                    Uint8Array.from([bufJsonLength.length]),
-                    bufJsonLength,
-                    new TextEncoder().encode(jsonArgs),
+                    ...serializedArgs
                 )
 
             }

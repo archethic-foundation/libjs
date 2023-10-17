@@ -45,6 +45,12 @@ export function sortObjectKeysASC(term: any): any {
     if (Array.isArray(term))
         return term.map((item: any) => sortObjectKeysASC(item))
 
+    if (term instanceof Map)
+        // we can't sort keys of a map
+        // because the keys aren't strings
+        // FIXME: this might cause an issue because elixir order & javascript order may differ
+        return term
+
     // object: sort and map over elements
     if (isObject(term))
         return Object.keys(term).sort().reduce((newObj: any, key: string) => {

@@ -9,6 +9,7 @@ import {
     uint8ArrayToHex,
 } from "../src/utils";
 import { Curve } from "../src/types";
+import ABF from "../src/abf";
 
 // all assert should be transformed to jest expect
 describe("Transaction builder", () => {
@@ -395,13 +396,10 @@ describe("Transaction builder", () => {
                 Uint8Array.from([14]),
                 // action value
                 new TextEncoder().encode("vote_for_mayor"),
-                // args
-                // args size bytes
-                Uint8Array.from([1]),
                 // args size
-                Uint8Array.from([13]),
+                Uint8Array.from([1]),
                 // args value
-                new TextEncoder().encode("[\"Ms. Smith\"]"),
+                ABF.serialize("Ms. Smith")
             );
             expect(payload).toEqual(expected_binary);
 
@@ -457,13 +455,10 @@ describe("Transaction builder", () => {
                 Uint8Array.from([10]),
                 // action value
                 new TextEncoder().encode("set_geopos"),
-                // args
-                // args size bytes
-                Uint8Array.from([1]),
                 // args size
-                Uint8Array.from([19]),
+                Uint8Array.from([1]),
                 // args value
-                new TextEncoder().encode(`[{"lat":1,"lng":2}]`),
+                ABF.serialize({ "lng": 2, "lat": 1 })
             );
             expect(payload).toEqual(expected_binary);
 

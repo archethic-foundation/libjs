@@ -6,7 +6,7 @@ import {
     fromBigInt,
     toByteArray,
     fromByteArray,
-    uint8ArrayToInt
+    sortObjectKeysASC
 } from "./utils"
 
 export default {
@@ -22,6 +22,8 @@ export default {
  * @returns the data encoded
  */
 function serialize(data: any): Uint8Array {
+    // we need to order object keys ASC because that's what elixir does
+    data = sortObjectKeysASC(data)
 
     return concatUint8Arrays(
         // abf version 1
