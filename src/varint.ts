@@ -1,4 +1,4 @@
-import { toByteArray, concatUint8Arrays, nextUint8, fromByteArray } from "./utils"
+import { toByteArray, concatUint8Arrays, nextUint8, fromByteArray } from "./utils.js"
 
 export default {
     serialize,
