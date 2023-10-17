@@ -79,7 +79,7 @@ function do_serialize_v1(data: any): Uint8Array {
     } else if (typeof data === 'string') {
         return concatUint8Arrays(
             Uint8Array.from([TYPE_STR]),
-            VarInt.serialize(data.length),
+            VarInt.serialize(byte_size(data)),
             serializeString(data)
         )
     } else if (Array.isArray(data)) {
@@ -179,4 +179,8 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
 
             return map
     }
+}
+
+function byte_size(str: string) {
+    return (new TextEncoder().encode(str)).length
 }
