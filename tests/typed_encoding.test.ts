@@ -20,6 +20,7 @@ describe("TE", () => {
     it("should serialize/deserialize a str", () => {
         expect(TE.deserialize(TE.serialize("hello"))).toBe("hello")
         expect(TE.deserialize(TE.serialize("world"))).toBe("world")
+        expect(TE.deserialize(TE.serialize("un été à l'ombre"))).toBe("un été à l'ombre")
     })
 
     it("should serialize/deserialize a list", () => {
