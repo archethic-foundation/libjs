@@ -89,19 +89,6 @@ function do_serialize_v1(data: any): Uint8Array {
             VarInt.serialize(data.length),
             ...serializedItems
         )
-    } else if (data instanceof Map) {
-        const serializedKeyValues = []
-
-        for (let [key, value] of data.entries()) {
-            serializedKeyValues.push(do_serialize_v1(key))
-            serializedKeyValues.push(do_serialize_v1(value))
-        }
-
-        return concatUint8Arrays(
-            Uint8Array.from([TYPE_MAP]),
-            VarInt.serialize(data.size),
-            ...serializedKeyValues
-        )
     } else if (typeof data == "object") {
         const serializedKeyValues =
             Object.keys(data)
@@ -169,15 +156,8 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
                 map.set(do_deserialize_v1(iter), do_deserialize_v1(iter))
             }
 
-            // then, if all keys are strings, convert it to object
-            //
-            // it's not ideal because we might have a different value from before the serialization
-            // but I doubt we can do anything about it without modifying the serialization in Elixir
-            if (Array.from(map.keys()).every(k => typeof k == "string")) {
-                return Object.fromEntries(map.entries())
-            }
+            return Object.fromEntries(map.entries())
 
-            return map
     }
 }
 
