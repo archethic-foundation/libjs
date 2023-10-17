@@ -1,5 +1,3 @@
-// ABF stands for Archethic Binary Format
-
 import {
     concatUint8Arrays,
     toBigInt,
@@ -27,7 +25,7 @@ function serialize(data: any): Uint8Array {
     data = sortObjectKeysASC(data)
 
     return concatUint8Arrays(
-        // abf version 1
+        // version 1
         Uint8Array.from([1]),
         do_serialize_v1(data)
     )

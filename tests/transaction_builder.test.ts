@@ -9,7 +9,7 @@ import {
     uint8ArrayToHex,
 } from "../src/utils";
 import { Curve } from "../src/types";
-import ABF from "../src/abf";
+import TE from "../src/typed_encoding";
 
 const VERSION = 3
 
@@ -401,7 +401,7 @@ describe("Transaction builder", () => {
                 // args size
                 Uint8Array.from([1]),
                 // args value
-                ABF.serialize("Ms. Smith")
+                TE.serialize("Ms. Smith")
             );
             expect(payload).toEqual(expected_binary);
 
@@ -460,7 +460,7 @@ describe("Transaction builder", () => {
                 // args size
                 Uint8Array.from([1]),
                 // args value
-                ABF.serialize({ "lng": 2, "lat": 1 })
+                TE.serialize({ "lng": 2, "lat": 1 })
             );
             expect(payload).toEqual(expected_binary);
 
