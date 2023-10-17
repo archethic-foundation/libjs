@@ -21,7 +21,7 @@ import {
 import ABF from "./abf.js"
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 
-const VERSION = 2
+const VERSION = 3
 
 function getTransactionTypeId(type: UserTypeTransaction): number {
     switch (type) {
