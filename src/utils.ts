@@ -144,7 +144,14 @@ export function uint8ArrayToInt(bytes: Uint8Array): number {
  * @param decimal Number of decimals
  */
 export function toBigInt(number: number, decimal: number = 8): number {
-    return Math.trunc(number * Math.pow(10, decimal));
+    // This is a workaroud of float weird behavior
+    // 94.03999999999999 * 100_000_000 = 9404000000
+    // 94.03999999999999 * 10*10*10*10*10*10*10*10 = 9403999999
+    let nb = number
+    for (let i = 0; i < decimal; i++) {
+        nb = nb * 10
+    }
+    return Math.trunc(nb)
 }
 
 /**
