@@ -51,7 +51,7 @@
         "isomorphic-ws": "^5.0.0",
         "js-sha3": "^0.9.0",
         "json-rpc-2.0": "^1.6.0",
-        "phoenix": "^1.7.2",
+        "phoenix": "^1.7.8",
         "sjcl": "^1.0.8",
         "tweetnacl": "^1.0.3",
         "uninstall": "^0.0.0"
