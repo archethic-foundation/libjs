@@ -97,7 +97,7 @@ export type Endpoint = {
 };
 
 export type AccountIdentity = {
-  name: string;
+  shortName: string;
   genesisAddress: string;
 };
 
