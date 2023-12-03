@@ -10,33 +10,28 @@ export default class Transaction {
     builder = ExtendedTransactionBuilder;
     constructor(core: Archethic) {
         this.core = core;
-
     }
 
     new(): ExtendedTransactionBuilder {
-        return new this.builder(this.core)
+        return new this.builder(this.core);
     }
 
     send(tx: TransactionBuilder) {
-        return this.core.rpcNode!.sendTransaction(tx)
+        return this.core.rpcNode!.sendTransaction(tx);
     }
 
     getTransactionIndex(address: string | Uint8Array): Promise<number> {
-        return this.core.requestNode((endpoint) =>
-            API.getTransactionIndex(address, endpoint)
-        );
+        return this.core.requestNode((endpoint) => API.getTransactionIndex(address, endpoint));
     }
 
     getTransactionFee(tx: TransactionBuilder): Promise<TransactionFee> {
-        return this.core.rpcNode!.getTransactionFee(tx)
+        return this.core.rpcNode!.getTransactionFee(tx);
     }
 
     getTransactionOwnerships(address: string | Uint8Array, last = false): Promise<Ownership[]> {
-        return this.core.requestNode((endpoint) =>
-            API.getTransactionOwnerships(address, endpoint, last)
-        );
+        return this.core.requestNode((endpoint) => API.getTransactionOwnerships(address, endpoint, last));
     }
-};
+}
 
 export class ExtendedTransactionBuilder extends TransactionBuilder {
     core: Archethic;
@@ -49,9 +44,7 @@ export class ExtendedTransactionBuilder extends TransactionBuilder {
 
     //Override TransactionSender.send to use the node resolution
     send(confirmationThreshold: number, timeout: number) {
-        this.core.requestNode((endpoint) =>
-            this.sender.send(this, endpoint, confirmationThreshold, timeout)
-        );
+        this.core.requestNode((endpoint) => this.sender.send(this, endpoint, confirmationThreshold, timeout));
     }
 
     //Use of composition as multi inheritance model
@@ -65,4 +58,3 @@ export class ExtendedTransactionBuilder extends TransactionBuilder {
         return this;
     }
 }
-
