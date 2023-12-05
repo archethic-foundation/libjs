@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "start": "npm run build && http-server",
-    "build": "./build.js"
+    "build": "node ./build.js"
   },
   "dependencies": {
     "@archethicjs/sdk": "file:../.."
