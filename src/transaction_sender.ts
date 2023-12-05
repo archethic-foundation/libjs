@@ -177,7 +177,7 @@ async function waitConfirmations(
   const notifier = absinthe.send(absintheSocket, operation);
   return absinthe.observe(absintheSocket, notifier, (result: any) => {
     if (result.data.transactionConfirmed) {
-      const { nbConfirmations: nbConfirmations, maxConfirmations: maxConfirmations } = result.data.transactionConfirmed;
+      const { nbConfirmations, maxConfirmations } = result.data.transactionConfirmed;
 
       handler(nbConfirmations, maxConfirmations);
     }
@@ -196,7 +196,7 @@ async function waitError(address: string | Uint8Array, absintheSocket: any, hand
   const notifier = absinthe.send(absintheSocket, operation);
   return absinthe.observe(absintheSocket, notifier, (result: any) => {
     if (result.data.transactionError) {
-      const { context: context, reason: reason } = result.data.transactionError;
+      const { context, reason } = result.data.transactionError;
       handler(context, reason);
     }
   });
