@@ -35,8 +35,6 @@ export default class TransactionSender {
 
     this.timeout = undefined;
     this.nbConfirmationReceived = 0;
-
-    return this;
   }
 
   /**
