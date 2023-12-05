@@ -69,19 +69,19 @@ export default class TransactionSender {
         break;
 
       default:
-        throw "Event " + event + " is not supported";
+        throw new Error("Event " + event + " is not supported");
     }
 
     return this;
   }
 
   async send(tx: TransactionBuilder, endpoint: string, confirmationThreshold: number = 100, timeout: number = 60) {
-    if (confirmationThreshold < 0 && confirmationThreshold > 100) {
-      throw "'confirmationThreshold' must be an integer between 0 and 100";
+    if (confirmationThreshold < 0 || confirmationThreshold > 100) {
+      throw new Error("'confirmationThreshold' must be an integer between 0 and 100");
     }
 
     if (timeout <= 0) {
-      throw "'timeout' must be an integer greater than 0";
+      throw new Error("'timeout' must be an integer greater than 0");
     }
 
     const txAddress = uint8ArrayToHex(tx.address);
@@ -146,7 +146,7 @@ export default class TransactionSender {
           break;
 
         default:
-          throw "Event " + event + " is not supported";
+          throw new Error("Event " + event + " is not supported");
       }
     } else {
       absinthe.cancel(this.absintheSocket as AbsintheSocket, this.confirmationNotifier);
