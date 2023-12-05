@@ -43,7 +43,7 @@ export class ExtendedTransactionBuilder extends TransactionBuilder {
   }
 
   //Override TransactionSender.send to use the node resolution
-  send(confirmationThreshold: number, timeout: number) {
+  send(confirmationThreshold?: number, timeout?: number) {
     this.core.requestNode((endpoint) => this.sender.send(this, endpoint, confirmationThreshold, timeout));
   }
 
