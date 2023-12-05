@@ -9,25 +9,25 @@ import { Balance, NearestEndpoint, OracleData, Ownership, Token } from "./types.
  * @param endpoint
  */
 export async function rawGraphQLQuery(query: string, endpoint: string): Promise<any> {
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: query,
-        }),
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: query
     })
-        .then(handleResponse)
-        .then((res) => {
-            if (res.errors) {
-                return null;
-            } else {
-                return res.data;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res) => {
+      if (res.errors) {
+        return null;
+      } else {
+        return res.data;
+      }
+    });
 }
 
 /**
@@ -36,30 +36,30 @@ export async function rawGraphQLQuery(query: string, endpoint: string): Promise<
  * @returns {Promise<NearestEndpoint[]>} A list of nearest endpoints
  */
 export async function getNearestEndpoints(endpoint: string): Promise<NearestEndpoint[]> {
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: `query {
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
                     nearestEndpoints {
                         ip,
                         port
                     }
-                }`,
-        }),
+                }`
     })
-        .then(handleResponse)
-        .then((res): NearestEndpoint[] => {
-            if (res.errors || res.data.nearestEndpoints == null) {
-                return [];
-            } else {
-                return res.data.nearestEndpoints;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res): NearestEndpoint[] => {
+      if (res.errors || res.data.nearestEndpoints == null) {
+        return [];
+      } else {
+        return res.data.nearestEndpoints;
+      }
+    });
 }
 
 /**
@@ -68,31 +68,31 @@ export async function getNearestEndpoints(endpoint: string): Promise<NearestEndp
  * @param endpoint The Archethic API endpoint
  */
 export async function getTransactionIndex(address: string | Uint8Array, endpoint: string): Promise<number> {
-    address = maybeUint8ArrayToHex(address);
+  address = maybeUint8ArrayToHex(address);
 
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: `query {
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
                     lastTransaction(address: "${address}") {
                         chainLength
                     }
-                }`,
-        }),
+                }`
     })
-        .then(handleResponse)
-        .then((res): number => {
-            if (res.errors || res.data.lastTransaction == null) {
-                return 0;
-            } else {
-                return res.data.lastTransaction.chainLength;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res): number => {
+      if (res.errors || res.data.lastTransaction == null) {
+        return 0;
+      } else {
+        return res.data.lastTransaction.chainLength;
+      }
+    });
 }
 
 /**
@@ -101,31 +101,30 @@ export async function getTransactionIndex(address: string | Uint8Array, endpoint
  * @returns {Promise<string>} The balance of the address
  */
 export async function getStorageNoncePublicKey(endpoint: string): Promise<string> {
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: `query {
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
                     sharedSecrets {
                         storageNoncePublicKey
                     }
-                }`,
-        }),
+                }`
     })
-        .then(handleResponse)
-        .then((res): string => {
-            if (res.errors || res.data.sharedSecrets == null) {
-                return "";
-            } else {
-                return res.data.sharedSecrets.storageNoncePublicKey;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res): string => {
+      if (res.errors || res.data.sharedSecrets == null) {
+        return "";
+      } else {
+        return res.data.sharedSecrets.storageNoncePublicKey;
+      }
+    });
 }
-
 
 // The `last` flag is used to fetch the ownerships of the last transaction of the chain
 /**
@@ -134,19 +133,23 @@ export async function getStorageNoncePublicKey(endpoint: string): Promise<string
  * @param endpoint The Archethic API endpoint
  * @param last If true, get the ownerships of the last transaction of the chain
  */
-export async function getTransactionOwnerships(address: string | Uint8Array, endpoint: string, last: boolean = false): Promise<Ownership[]> {
-    address = maybeUint8ArrayToHex(address)
+export async function getTransactionOwnerships(
+  address: string | Uint8Array,
+  endpoint: string,
+  last: boolean = false
+): Promise<Ownership[]> {
+  address = maybeUint8ArrayToHex(address);
 
-    const url = new URL("/api", endpoint);
-    const field = last ? "lastTransaction" : "transaction"
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: `query {
+  const url = new URL("/api", endpoint);
+  const field = last ? "lastTransaction" : "transaction";
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
                     ${field}(address: "${address}") {
                       data {
                         ownerships {
@@ -158,17 +161,17 @@ export async function getTransactionOwnerships(address: string | Uint8Array, end
                         }
                       }
                     }
-                }`,
-        }),
+                }`
     })
-        .then(handleResponse)
-        .then((res): Ownership[] => {
-            if (res.errors || res.data == null) {
-                return [];
-            } else {
-                return res.data[field].data.ownerships;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res): Ownership[] => {
+      if (res.errors || res.data == null) {
+        return [];
+      } else {
+        return res.data[field].data.ownerships;
+      }
+    });
 }
 
 /**
@@ -177,32 +180,32 @@ export async function getTransactionOwnerships(address: string | Uint8Array, end
  * @param endpoint The Archethic API endpoint
  */
 export async function getToken(tokenAddress: string | Uint8Array, endpoint: string): Promise<{} | Token> {
-    tokenAddress = maybeUint8ArrayToHex(tokenAddress)
+  tokenAddress = maybeUint8ArrayToHex(tokenAddress);
 
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: `query {
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
                     token(address: "${tokenAddress}") {
                       genesis, name, symbol, supply, type
                       properties, collection, id, decimals
                     }
-              }`,
-        }),
+              }`
     })
-        .then(handleResponse)
-        .then((res): Token | {} => {
-            if (res.errors || res.data == null) {
-                return {}; // TODO : return null ?
-            } else {
-                return res.data.token;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res): Token | {} => {
+      if (res.errors || res.data == null) {
+        return {}; // TODO : return null ?
+      } else {
+        return res.data.token;
+      }
+    });
 }
 
 /**
@@ -211,10 +214,10 @@ export async function getToken(tokenAddress: string | Uint8Array, endpoint: stri
  * @param timestamp The timestamp of the data to get
  */
 export async function getOracleData(endpoint: string, timestamp: undefined | number = undefined): Promise<OracleData> {
-    let query;
+  let query;
 
-    if (timestamp === undefined) {
-        query = `query {
+  if (timestamp === undefined) {
+    query = `query {
                     oracleData {
                         timestamp,
                         services {
@@ -225,8 +228,8 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
                         }
                     }
                 }`;
-    } else {
-        query = `query {
+  } else {
+    query = `query {
                     oracleData(timestamp: ${timestamp}) {
                         services {
                           uco {
@@ -236,27 +239,27 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
                         }
                     }
                 }`;
-    }
+  }
 
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: query,
-        }),
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: query
     })
-        .then(handleResponse)
-        .then((res): OracleData => {
-            if (res.data.oracleData == null) {
-                return { services: {} };
-            } else {
-                return res.data.oracleData;
-            }
-        });
+  })
+    .then(handleResponse)
+    .then((res): OracleData => {
+      if (res.data.oracleData == null) {
+        return { services: {} };
+      } else {
+        return res.data.oracleData;
+      }
+    });
 }
 
 /**
@@ -265,12 +268,12 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
  * @param handler The handler to call when a new update is received
  */
 export async function subscribeToOracleUpdates(endpoint: string, handler: Function): Promise<any> {
-    const { host, protocol } = new URL(endpoint);
-    const ws_protocol = protocol == "https:" ? "wss" : "ws";
+  const { host, protocol } = new URL(endpoint);
+  const ws_protocol = protocol == "https:" ? "wss" : "ws";
 
-    const absintheSocket = absinthe.create(`${ws_protocol}://${host}/socket`);
+  const absintheSocket = absinthe.create(`${ws_protocol}://${host}/socket`);
 
-    const operation = `
+  const operation = `
       subscription {
         oracleUpdate {
           timestamp,
@@ -283,11 +286,11 @@ export async function subscribeToOracleUpdates(endpoint: string, handler: Functi
         }
       }
       `;
-    const notifier = absinthe.send(absintheSocket, operation);
+  const notifier = absinthe.send(absintheSocket, operation);
 
-    return absinthe.observe(absintheSocket, notifier, (result: any) => {
-        handler(result.data.oracleUpdate);
-    });
+  return absinthe.observe(absintheSocket, notifier, (result: any) => {
+    handler(result.data.oracleUpdate);
+  });
 }
 
 /**
@@ -296,18 +299,17 @@ export async function subscribeToOracleUpdates(endpoint: string, handler: Functi
  * @param address The address to get the balance of
  */
 export async function getBalance(address: string | Uint8Array, endpoint: string): Promise<Balance> {
+  address = maybeUint8ArrayToHex(address);
 
-    address = maybeUint8ArrayToHex(address)
-
-    const url = new URL("/api", endpoint);
-    return fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
-        body: JSON.stringify({
-            query: `query {
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
                     balance(address: "${address}") {
                       uco,
                       token {
@@ -316,18 +318,17 @@ export async function getBalance(address: string | Uint8Array, endpoint: string)
                         tokenId
                       }
                     }
-              }`,
-        }),
+              }`
     })
-        .then(handleResponse)
-        .then((res): Balance => {
-            if (res.errors || res.data == null) {
-                return { uco: 0, token: [] };
-            } else {
-                return res.data.balance;
-            }
-        });
-
+  })
+    .then(handleResponse)
+    .then((res): Balance => {
+      if (res.errors || res.data == null) {
+        return { uco: 0, token: [] };
+      } else {
+        return res.data.balance;
+      }
+    });
 }
 
 /**
@@ -335,11 +336,11 @@ export async function getBalance(address: string | Uint8Array, endpoint: string)
  * @param response
  */
 async function handleResponse(response: Response): Promise<any> {
-    return new Promise(function (resolve, reject) {
-        if (response.status >= 200 && response.status <= 299) {
-            response.json().then(resolve);
-        } else {
-            reject(response.statusText);
-        }
-    });
+  return new Promise(function (resolve, reject) {
+    if (response.status >= 200 && response.status <= 299) {
+      response.json().then(resolve);
+    } else {
+      reject(response.statusText);
+    }
+  });
 }

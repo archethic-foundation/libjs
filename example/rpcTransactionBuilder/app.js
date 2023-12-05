@@ -1,5 +1,5 @@
-import Archethic, { Utils } from '../../dist/index';
-import { ArchethicRPCClient } from '../../dist/api/wallet_rpc';
+import Archethic, { Utils } from "../../dist/index";
+import { ArchethicRPCClient } from "../../dist/api/wallet_rpc";
 
 const { toBigInt } = Utils;
 
@@ -10,23 +10,21 @@ let tokenTransfers = [];
 let recipients = [];
 let ownerships = [];
 
-ArchethicRPCClient.instance.setOrigin( {name: 'Wallet RPC example application'})
+ArchethicRPCClient.instance.setOrigin({ name: "Wallet RPC example application" });
 
 /** @type {Archethic | undefined} */
-let archethic = undefined
+let archethic = undefined;
 
 window.onload = function () {
   const endpoint = document.querySelector("#endpoint").value;
-  console.log(`Endpoint : ${endpoint}`)
+  console.log(`Endpoint : ${endpoint}`);
   const localArchethic = new Archethic(endpoint);
   localArchethic.rpcWallet.onconnectionstatechange((state) => {
-    document
-      .querySelector("#rpcConnectionStatus")
-      .textContent = state
-  })
+    document.querySelector("#rpcConnectionStatus").textContent = state;
+  });
   localArchethic.connect();
-  archethic = localArchethic
-}
+  archethic = localArchethic;
+};
 
 window.generate_transaction = async () => {
   document.querySelector("#transactionOutput").style.visibility = "hidden";
@@ -47,51 +45,44 @@ window.generate_transaction = async () => {
   });
 
   tokenTransfers.forEach(function (transfer) {
-    txBuilder.addTokenTransfer(
-      transfer.to,
-      transfer.amount,
-      transfer.token,
-      transfer.tokenId
-    );
+    txBuilder.addTokenTransfer(transfer.to, transfer.amount, transfer.token, transfer.tokenId);
   });
 
   recipients.forEach(function (recipient) {
     txBuilder.addRecipient(recipient);
   });
 
-  let sendTxButton = document.querySelector("#tx_send_button")
+  let sendTxButton = document.querySelector("#tx_send_button");
   sendTxButton.disabled = true;
-  archethic.rpcWallet.sendTransaction(txBuilder).then((sendResult) => {
-    document.querySelector("#transactionOutput #address").innerText =
-      sendResult.transactionAddress;
-    document.querySelector("#transactionOutput").style.visibility = "visible";
+  archethic.rpcWallet
+    .sendTransaction(txBuilder)
+    .then((sendResult) => {
+      document.querySelector("#transactionOutput #address").innerText = sendResult.transactionAddress;
+      document.querySelector("#transactionOutput").style.visibility = "visible";
 
-    document.querySelector("#transaction_error").style.display = "none";
-    document.querySelector("#confirmed").style.display = "block";
-    document.querySelector("#confirmations").innerText = sendResult.nbConfirmations;
-    document.querySelector("#maxConfirmations").innerText = sendResult.maxConfirmations;
+      document.querySelector("#transaction_error").style.display = "none";
+      document.querySelector("#confirmed").style.display = "block";
+      document.querySelector("#confirmations").innerText = sendResult.nbConfirmations;
+      document.querySelector("#maxConfirmations").innerText = sendResult.maxConfirmations;
 
-    document.querySelector("#success").style.display = "block";
-    document.querySelector("#tx_address_link").innerText =
-      archethic.endpoint.nodeEndpoint +
-      "/explorer/transaction/" +
-      sendResult.transactionAddress;
-    document
-      .querySelector("#tx_address_link")
-      .setAttribute(
-        "href",
-        archethic.endpoint.nodeEndpoint +
-        "/explorer/transaction/" +
-        sendResult.transactionAddress
-      );
-
-  }).catch((sendError) => {
-    document.querySelector("#confirmed").style.display = "none";
-    document.querySelector("#transaction_error").style.display = "block";
-    document.querySelector("#error_reason").innerText = JSON.stringify(sendError);
-  }).finally(() => {
-    sendTxButton.disabled = false;
-  })
+      document.querySelector("#success").style.display = "block";
+      document.querySelector("#tx_address_link").innerText =
+        archethic.endpoint.nodeEndpoint + "/explorer/transaction/" + sendResult.transactionAddress;
+      document
+        .querySelector("#tx_address_link")
+        .setAttribute(
+          "href",
+          archethic.endpoint.nodeEndpoint + "/explorer/transaction/" + sendResult.transactionAddress
+        );
+    })
+    .catch((sendError) => {
+      document.querySelector("#confirmed").style.display = "none";
+      document.querySelector("#transaction_error").style.display = "block";
+      document.querySelector("#error_reason").innerText = JSON.stringify(sendError);
+    })
+    .finally(() => {
+      sendTxButton.disabled = false;
+    });
 };
 
 window.onClickAddTransfer = () => {
@@ -140,17 +131,15 @@ window.onClickAddTokenTransfer = async () => {
     return;
   }
 
-  const { decimals } = await archethic.network
-    .getToken(transferToken)
-    .catch(() => {
-      return { decimals: 8 };
-    });
+  const { decimals } = await archethic.network.getToken(transferToken).catch(() => {
+    return { decimals: 8 };
+  });
 
   tokenTransfers.push({
     to: transfer_to,
     amount: toBigInt(amount, decimals),
     token: transferToken,
-    tokenId: parseInt(transferTokenId),
+    tokenId: parseInt(transferTokenId)
   });
 
   const option = document.createElement("option");
@@ -208,32 +197,23 @@ window.sendTransaction = async () => {
     .on("sent", () => {
       document.querySelector("#success").style.display = "block";
       document.querySelector("#tx_address_link").innerText =
-        endpoint +
-        "/explorer/transaction/" +
-        Utils.uint8ArrayToHex(transaction.address);
+        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address);
       document
         .querySelector("#tx_address_link")
-        .setAttribute(
-          "href",
-          endpoint +
-          "/explorer/transaction/" +
-          Utils.uint8ArrayToHex(transaction.address)
-        );
+        .setAttribute("href", endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address));
     })
     .send();
 };
 
-document
-  .querySelector("#content_upload")
-  .addEventListener("change", (event) => {
-    const fileList = event.target.files;
+document.querySelector("#content_upload").addEventListener("change", (event) => {
+  const fileList = event.target.files;
 
-    const fr = new FileReader();
-    fr.onload = function (e) {
-      file_content = new Uint8Array(e.target.result);
-    };
-    fr.readAsArrayBuffer(fileList[0]);
-  });
+  const fr = new FileReader();
+  fr.onload = function (e) {
+    file_content = new Uint8Array(e.target.result);
+  };
+  fr.readAsArrayBuffer(fileList[0]);
+});
 
 window.addOwnership = () => {
   const ownershipIndex = ownerships.length;
@@ -260,21 +240,12 @@ window.addOwnership = () => {
   ownershipEl.appendChild(document.createElement("br"));
 
   const authorizedPublicKeyLabel = document.createElement("label");
-  authorizedPublicKeyLabel.setAttribute(
-    "for",
-    "authPublicKey_" + ownershipIndex
-  );
+  authorizedPublicKeyLabel.setAttribute("for", "authPublicKey_" + ownershipIndex);
 
   const authorizedPublicKeyInput = document.createElement("input");
   authorizedPublicKeyInput.setAttribute("type", "text");
-  authorizedPublicKeyInput.setAttribute(
-    "id",
-    "authPublicKey_" + ownershipIndex
-  );
-  authorizedPublicKeyInput.setAttribute(
-    "placeholder",
-    "Enter the public key to authorize"
-  );
+  authorizedPublicKeyInput.setAttribute("id", "authPublicKey_" + ownershipIndex);
+  authorizedPublicKeyInput.setAttribute("placeholder", "Enter the public key to authorize");
   authorizedPublicKeyInput.setAttribute("class", "input");
 
   const authorizedPublicKeyButtonAdd = document.createElement("button");

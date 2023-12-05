@@ -1,18 +1,15 @@
-import Archethic, { Crypto, Utils } from '@archethicjs/sdk'
-import Keychain from '../../src/keychain';
+import Archethic, { Crypto, Utils } from "@archethicjs/sdk";
+import Keychain from "../../src/keychain";
 
-const { toBigInt } = Utils
+const { toBigInt } = Utils;
 
 let endpoint = document.querySelector("#endpoint").value;
 
 let archethic = new Archethic(endpoint);
 
-document
-  .querySelector("#endpoint")
-  .addEventListener("change", async function () {
-    archethic = new Archethic(this.value);
-  });
-
+document.querySelector("#endpoint").addEventListener("change", async function () {
+  archethic = new Archethic(this.value);
+});
 
 // This function creates 2 transactions:
 //
@@ -30,7 +27,7 @@ window.createKeychain = async () => {
 
   const keychain = new Keychain(Crypto.randomSecretKey())
     .addService("uco", "m/650'/0/0")
-    .addAuthorizedPublicKey(publicKey)
+    .addAuthorizedPublicKey(publicKey);
 
   const accessAddress = Crypto.deriveAddress(accessSeed, 1);
   const keychainAddress = Crypto.deriveAddress(keychain.seed, 1);
@@ -40,12 +37,9 @@ window.createKeychain = async () => {
     .originSign(originPrivateKey)
     .on("confirmation", (confirmations, maxConfirmations, sender) => {
       document.querySelector("#keychainSeed1").innerText = Utils.uint8ArrayToHex(keychain.seed);
-      let txEndpointLink =
-        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(keychainAddress);
+      let txEndpointLink = endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(keychainAddress);
       document.querySelector("#keychainTxLink").innerText = txEndpointLink;
-      document
-        .querySelector("#keychainTxLink")
-        .setAttribute("href", txEndpointLink);
+      document.querySelector("#keychainTxLink").setAttribute("href", txEndpointLink);
 
       sender.unsubscribe();
 
@@ -53,13 +47,9 @@ window.createKeychain = async () => {
         .newAccessTransaction(accessSeed, keychainAddress)
         .originSign(originPrivateKey)
         .on("confirmation", (confirmation, maxConfirmation, sender) => {
-          let txEndpointLink =
-            endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(accessAddress);
-          document.querySelector("#accessKeychainTxLink").innerText =
-            txEndpointLink;
-          document
-            .querySelector("#accessKeychainTxLink")
-            .setAttribute("href", txEndpointLink);
+          let txEndpointLink = endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(accessAddress);
+          document.querySelector("#accessKeychainTxLink").innerText = txEndpointLink;
+          document.querySelector("#accessKeychainTxLink").setAttribute("href", txEndpointLink);
           document.querySelector("#keychainCreation").style.display = "block";
 
           sender.unsubscribe();
@@ -67,7 +57,7 @@ window.createKeychain = async () => {
         .send();
     })
     .send();
-}
+};
 
 window.getKeychain = async () => {
   await archethic.connect();
@@ -78,12 +68,12 @@ window.getKeychain = async () => {
 
     document.querySelector("#keychainSeed2").innerText = Utils.uint8ArrayToHex(seed);
 
-    displayAuthorizedPublicKeys(keychain)
-    displayServices(keychain)
+    displayAuthorizedPublicKeys(keychain);
+    displayServices(keychain);
   });
 
   document.querySelector("#keychainInfo").style.display = "block";
-}
+};
 
 window.sendTransaction = async () => {
   await archethic.connect();
@@ -106,9 +96,7 @@ window.sendTransaction = async () => {
 
   document.querySelector("#confirmations").innerText = 0;
 
-  const signedTx = keychain
-    .buildTransaction(tx, serviceName, index)
-    .originSign(originPrivateKey);
+  const signedTx = keychain.buildTransaction(tx, serviceName, index).originSign(originPrivateKey);
 
   signedTx
     .on("confirmation", (nbConfirmations, maxConfirmations, sender) => {
@@ -124,43 +112,39 @@ window.sendTransaction = async () => {
         endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(tx.address);
       document
         .querySelector("#tx_address_link")
-        .setAttribute(
-          "href",
-          endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(tx.address)
-        );
+        .setAttribute("href", endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(tx.address));
     })
     .send();
-}
+};
 
 window.addRandomServiceToKeychain = async () => {
   const randString = Math.random().toString(16).substr(2, 8);
   const randInteger = Math.random().toString().substr(2, 3);
 
-  updateKeychain(keychain => {
+  updateKeychain((keychain) => {
     keychain.addService(randString, `m/650'/${randInteger}/0`);
   });
 };
 
 window.removeServiceFromKeychain = async (serviceName) => {
-  updateKeychain(keychain => {
-    keychain.removeService(serviceName)
+  updateKeychain((keychain) => {
+    keychain.removeService(serviceName);
   });
 };
 
 window.addAuthorizedKeyToKeyChain = async () => {
   // get the value from input and clean it
-  $input = document.querySelector("#authorizedPublicKeysToAdd")
+  $input = document.querySelector("#authorizedPublicKeysToAdd");
   const humanReadablePublicKey = $input.value;
   $input.value = "";
 
-  updateKeychain(keychain => {
+  updateKeychain((keychain) => {
     keychain.addAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
   });
-
 };
 
 window.removeAuthorizedPublicKey = async (humanReadablePublicKey) => {
-  updateKeychain(keychain => {
+  updateKeychain((keychain) => {
     keychain.removeAuthorizedPublicKey(Utils.hexToUint8Array(humanReadablePublicKey));
   });
 };
@@ -188,23 +172,21 @@ async function updateKeychain(func) {
     .send();
 }
 
-
 function displayAuthorizedPublicKeys(keychain) {
   let container = document.querySelector("#authorizedPublicKeys");
   container.innerHTML = "";
 
-  keychain.authorizedPublicKeys.forEach(publicKey => {
+  keychain.authorizedPublicKeys.forEach((publicKey) => {
     var humanReadablePublicKey = Utils.uint8ArrayToHex(publicKey);
     var $ul = document.createElement("ul");
 
     var $li = document.createElement("li");
-    $li.innerText = humanReadablePublicKey
+    $li.innerText = humanReadablePublicKey;
 
     var removeBtn = document.createElement("button");
     removeBtn.innerText = "Remove";
     removeBtn.setAttribute("onClick", `removeAuthorizedPublicKey("${humanReadablePublicKey}");`);
     $li.appendChild(removeBtn);
-
 
     $ul.appendChild($li);
     container.appendChild($ul);
@@ -214,8 +196,8 @@ function displayAuthorizedPublicKeys(keychain) {
 function displayServices(keychain) {
   let servicesContainer = document.querySelector("#services");
   servicesContainer.innerHTML = "";
-  console.log(keychain)
-  console.log(keychain.services)
+  console.log(keychain);
+  console.log(keychain.services);
   for (let service in keychain.services) {
     const { derivationPath } = keychain.services[service];
 
@@ -245,10 +227,7 @@ function displayServices(keychain) {
 
       var serviceAddressLink = document.createElement("a");
       serviceAddressLink.innerText = "Address: " + Utils.uint8ArrayToHex(address);
-      serviceAddressLink.setAttribute(
-        "href",
-        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(address)
-      );
+      serviceAddressLink.setAttribute("href", endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(address));
       serviceAddressLink.setAttribute("target", "_blank");
 
       var removeBtn = document.createElement("button");

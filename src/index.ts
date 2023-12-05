@@ -11,56 +11,53 @@ import Account, { Keychain } from "./account.js";
 export { Utils, Crypto, Keychain };
 
 export default class Archethic {
+  endpoint: DirectEndpoint | WalletRPCEndpoint;
+  rpcWallet: ArchethicRPCClient | undefined;
+  rpcNode: NodeRPCClient | undefined;
+  transaction: Transaction;
+  nearestEndpoints: Set<string>;
+  account: Account;
+  network: Network;
 
-    endpoint: DirectEndpoint | WalletRPCEndpoint;
-    rpcWallet: ArchethicRPCClient | undefined;
-    rpcNode: NodeRPCClient | undefined;
-    transaction: Transaction;
-    nearestEndpoints: Set<string>;
-    account: Account;
-    network: Network;
-
-    constructor(endpoint: string) {
-        this.endpoint = Endpoint.build(endpoint);
-        if (this.endpoint instanceof WalletRPCEndpoint) {
-            this.rpcWallet = ArchethicRPCClient.instance
-        }
-        this.account = new Account(this);
-        this.network = new Network(this);
-        this.nearestEndpoints = new Set<string>();
-        this.transaction = new Transaction(this);
-        this.rpcNode = new NodeRPCClient(this);
+  constructor(endpoint: string) {
+    this.endpoint = Endpoint.build(endpoint);
+    if (this.endpoint instanceof WalletRPCEndpoint) {
+      this.rpcWallet = ArchethicRPCClient.instance;
     }
+    this.account = new Account(this);
+    this.network = new Network(this);
+    this.nearestEndpoints = new Set<string>();
+    this.transaction = new Transaction(this);
+    this.rpcNode = new NodeRPCClient(this);
+  }
 
-    async connect() {
-        if (this.endpoint instanceof WalletRPCEndpoint) {
-            await this.endpoint.resolve()
-
-        }
-        const nodes = await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
-
-        let nearestEndpoints = nodes.map(({ ip, port }) => {
-            return `http://${ip}:${port}`;
-        })
-
-        nearestEndpoints.push(this.endpoint.origin.toString()) // Add the main endpoint as fallback
-
-        this.nearestEndpoints = new Set(nearestEndpoints);
-        return this;
+  async connect() {
+    if (this.endpoint instanceof WalletRPCEndpoint) {
+      await this.endpoint.resolve();
     }
+    const nodes = await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
 
-    async requestNode(call: (endpoint: string) => Promise<any>): Promise<any> {
-        const node = this.nearestEndpoints.values().next().value;
+    let nearestEndpoints = nodes.map(({ ip, port }) => {
+      return `http://${ip}:${port}`;
+    });
 
-        try {
-            return await call(node);
-        } catch (err) {
-            this.nearestEndpoints.delete(node);
-            if (this.nearestEndpoints.size == 0) {
-                throw "Cannot reach Archethic node";
-            }
-            return this.requestNode(call);
-        }
+    nearestEndpoints.push(this.endpoint.origin.toString()); // Add the main endpoint as fallback
+
+    this.nearestEndpoints = new Set(nearestEndpoints);
+    return this;
+  }
+
+  async requestNode(call: (endpoint: string) => Promise<any>): Promise<any> {
+    const node = this.nearestEndpoints.values().next().value;
+
+    try {
+      return await call(node);
+    } catch (err) {
+      this.nearestEndpoints.delete(node);
+      if (this.nearestEndpoints.size == 0) {
+        throw "Cannot reach Archethic node";
+      }
+      return this.requestNode(call);
     }
-
+  }
 }

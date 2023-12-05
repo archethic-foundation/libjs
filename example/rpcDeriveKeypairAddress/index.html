@@ -1,147 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <title>Keychain derive Keypair and Address</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" />
+    <style>
+      body {
+        background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
+        min-height: 100vh;
+        padding-bottom: 20px;
+      }
+    </style>
+  </head>
 
-<head>
-  <title>Keychain derive Keypair and Address</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-  <style>
-    body {
-      background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
-      min-height: 100vh;
-      padding-bottom: 20px;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container margin-top-6">
-    <div class="columns">
-      <div class="column">
-        <h1 class="is-size-2 has-text-white">Archethic</h1>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column">
-        <h1 class="is-size-5 has-text-white">AEwallet derive keypair and address</h1>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column">
-        <div class="box">
-          <label for="endpoint">Wallet RPC endpoint</label>
-          <input type="text" class="input" readonly value="ws://localhost:12345" placeholder="Wallet RPC endpoint"
-            id="endpoint" />
-        </div>
-      </div>
-      <div class="column">
-      <div class="box">
-        <p class="is-size-6 title">RPC Connection status : </p>
-        <p id="rpcConnectionStatus"></p>
-      </div>
-      </div>
-    </div>
-
-    <form>
+  <body>
+    <div class="container margin-top-6">
       <div class="columns">
         <div class="column">
-          <form id="deriveKeypair" >
+          <h1 class="is-size-2 has-text-white">Archethic</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-5 has-text-white">AEwallet derive keypair and address</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
           <div class="box">
-            <h2 class="is-size-5">Derive keypair</h2>
-            <br/>
-            <div class="box" style="display: flex; justify-content: space-evenly; flex-wrap: wrap" >
-              <div>
-                <label for="serviceName">Service name</label>
-                <br/>
-                <input type="text" class="input" id="serviceName" required placeholder="Enter the name of the new service"
-                       style="width: 400px" />
-              </div>
-
-              <div>
-                <label for="index">Index</label>
-                <br />
-                <input type="number" class="input" id="index" placeholder="Index"
-                       style="width: 400px" />
-              </div>
-              <div>
-                <label for="pathSuffix">Index</label>
-                <br />
-                <input type="text" class="input" id="pathSuffix" placeholder="Path Suffix"
-                       style="width: 400px" />
-              </div>
-
-            </div>
-            <div style="display: flex; justify-content: space-evenly" >
-
-              <div class="">
-                <br/>
-                <button type="submit" value="Submit" form="deriveKeypair" id="deriveKeypairButton" onclick="derive_keypair()" class="button is-warning" >Derive Keypair
-                 with AEWallet</button>
-              </div>
-            </div>
-
-            <div id="keypairResult" style="visibility: hidden" >
-                <br/>
-                <p>Public key: <span id="publicKey"></span></p>
-            </div>
-
+            <label for="endpoint">Wallet RPC endpoint</label>
+            <input
+              type="text"
+              class="input"
+              readonly
+              value="ws://localhost:12345"
+              placeholder="Wallet RPC endpoint"
+              id="endpoint"
+            />
           </div>
-          </form>
         </div>
-      </div>
-    </form>
-
-    <form>
-      <div class="columns">
         <div class="column">
-          <form id="deriveAddress" >
-            <div class="box">
-              <h2 class="is-size-5">Derive Address</h2>
-              <br/>
-              <div class="box" style="display: flex; justify-content: space-evenly; flex-wrap: wrap" >
-                <div>
-                  <label for="serviceNameAddress">Service name</label>
-                  <br/>
-                  <input type="text" class="input" id="serviceNameAddress" required placeholder="Enter the name of the new service"
-                         style="width: 400px" />
-                </div>
-
-                <div>
-                  <label for="indexAddress">Index</label>
-                  <br />
-                  <input type="number" class="input" id="indexAddress" placeholder="Index"
-                         style="width: 400px" />
-                </div>
-                <div>
-                  <label for="pathSuffixAddress">Index</label>
-                  <br />
-                  <input type="text" class="input" id="pathSuffixAddress" placeholder="Path Suffix"
-                         style="width: 400px" />
-                </div>
-
-              </div>
-              <div style="display: flex; justify-content: space-evenly" >
-
-                <div class="">
-                  <br/>
-                  <button type="submit" value="Submit" form="deriveAddress" id="deriveAddressButton" onclick="derive_address()" class="button is-warning" >Derive Address
-                    with AEWallet</button>
-                </div>
-              </div>
-
-              <div id="addressResult" style="visibility: hidden" >
-                <br/>
-                <p>Address: <span id="address"></span></p>
-              </div>
-
-            </div>
-          </form>
+          <div class="box">
+            <p class="is-size-6 title">RPC Connection status :</p>
+            <p id="rpcConnectionStatus"></p>
+          </div>
         </div>
       </div>
-    </form>
 
-  </div>
+      <form>
+        <div class="columns">
+          <div class="column">
+            <form id="deriveKeypair">
+              <div class="box">
+                <h2 class="is-size-5">Derive keypair</h2>
+                <br />
+                <div class="box" style="display: flex; justify-content: space-evenly; flex-wrap: wrap">
+                  <div>
+                    <label for="serviceName">Service name</label>
+                    <br />
+                    <input
+                      type="text"
+                      class="input"
+                      id="serviceName"
+                      required
+                      placeholder="Enter the name of the new service"
+                      style="width: 400px"
+                    />
+                  </div>
 
-  <script src="dist/app.js"></script>
-</body>
+                  <div>
+                    <label for="index">Index</label>
+                    <br />
+                    <input type="number" class="input" id="index" placeholder="Index" style="width: 400px" />
+                  </div>
+                  <div>
+                    <label for="pathSuffix">Index</label>
+                    <br />
+                    <input type="text" class="input" id="pathSuffix" placeholder="Path Suffix" style="width: 400px" />
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-evenly">
+                  <div class="">
+                    <br />
+                    <button
+                      type="submit"
+                      value="Submit"
+                      form="deriveKeypair"
+                      id="deriveKeypairButton"
+                      onclick="derive_keypair()"
+                      class="button is-warning"
+                    >
+                      Derive Keypair with AEWallet
+                    </button>
+                  </div>
+                </div>
 
+                <div id="keypairResult" style="visibility: hidden">
+                  <br />
+                  <p>Public key: <span id="publicKey"></span></p>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </form>
+
+      <form>
+        <div class="columns">
+          <div class="column">
+            <form id="deriveAddress">
+              <div class="box">
+                <h2 class="is-size-5">Derive Address</h2>
+                <br />
+                <div class="box" style="display: flex; justify-content: space-evenly; flex-wrap: wrap">
+                  <div>
+                    <label for="serviceNameAddress">Service name</label>
+                    <br />
+                    <input
+                      type="text"
+                      class="input"
+                      id="serviceNameAddress"
+                      required
+                      placeholder="Enter the name of the new service"
+                      style="width: 400px"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="indexAddress">Index</label>
+                    <br />
+                    <input type="number" class="input" id="indexAddress" placeholder="Index" style="width: 400px" />
+                  </div>
+                  <div>
+                    <label for="pathSuffixAddress">Index</label>
+                    <br />
+                    <input
+                      type="text"
+                      class="input"
+                      id="pathSuffixAddress"
+                      placeholder="Path Suffix"
+                      style="width: 400px"
+                    />
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-evenly">
+                  <div class="">
+                    <br />
+                    <button
+                      type="submit"
+                      value="Submit"
+                      form="deriveAddress"
+                      id="deriveAddressButton"
+                      onclick="derive_address()"
+                      class="button is-warning"
+                    >
+                      Derive Address with AEWallet
+                    </button>
+                  </div>
+                </div>
+
+                <div id="addressResult" style="visibility: hidden">
+                  <br />
+                  <p>Address: <span id="address"></span></p>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script src="dist/app.js"></script>
+  </body>
 </html>

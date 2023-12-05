@@ -14,52 +14,52 @@
 }
 
 .connectButton {
-    background-color: #282c34;
-    border: 1px solid white;
-    border-radius: 12px;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
+  background-color: #282c34;
+  border: 1px solid white;
+  border-radius: 12px;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
 }
 .connectButton:hover {
-    background-color: white;
-    color: #282c34;
+  background-color: white;
+  color: #282c34;
 }
 
 .connectButton:disabled {
-    background-color: #626262;
-    color: white;
-    cursor: not-allowed;
+  background-color: #626262;
+  color: white;
+  cursor: not-allowed;
 }
 
-.console-output{
-    background-color: #282c34;
-    color: white;
-    padding: 15px 32px;
-    text-align: left;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border: 1px solid white;
-    border-radius: 12px;
-    overflow: auto;
-    height: 200px;
-    width: 80%;
+.console-output {
+  background-color: #282c34;
+  color: white;
+  padding: 15px 32px;
+  text-align: left;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border: 1px solid white;
+  border-radius: 12px;
+  overflow: auto;
+  height: 200px;
+  width: 80%;
 }
 
-.success{
-    color: green;
+.success {
+  color: green;
 }
 
-.error{
-    color: red;
+.error {
+  color: red;
 }
 
 .App-header {

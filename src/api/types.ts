@@ -1,18 +1,10 @@
 import { TransactionFee, TransactionRPC } from "../types";
 
 export type NodeRpcMethods = {
-  contract_fun(params: {
-    contract: string;
-    function: string;
-    args?: any[];
-  }): any;
-  estimate_transaction_fee(
-    params: EstimateTransactionFeeRequest
-  ): TransactionFee;
+  contract_fun(params: { contract: string; function: string; args?: any[] }): any;
+  estimate_transaction_fee(params: EstimateTransactionFeeRequest): TransactionFee;
   send_transaction(params: SendTransactionRequest): SendTransactionResponse;
-  simulate_contract_execution(
-    params: SimulateContractExecutionRequest
-  ): SimulateContractExecutionResponse[];
+  simulate_contract_execution(params: SimulateContractExecutionRequest): SimulateContractExecutionResponse[];
   add_origin_key(params: AddOriginKeyRequest): AddOriginKeyResponse;
 };
 
@@ -53,7 +45,7 @@ export enum ConnectionState {
   Closed = "WalletRPCConnection_closed",
   Closing = "WalletRPCConnection_closing",
   Connecting = "WalletRPCConnection_connecting",
-  Open = "WalletRPCConnection_open",
+  Open = "WalletRPCConnection_open"
 }
 export enum RpcErrorCode {
   UnsupportedMethod = -32601,
@@ -67,7 +59,7 @@ export enum RpcErrorCode {
   ServiceNotFound = 5007,
   UserRejected = 4001,
   UnknownAccount = 5005,
-  Other = 5000,
+  Other = 5000
 }
 
 export type RpcSubscription = {

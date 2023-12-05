@@ -1,80 +1,82 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <title>Keychain example</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" />
+    <style>
+      body {
+        background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
+        min-height: 100vh;
+        padding-bottom: 20px;
+      }
+    </style>
+  </head>
 
-<head>
-  <title>Keychain example</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-  <style>
-    body {
-      background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
-      min-height: 100vh;
-      padding-bottom: 20px;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container margin-top-6">
-    <div class="columns">
-      <div class="column">
-        <h1 class="is-size-2 has-text-white">Archethic</h1>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column">
-        <h1 class="is-size-5 has-text-white">RPC tool</h1>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column">
-        <div class="box">
-          <label for="endpoint">Wallet RPC endpoint</label>
-          <input type="text" class="input" readonly value="ws://localhost:12345" placeholder="Wallet RPC endpoint"
-            id="endpoint" />
-        </div>
-        <div class="column box">
-          <p class="is-size-6 title">RPC Connection status : </p>
-          <p id="rpcConnectionStatus"></p>
+  <body>
+    <div class="container margin-top-6">
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-2 has-text-white">Archethic</h1>
         </div>
       </div>
-    </div>
-    <div class="box">
-      <label for="account">Select an account to listen</label>
-      <select id="account" class="select">
-        <option>-</option>
-      </select>
-    </div>
-    </form>
-    <div class="box" id="notifications">
-      <p for="account">Received notifications</p>
-    </div>
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-5 has-text-white">RPC tool</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <div class="box">
+            <label for="endpoint">Wallet RPC endpoint</label>
+            <input
+              type="text"
+              class="input"
+              readonly
+              value="ws://localhost:12345"
+              placeholder="Wallet RPC endpoint"
+              id="endpoint"
+            />
+          </div>
+          <div class="column box">
+            <p class="is-size-6 title">RPC Connection status :</p>
+            <p id="rpcConnectionStatus"></p>
+          </div>
+        </div>
+      </div>
+      <div class="box">
+        <label for="account">Select an account to listen</label>
+        <select id="account" class="select">
+          <option>-</option>
+        </select>
+      </div>
+      <div class="box" id="notifications">
+        <p for="account">Received notifications</p>
+      </div>
 
-    <div class="column">
-      <button type="button" id="account_sub_button" class="button is-warning" onclick="subscribe_account()">Listen to
-        account changed</button>
-    </div>
-    <div class="columns">
       <div class="column">
-        <div class="box" style="visibility: hidden" id="transactionOutput">
-          <p>Transaction address: <span id="address"></span></p>
-          <p id="success" style="display: none">
-            Your transaction has been sent to the network. <br />
-            You can verify it at <a id="tx_address_link" target="_blank"></a>
-          </p>
-          <p id="confirmed" style="display: none">
-            Transaction confirmed with <span id="confirmations"></span> replications out of <span
-              id="maxConfirmations"></span>
-          </p>
-          <p id="transaction_error" style="display: none; color: red">
-            Error during transaction validation : <span id="error_reason"></span>
-          </p>
+        <button type="button" id="account_sub_button" class="button is-warning" onclick="subscribe_account()">
+          Listen to account changed
+        </button>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <div class="box" style="visibility: hidden" id="transactionOutput">
+            <p>Transaction address: <span id="address"></span></p>
+            <p id="success" style="display: none">
+              Your transaction has been sent to the network. <br />
+              You can verify it at <a id="tx_address_link" target="_blank"></a>
+            </p>
+            <p id="confirmed" style="display: none">
+              Transaction confirmed with <span id="confirmations"></span> replications out of
+              <span id="maxConfirmations"></span>
+            </p>
+            <p id="transaction_error" style="display: none; color: red">
+              Error during transaction validation : <span id="error_reason"></span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  </div>
-  </div>
-  <script src="dist/app.js"></script>
-</body>
-
+    <script src="dist/app.js"></script>
+  </body>
 </html>

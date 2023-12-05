@@ -13,8 +13,9 @@ npm install @archethicjs/sdk
 ## Usage
 
 When it comes to private data manipulation, your application has two options :
-  1. **Standalone :** store private keys on your own
-  2. **WalletRPC :** delegate sensitive operations to a Wallet application. (**recommended**, but still Alpha)
+
+1. **Standalone :** store private keys on your own
+2. **WalletRPC :** delegate sensitive operations to a Wallet application. (**recommended**, but still Alpha)
 
 The second option is strongly preferable : it preserves you from security problematics. When your web application needs to perform a sensitive operation (signing a Transaction, reading a Transaction secrets), it will ask **Archethic Wallet** application to perform it.
 That way, cryptographic secrets never leak from the **Archethic Wallet**.
@@ -26,7 +27,6 @@ The only requirement is user has to run an **Archethic Wallet** on their compute
 ### Using the network with WalletRPC
 
 This library aims to provide an easy way to interact with Archethic network.
-
 
 ```js
 import Archethic from "@archethicjs/sdk";
@@ -43,11 +43,9 @@ console.log(archethic)
 }
 ```
 
-
 ### Using the network without WalletRPC
 
 This library aims to provide an easy way to interact with Archethic network.
-
 
 ```js
 import Archethic from "@archethicjs/sdk";
@@ -68,7 +66,6 @@ console.log(archethic)
 
 If you still want to use the nearest point while being on an HTTPS website, you could call a server endpoint to make the query for you.
 
-
 ## API
 
   <details>
@@ -82,6 +79,7 @@ Creates a new transaction to build (or update) a keychain by embedding the on-ch
 - `transactionChainIndex` The index of the transaction created (0 for new keychain)
 
 #### Example of keychain creation
+
 ```js
 import Archethic, { Crypto } from "@archethicjs/sdk";
 
@@ -98,6 +96,7 @@ const tx = archethic.account.newKeychainTransaction(keychain, 0);
 ```
 
 #### Example of keychain update
+
 ```js
 import Archethic, { Crypto } from "@archethicjs/sdk";
 
@@ -105,7 +104,7 @@ const accessSeed = "myseed";
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
 let keychain = await archethic.account.getKeychain(accessSeed);
-keychain.addService("mywallet", "m/650'/1/0")
+keychain.addService("mywallet", "m/650'/1/0");
 
 // determine the new transaction index
 const keychainGenesisAddress = Crypto.deriveAddress(keychain.seed, 0);
@@ -178,9 +177,7 @@ await archethic.connect();
 
 const keychain = await archethic.account.getKeychain(accessKeychainSeed);
 
-const index = archethic.transaction.getTransactionIndex(
-  keychain.deriveAddress("uco", 0)
-);
+const index = archethic.transaction.getTransactionIndex(keychain.deriveAddress("uco", 0));
 /*const signedTx =*/ keychain.buildTransaction(tx, "uco", index);
 ```
 
@@ -230,17 +227,16 @@ Use ec encryption on the seed for the list of authorizedPublicKeys
 ```js
 import Archethic, { Keychain, Crypto } from "@archethicjs/sdk";
 
-const archethic = new Archethic("http://testnet.archethic.net")
-await archethic.connect()
+const archethic = new Archethic("http://testnet.archethic.net");
+await archethic.connect();
 
-const keychain = new Keychain(Crypto.randomSecretKey())
-    .addService("uco", "m/650'/uco")
+const keychain = new Keychain(Crypto.randomSecretKey()).addService("uco", "m/650'/uco");
 
-const storageNonce = await archethic.network.getStorageNoncePublicKey()
+const storageNonce = await archethic.network.getStorageNoncePublicKey();
 
 const { secret, authorizedPublicKeys } = keychain.ecEncryptServiceSeed("uco", [storageNonce]);
 // secret and authorizedPublicKeys can be used to create an ownership
-const tx = archethic.transaction.new().addOwnership(secret, authorizedPublicKeys)
+const tx = archethic.transaction.new().addOwnership(secret, authorizedPublicKeys);
 ```
 
 #### toDID()
@@ -417,19 +413,21 @@ Add a token transfer to the `data.ledger.token.transfers` section of the transac
 
 #### addRecipient(to, action, args)
 
- Adds a recipient to call the smart contract's "transaction" action.
-  - `to` is the contract's address in hexadecimal or Uint8Array
-  - `action` is the name of the action. This parameter is not mandatory
-  - `args` is the list of arguments for the action (must contain only JSON valid data). This parameter is not mandatory
+Adds a recipient to call the smart contract's "transaction" action.
 
-  ```js
-import Archethic from "@archethicjs/sdk"
-const archethic = new Archethic("https://testnet.archethic.net")
+- `to` is the contract's address in hexadecimal or Uint8Array
+- `action` is the name of the action. This parameter is not mandatory
+- `args` is the list of arguments for the action (must contain only JSON valid data). This parameter is not mandatory
 
-const tx = archethic.transaction.new()
+```js
+import Archethic from "@archethicjs/sdk";
+const archethic = new Archethic("https://testnet.archethic.net");
+
+const tx = archethic.transaction
+  .new()
   .setType("transfer")
   .addRecipient("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
-  .addRecipient("0000bc96b1a9751d3750edb9381a55b5b4e4fb104c10b0b6c9a00433ec464637bfab", "vote", ["Dr. Who"])
+  .addRecipient("0000bc96b1a9751d3750edb9381a55b5b4e4fb104c10b0b6c9a00433ec464637bfab", "vote", ["Dr. Who"]);
 ```
 
 #### build(seed, index, curve, hashAlgo)
@@ -449,10 +447,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  )
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
   .build("mysuperpassphraseorseed", 0);
 ```
 
@@ -509,10 +504,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  );
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42);
 
 const signaturePayload = tx.previousSignaturePayload();
 ```
@@ -531,10 +523,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  );
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42);
 
 const signaturePayload = tx.previousSignaturePayload();
 const prevSign = someFunctionToGetSignature(signaturePayload);
@@ -553,10 +542,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  );
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42);
 
 const txAddress = someFunctionToGetTxAddress();
 tx.setAddress(txAddress);
@@ -573,10 +559,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  )
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
   .build(seed, originPrivateKey);
 
 const originPayload = tx.originSignaturePayload();
@@ -593,10 +576,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  )
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
   .build("mysuperpassphraseorseed", 0);
 
 const originPayload = tx.originSignaturePayload();
@@ -619,10 +599,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  )
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
   .build("mysuperpassphraseorseed", 0)
   .originSign(privateKey)
   .on("confirmation", (nbConf, maxConf) => console.log(nbConf, maxConf))
@@ -655,10 +632,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addUCOTransfer(
-    "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-    0.42
-  )
+  .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
   .build("mysuperpassphraseorseed", 0)
   .originSign(privateKey)
   .on("sent", () => console.log("transaction sent !"))
@@ -725,18 +699,16 @@ Query a node to find the ownerships (secrets and authorized keys) to given trans
 import Archethic from "@archethicjs/sdk";
 
 const archethic = new Archethic("https://testnet.archethic.net");
-const ownerships = await archethic.transaction.getTransactionOwnerships(
-  tx.address
-);
+const ownerships = await archethic.transaction.getTransactionOwnerships(tx.address);
 console.log(ownerships)[
   {
     secret: "...",
     authorizedPublicKeys: [
       {
         publicKey: "...",
-        encryptedSecretKey: "",
-      },
-    ],
+        encryptedSecretKey: ""
+      }
+    ]
   }
 ];
 ```
@@ -782,13 +754,13 @@ Call a Smart Contract's exported function with given args.
 - `args` is the list of arguments to call the function with
 
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
-await archethic.connect()
+await archethic.connect();
 
-const response = await archethic.rpcNode?.callFunction("0000AB...CD", "add", [1, 2])
-console.log(response)
-3
+const response = await archethic.rpcNode?.callFunction("0000AB...CD", "add", [1, 2]);
+console.log(response);
+3;
 ```
 
 ### getBalance(address)
@@ -827,10 +799,7 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect();
-const response = await archethic.network.addOriginKey(
-  originPublicKey,
-  certificate
-);
+const response = await archethic.network.addOriginKey(originPublicKey, certificate);
 
 console.log(response);
 {
@@ -849,8 +818,7 @@ const archethic = new Archethic("https://testnet.archethic.net");
 
 await archethic.connect();
 
-const storageNoncePublicKey =
-  await archethic.network.getStorageNoncePublicKey();
+const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
 // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
 ```
 
@@ -896,6 +864,7 @@ console.log(oracleData)
   }
 }
 ```
+
 ### rawGraphQLQuery(query)
 
 Query the GraphQL API of the node with a custom graphQL query that fits your needs.
@@ -951,7 +920,6 @@ await archethic.network.subscribeToOracleUpdates(console.log)
 
   </details>
 
-
   <details>
   <summary>Wallet RPC</summary>
 
@@ -961,19 +929,13 @@ Configures the DApp identity. DApp identity will be sent to WalletRPC.
 
 On operations requiring user's confirmation, that identity might be displayed.
 
-
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 ```
 
 ### onconnectionstatechange(callback)
@@ -1003,86 +965,62 @@ archethic.rpcWallet.onconnectionstatechange(
 archethic.rpcWallet.unsubscribeconnectionstatechange()
 ```
 
-###  getAccounts()
+### getAccounts()
 
 Reads a concise accounts list from ArchethicWallet.
 
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.getAccounts().then(
-  (accounts) => {
-    accounts.forEach(account => {
-      console.log(`\t ${JSON.stringify(account)}`)
-    })
-  }
-)
+archethic.rpcWallet.getAccounts().then((accounts) => {
+  accounts.forEach((account) => {
+    console.log(`\t ${JSON.stringify(account)}`);
+  });
+});
 ```
 
-###  getServices()
+### getServices()
 
 Reads a concise services list from ArchethicWallet.
 
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.getServices().then(
-  (services) => {
-    services.forEach(service => {
-      console.log(`\t ${JSON.stringify(service)}`)
-    })
-  }
-)
+archethic.rpcWallet.getServices().then((services) => {
+  services.forEach((service) => {
+    console.log(`\t ${JSON.stringify(service)}`);
+  });
+});
 ```
 
-###  onAccountChange(accountName, callback) : RpcSubscription
+### onAccountChange(accountName, callback) : RpcSubscription
 
 Listens to an account's changes.
 
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-
-
-const subscription = await archethic.rpcWallet.onAccountChange(
-  'account name',
-  (account) => {
-    console.log(JSON.stringify(account))
-  }
-)
+const subscription = await archethic.rpcWallet.onAccountChange("account name", (account) => {
+  console.log(JSON.stringify(account));
+});
 ```
 
-###  unsubscribe(rpcSubscription)
+### unsubscribe(rpcSubscription)
 
 Stops any subscription to Wallet.
 
@@ -1104,31 +1042,27 @@ const subscription // subscription from a previous call (onAccountChange for exa
 await archethic.rpcWallet.unsubscribe(subscription)
 ```
 
-###  sendTransaction(transaction)
+### sendTransaction(transaction)
 
 Asks ArchethicWallet to sign and send a transaction.
 
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.sendTransaction(
-  {
+archethic.rpcWallet
+  .sendTransaction({
     type: "token",
     version: 1,
     data: {
-      content: "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
+      content:
+        '{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}',
       code: "",
-      ownerships:[],
+      ownerships: [],
       ledger: {
         uco: {
           transfers: []
@@ -1139,132 +1073,118 @@ archethic.rpcWallet.sendTransaction(
       },
       recipients: []
     }
-  }
-).then((sendResult) => {
-  console.log(JSON.stringify(sendResult))
-  // { transactionAddress: "asdfasfsadf", nbConfirmations: 3, maxConfirmations: 3 }
-}).catch((sendError) => {
-  console.log(JSON.stringify(sendResult))
-})
+  })
+  .then((sendResult) => {
+    console.log(JSON.stringify(sendResult));
+    // { transactionAddress: "asdfasfsadf", nbConfirmations: 3, maxConfirmations: 3 }
+  })
+  .catch((sendError) => {
+    console.log(JSON.stringify(sendResult));
+  });
 ```
 
-
-###  signTransactions([transaction])
+### signTransactions([transaction])
 
 Asks ArchethicWallet to sign multiple transactions.
 
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.signTransactions(
-  [{
-    type: "token",
-    version: 1,
-    data: {
-      content: "{ \"name\": \"NFT 001\", \"supply\": 100000000, \"type\": \"non-fungible\", \"symbol\": \"NFT1\", \"aeip\": [2], \"properties\": {}}",
-      code: "",
-      ownerships:[],
-      ledger: {
-        uco: {
-          transfers: []
+archethic.rpcWallet
+  .signTransactions([
+    {
+      type: "token",
+      version: 1,
+      data: {
+        content:
+          '{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}',
+        code: "",
+        ownerships: [],
+        ledger: {
+          uco: {
+            transfers: []
+          },
+          token: {
+            transfers: []
+          }
         },
-        token: {
-          transfers: []
-        }
-      },
-      recipients: []
+        recipients: []
+      }
     }
-  }]
-).then((signedResult) => {
-  console.log(JSON.stringify(signedResult))
-  signedResult.forEach((signedTransaction) => {
-    console.log(JSON.stringify(signedTransaction))
-    // {address: "000ef....", previousPublicKey: "00045b...", previousSignature: "000ef....", originSignature: "00045b..."}
+  ])
+  .then((signedResult) => {
+    console.log(JSON.stringify(signedResult));
+    signedResult.forEach((signedTransaction) => {
+      console.log(JSON.stringify(signedTransaction));
+      // {address: "000ef....", previousPublicKey: "00045b...", previousSignature: "000ef....", originSignature: "00045b..."}
+    });
   })
-}).catch((signedError) => {
-  console.log(JSON.stringify(signedError))
-})
+  .catch((signedError) => {
+    console.log(JSON.stringify(signedError));
+  });
 ```
 
 ### addService(name)
+
 Add a service in the keychain
+
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.addService("myService").then(
-        (result) => {
-            console.log(JSON.stringify(result))
-        }
-    )
-    .catch(
-        (error) => {
-            console.log(error)
-        }
-    )
+archethic.rpcWallet
+  .addService("myService")
+  .then((result) => {
+    console.log(JSON.stringify(result));
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 ```
 
-
 ### keychainDeriveKeypair(serviceName, index, pathSuffix)
+
 Derive a keypair for the given service at the index given and get the public key
+
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.keychainDeriveKeypair("myService", 1, "suffix").then(
-        (result) => {
-            console.log(result['publicKey'])
-        })
+archethic.rpcWallet.keychainDeriveKeypair("myService", 1, "suffix").then((result) => {
+  console.log(result["publicKey"]);
+});
 ```
 
 ### keychainDeriveAddress(serviceName, index, pathSuffix)
+
 Derive an address for the given service at the index given
+
 ```js
-import Archethic from "@archethicjs/sdk"
+import Archethic from "@archethicjs/sdk";
 
-const archethic = new Archethic("ws://localhost:12345")
-await archethic.connect()
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet.keychainDeriveAddress("myService", 1, "suffix").then(
-        (result) => {
-            console.log(result['address'])
-        })
+archethic.rpcWallet.keychainDeriveAddress("myService", 1, "suffix").then((result) => {
+  console.log(result["address"]);
+});
 ```
+
   </details>
 
   <details>
@@ -1283,10 +1203,7 @@ It creates a new keypair into hexadecimal format
 
 ```js
 import { Crypto } from "@archethicjs/sdk";
-const { publicKey: publicKey, privateKey: privateKey } = Crypto.deriveKeyPair(
-  "mysuperpassphraseorseed",
-  0
-);
+const { publicKey: publicKey, privateKey: privateKey } = Crypto.deriveKeyPair("mysuperpassphraseorseed", 0);
 // publicKey => 0100048cac473e46edd109c3ef59eec22b9ece9f99a2d0dce1c4ccb31ce0bacec4a9ad246744889fb7c98ea75c0f0ecd60002c07fae92f23382669ca9aff1339f44216
 ```
 
@@ -1340,10 +1257,7 @@ Perform an ECIES decryption using a private key and an encrypted data
 
 ```js
 import { Crypto } from "@archethicjs/sdk";
-const cipher = Crypto.ecDecrypt(
-  "dataToDecrypt",
-  "36f7753a63188eabaf4891c5724d346da58160cdc386ebf248603724d1796cd3"
-);
+const cipher = Crypto.ecDecrypt("dataToDecrypt", "36f7753a63188eabaf4891c5724d346da58160cdc386ebf248603724d1796cd3");
 ```
 
 ### aesEncrypt(data, publicKey)

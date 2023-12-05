@@ -1,10 +1,15 @@
 import fetch from "cross-fetch";
 import { JSONRPCClient, TypedJSONRPCClient } from "json-rpc-2.0";
-import { AddOriginKeyRequest, AddOriginKeyResponse, NodeRpcMethods, SendTransactionResponse, SimulateContractExecutionResponse } from "./types";
+import {
+  AddOriginKeyRequest,
+  AddOriginKeyResponse,
+  NodeRpcMethods,
+  SendTransactionResponse,
+  SimulateContractExecutionResponse
+} from "./types";
 import Archethic from "..";
 import TransactionBuilder from "../transaction_builder";
 import { TransactionFee } from "../types";
-
 
 export class NodeRPCClient {
   private client: TypedJSONRPCClient<NodeRpcMethods>;
@@ -15,12 +20,12 @@ export class NodeRPCClient {
   }
 
   /**
-     *
-     * @param {string} contractAddress
-     * @param {string} functionName
-     * @param {any[]}  args
-     * @returns {Promise<void>}
-     */
+   *
+   * @param {string} contractAddress
+   * @param {string} functionName
+   * @param {any[]}  args
+   * @returns {Promise<void>}
+   */
   async callFunction(contractAddress: string, functionName: string, args: any[]) {
     return this.client.request("contract_fun", {
       contract: contractAddress,
@@ -35,7 +40,6 @@ export class NodeRPCClient {
    */
   async getTransactionFee(tx: TransactionBuilder): Promise<TransactionFee> {
     return this.client.request("estimate_transaction_fee", { transaction: tx.toNodeRPC() });
-
   }
 
   /**
@@ -48,10 +52,10 @@ export class NodeRPCClient {
   }
 
   /**
-  * Add an origin key
-  * @param {AddOriginKeyRequest} origin
-  * @returns {Promise<AddOriginKeyResponse>} The transaction response
-  */
+   * Add an origin key
+   * @param {AddOriginKeyRequest} origin
+   * @returns {Promise<AddOriginKeyResponse>} The transaction response
+   */
   async addOriginKey(origin: AddOriginKeyRequest): Promise<AddOriginKeyResponse> {
     return this.client.request("add_origin_key", origin);
   }
@@ -72,18 +76,16 @@ export class NodeRPCClient {
       return fetch(url, {
         method: "POST",
         headers: {
-          "content-type": "application/json",
+          "content-type": "application/json"
         },
-        body: JSON.stringify(jsonRPCRequest),
+        body: JSON.stringify(jsonRPCRequest)
       }).then((response) => {
         if (response.status === 200) {
-          return response
-            .json()
-            .then((jsonRPCResponse) => this.client.receive(jsonRPCResponse));
+          return response.json().then((jsonRPCResponse) => this.client.receive(jsonRPCResponse));
         } else if (jsonRPCRequest.id !== undefined) {
           return Promise.reject(new Error(response.statusText));
         }
-      })
-    })
+      });
+    });
   }
 }

@@ -15,12 +15,10 @@ let endpoint = document.querySelector("#endpoint").value;
 let archethic = new Archethic(endpoint);
 archethic.connect();
 
-document
-  .querySelector("#endpoint")
-  .addEventListener("change", async function() {
-    archethic = new Archethic(this.value);
-    archethic.connect();
-  });
+document.querySelector("#endpoint").addEventListener("change", async function () {
+  archethic = new Archethic(this.value);
+  archethic.connect();
+});
 
 window.generate_transaction = async () => {
   transaction = null;
@@ -34,7 +32,7 @@ window.generate_transaction = async () => {
 
   const code = document.querySelector("#code").value;
   if (code != "") {
-    const ownershipIndex = ownerships.findIndex(function(ownership) {
+    const ownershipIndex = ownerships.findIndex(function (ownership) {
       return ownership.secret == seed;
     });
     if (ownershipIndex == -1) {
@@ -45,9 +43,7 @@ window.generate_transaction = async () => {
     }
 
     const publicKey = await archethic.network.getStorageNoncePublicKey();
-    const authorizedKeyIndex = ownerships[
-      ownershipIndex
-    ].authorizedKeys.findIndex(function(authKey) {
+    const authorizedKeyIndex = ownerships[ownershipIndex].authorizedKeys.findIndex(function (authKey) {
       return authKey.publicKey == publicKey;
     });
 
@@ -70,48 +66,40 @@ window.generate_transaction = async () => {
     .setCode(document.querySelector("#code").value)
     .setContent(content);
 
-  ownerships.forEach(function(ownership) {
+  ownerships.forEach(function (ownership) {
     const secretKey = Crypto.randomSecretKey();
     const cipher = Crypto.aesEncrypt(ownership.secret, secretKey);
 
-    const authorizedKeys = ownership.authorizedKeys.map(function(authKey) {
+    const authorizedKeys = ownership.authorizedKeys.map(function (authKey) {
       let encryptedSecretKey = Crypto.ecEncrypt(secretKey, authKey.publicKey);
       return {
         publicKey: authKey.publicKey,
-        encryptedSecretKey: encryptedSecretKey,
+        encryptedSecretKey: encryptedSecretKey
       };
     });
 
     txBuilder.addOwnership(cipher, authorizedKeys);
   });
 
-  ucoTransfers.forEach(function(transfer) {
+  ucoTransfers.forEach(function (transfer) {
     txBuilder.addUCOTransfer(transfer.to, transfer.amount);
   });
 
-  tokenTransfers.forEach(function(transfer) {
-    txBuilder.addTokenTransfer(
-      transfer.to,
-      transfer.amount,
-      transfer.token,
-      transfer.tokenId
-    );
+  tokenTransfers.forEach(function (transfer) {
+    txBuilder.addTokenTransfer(transfer.to, transfer.amount, transfer.token, transfer.tokenId);
   });
 
-  recipients.forEach(function({ address, action, args }) {
+  recipients.forEach(function ({ address, action, args }) {
     txBuilder.addRecipient(address, action, args);
   });
 
-  transaction = txBuilder
-    .build(seed, parseInt(index), curve)
-    .originSign(originPrivateKey);
+  transaction = txBuilder.build(seed, parseInt(index), curve).originSign(originPrivateKey);
 
-  document.querySelector("#transactionOutput #address").innerText =
-    Utils.uint8ArrayToHex(transaction.address);
+  document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(transaction.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
   const result = await archethic.transaction.getTransactionFee(transaction);
-  const amount = Utils.fromBigInt(result.fee)
-  const usdValue = (result.rates.usd * amount).toFixed(4)
+  const amount = Utils.fromBigInt(result.fee);
+  const usdValue = (result.rates.usd * amount).toFixed(4);
   document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
 };
 
@@ -170,17 +158,15 @@ window.onClickAddTokenTransfer = async () => {
     return;
   }
 
-  const { decimals } = await archethic.network
-    .getToken(transferToken)
-    .catch(() => {
-      return { decimals: 8 };
-    });
+  const { decimals } = await archethic.network.getToken(transferToken).catch(() => {
+    return { decimals: 8 };
+  });
 
   tokenTransfers.push({
     to: transfer_to,
     amount: toBigInt(amount, decimals),
     token: transferToken,
-    tokenId: parseInt(transferTokenId),
+    tokenId: parseInt(transferTokenId)
   });
 
   const option = document.createElement("option");
@@ -211,12 +197,11 @@ window.onClickAddRecipient = () => {
   const $argsJsonErr = document.querySelector("#args_json_error");
   const $list = document.querySelector("#recipients");
 
-  const address = $address.value
-  const action = $action.value
-  const argsJson = $argsJson.value
+  const address = $address.value;
+  const action = $action.value;
+  const argsJson = $argsJson.value;
 
-  if (address == "")
-    return
+  if (address == "") return;
 
   $argsJsonErr.textContent = "";
 
@@ -225,35 +210,31 @@ window.onClickAddRecipient = () => {
     recipients.push({ address });
 
     // update list
-    if ($list.textContent != "")
-      $list.textContent = $list.textContent + '\n'
-    $list.textContent = $list.textContent + address
+    if ($list.textContent != "") $list.textContent = $list.textContent + "\n";
+    $list.textContent = $list.textContent + address;
 
     // reset form
-    $address.value = '';
-    $action.value = '';
-    $argsJson.value = '';
-  }
-  else {
+    $address.value = "";
+    $action.value = "";
+    $argsJson.value = "";
+  } else {
     try {
-      const args = JSON.parse(argsJson)
+      const args = JSON.parse(argsJson);
       // update state
       recipients.push({ address, action, args });
 
       // update list
-      if ($list.textContent != "")
-        $list.textContent = $list.textContent + '\n'
-      $list.textContent = $list.textContent + `${address} - ${action} - ${argsJson}`
+      if ($list.textContent != "") $list.textContent = $list.textContent + "\n";
+      $list.textContent = $list.textContent + `${address} - ${action} - ${argsJson}`;
 
       // reset form
-      $address.value = '';
-      $action.value = '';
-      $argsJson.value = '';
+      $address.value = "";
+      $action.value = "";
+      $argsJson.value = "";
     } catch (e) {
-      $argsJsonErr.textContent = "Invalid JSON:" + e.message
+      $argsJsonErr.textContent = "Invalid JSON:" + e.message;
     }
   }
-
 };
 
 window.sendTransaction = async () => {
@@ -275,17 +256,10 @@ window.sendTransaction = async () => {
     .on("sent", () => {
       document.querySelector("#success").style.display = "block";
       document.querySelector("#tx_address_link").innerText =
-        endpoint +
-        "/explorer/transaction/" +
-        Utils.uint8ArrayToHex(transaction.address);
+        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address);
       document
         .querySelector("#tx_address_link")
-        .setAttribute(
-          "href",
-          endpoint +
-          "/explorer/transaction/" +
-          Utils.uint8ArrayToHex(transaction.address)
-        );
+        .setAttribute("href", endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address));
     })
     .send();
 };
@@ -299,17 +273,15 @@ window.getTransactionIndex = async () => {
   document.querySelector("#index").value = nb;
 };
 
-document
-  .querySelector("#content_upload")
-  .addEventListener("change", (event) => {
-    const fileList = event.target.files;
+document.querySelector("#content_upload").addEventListener("change", (event) => {
+  const fileList = event.target.files;
 
-    const fr = new FileReader();
-    fr.onload = function(e) {
-      file_content = new Uint8Array(e.target.result);
-    };
-    fr.readAsArrayBuffer(fileList[0]);
-  });
+  const fr = new FileReader();
+  fr.onload = function (e) {
+    file_content = new Uint8Array(e.target.result);
+  };
+  fr.readAsArrayBuffer(fileList[0]);
+});
 
 window.addOwnership = () => {
   const ownershipIndex = ownerships.length;
@@ -325,7 +297,7 @@ window.addOwnership = () => {
   secretInput.setAttribute("id", "secret_" + ownershipIndex);
   secretInput.setAttribute("placeholder", "Secret to host");
   secretInput.setAttribute("class", "input");
-  secretInput.addEventListener("change", function(e) {
+  secretInput.addEventListener("change", function (e) {
     ownerships[ownershipIndex] = { secret: e.target.value, authorizedKeys: [] };
   });
 
@@ -336,28 +308,19 @@ window.addOwnership = () => {
   ownershipEl.appendChild(document.createElement("br"));
 
   const authorizedPublicKeyLabel = document.createElement("label");
-  authorizedPublicKeyLabel.setAttribute(
-    "for",
-    "authPublicKey_" + ownershipIndex
-  );
+  authorizedPublicKeyLabel.setAttribute("for", "authPublicKey_" + ownershipIndex);
 
   const authorizedPublicKeyInput = document.createElement("input");
   authorizedPublicKeyInput.setAttribute("type", "text");
-  authorizedPublicKeyInput.setAttribute(
-    "id",
-    "authPublicKey_" + ownershipIndex
-  );
-  authorizedPublicKeyInput.setAttribute(
-    "placeholder",
-    "Enter the public key to authorize"
-  );
+  authorizedPublicKeyInput.setAttribute("id", "authPublicKey_" + ownershipIndex);
+  authorizedPublicKeyInput.setAttribute("placeholder", "Enter the public key to authorize");
   authorizedPublicKeyInput.setAttribute("class", "input");
 
   const authorizedPublicKeyButtonAdd = document.createElement("button");
   authorizedPublicKeyButtonAdd.setAttribute("class", "button");
   authorizedPublicKeyButtonAdd.setAttribute("type", "button");
   authorizedPublicKeyButtonAdd.innerText = "Add public key";
-  authorizedPublicKeyButtonAdd.addEventListener("click", function() {
+  authorizedPublicKeyButtonAdd.addEventListener("click", function () {
     addPublicKey(ownershipIndex);
   });
 
@@ -365,7 +328,7 @@ window.addOwnership = () => {
   storageNoncePublicKeyButtonAdd.setAttribute("class", "button");
   storageNoncePublicKeyButtonAdd.setAttribute("type", "button");
   storageNoncePublicKeyButtonAdd.innerText = "Load storage nonce public key";
-  storageNoncePublicKeyButtonAdd.addEventListener("click", function() {
+  storageNoncePublicKeyButtonAdd.addEventListener("click", function () {
     loadStorageNoncePublicKey(ownershipIndex);
   });
 
@@ -386,9 +349,7 @@ window.addOwnership = () => {
 };
 
 window.addPublicKey = (ownershipIndex) => {
-  const publicKey = document.querySelector(
-    "#authPublicKey_" + ownershipIndex
-  ).value;
+  const publicKey = document.querySelector("#authPublicKey_" + ownershipIndex).value;
   if (publicKey == "") {
     return;
   }

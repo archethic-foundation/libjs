@@ -1,6 +1,6 @@
-import { Crypto, Utils } from '@archethicjs/sdk'
+import { Crypto, Utils } from "@archethicjs/sdk";
 
-window.generatePublicKey = function() {
+window.generatePublicKey = function () {
   let seed = document.querySelector("#seed").value;
   let index = parseInt(document.querySelector("#index").value);
   let curve = document.querySelector("#curve").value;
@@ -11,4 +11,4 @@ window.generatePublicKey = function() {
 
   const { publicKey } = Crypto.deriveKeyPair(seed, index, curve);
   document.querySelector("#publicKey").innerText = Utils.uint8ArrayToHex(publicKey);
-}
+};
