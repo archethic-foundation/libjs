@@ -1341,6 +1341,7 @@ Some examples are present to see how to use the SDK
 
 ```bash
 cd example/keychain
+npm install
 npm run start
 ```
 
@@ -1348,6 +1349,7 @@ npm run start
 
 ```bash
 cd example/transactionBuilder
+npm install
 npm run start
 ```
 
