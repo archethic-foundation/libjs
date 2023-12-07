@@ -54,6 +54,7 @@ export default class TransactionBuilder {
   public previousPublicKey: Uint8Array;
   public previousSignature: Uint8Array;
   public originSignature: Uint8Array;
+  public generateEncryptedSeedSC: boolean;
 
   /**
    * Create a new instance of the transaction builder
@@ -79,6 +80,7 @@ export default class TransactionBuilder {
     this.previousPublicKey = new Uint8Array();
     this.previousSignature = new Uint8Array();
     this.originSignature = new Uint8Array();
+    this.generateEncryptedSeedSC = false;
   }
 
   /**
@@ -246,6 +248,15 @@ export default class TransactionBuilder {
     addr = maybeHexToUint8Array(addr);
 
     this.address = addr;
+    return this;
+  }
+
+  /**
+   * Add a encrypted (by storage nonce public key) seed in the transaction's ownerships to allow nodes to manage smart contract
+   * @param {boolean} generateEncryptedSeedSC Generate encrypted seed for smart contract
+   */
+  setGenerateEncryptedSeedSC(generateEncryptedSeedSC: boolean) {
+    this.generateEncryptedSeedSC = generateEncryptedSeedSC;
     return this;
   }
 
