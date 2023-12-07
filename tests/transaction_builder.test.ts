@@ -439,6 +439,15 @@ describe("Transaction builder", () => {
     });
   });
 
+  describe("setGenerateEncryptedSeedSC", () => {
+    it("should set this.generateEncryptedSeedSC in transaction builder", () => {
+      const generateEncryptedSeedSC = true;
+      const tx = new TransactionBuilder("transfer").setGenerateEncryptedSeedSC(generateEncryptedSeedSC);
+
+      expect(tx.generateEncryptedSeedSC).toEqual(generateEncryptedSeedSC);
+    });
+  });
+
   describe("build", () => {
     it("should build the transaction and the related signature", () => {
       const tx = new TransactionBuilder("transfer")
