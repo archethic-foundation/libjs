@@ -385,4 +385,14 @@ export class ArchethicRPCClient {
   onCurrentAccountChange(listener: Function): PromiseLike<RpcSubscription> | undefined {
     return this._subscribe("subscribeCurrentAccount", {}, listener);
   }
+
+  /**
+   * Refreshes the current account.
+   *
+   */
+  refreshCurrentAccount(): void {
+    this._ensuresConnectionAlive();
+
+    this.client?.request("refreshCurrentAccount", new RpcRequest(this.origin));
+  }
 }
