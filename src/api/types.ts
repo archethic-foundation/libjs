@@ -1,4 +1,5 @@
 import { TransactionFee, TransactionRPC } from "../types";
+import { JSONRPCError } from "json-rpc-2.0";
 
 export type NodeRpcMethods = {
   contract_fun(params: { contract: string; function: string; args?: any[] }): any;
@@ -47,6 +48,7 @@ export enum ConnectionState {
   Connecting = "WalletRPCConnection_connecting",
   Open = "WalletRPCConnection_open"
 }
+
 export enum RpcErrorCode {
   UnsupportedMethod = -32601,
   Timeout = 5001,
@@ -62,6 +64,8 @@ export enum RpcErrorCode {
   Other = 5000,
   ServiceAlreadyExists = 5008
 }
+
+export type RpcError = JSONRPCError;
 
 export type RpcSubscription = {
   id: string;
