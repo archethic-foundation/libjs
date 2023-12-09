@@ -3,6 +3,7 @@ import absinthe from "./api/absinthe.js";
 import TransactionBuilder from "./transaction_builder.js";
 import { AbsintheSocket } from "@absinthe/socket";
 import Archethic from "./index.js";
+import { RpcError } from "./api/types.js";
 
 const senderContext = "SENDER";
 
@@ -75,7 +76,12 @@ export default class TransactionSender {
     return this;
   }
 
-  async send(tx: TransactionBuilder, endpoint: string, confirmationThreshold: number = 100, timeout: number = 60) {
+  async send(
+    tx: TransactionBuilder,
+    endpoint: string,
+    confirmationThreshold: number = 100,
+    timeout: number = 60
+  ): Promise<TransactionSender> {
     if (confirmationThreshold < 0 || confirmationThreshold > 100) {
       throw new Error("'confirmationThreshold' must be an integer between 0 and 100");
     }
@@ -109,8 +115,7 @@ export default class TransactionSender {
       .then(() => {
         handleSend.call(this, timeout);
       })
-      .catch((err) => handleError.call(this, senderContext, err));
-
+      .catch((err: RpcError) => handleError.call(this, senderContext, err));
     return this;
   }
 
@@ -249,5 +254,5 @@ function handleSend(this: TransactionSender, timeout: number) {
     absinthe.cancel(this.absintheSocket as AbsintheSocket, this.errorNotifier);
 
     this.onTimeout.forEach((func) => func(this.nbConfirmationReceived, this));
-  }, timeout * 1_000);
+  }, timeout * 1000);
 }
