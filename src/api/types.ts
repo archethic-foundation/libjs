@@ -59,7 +59,8 @@ export enum RpcErrorCode {
   ServiceNotFound = 5007,
   UserRejected = 4001,
   UnknownAccount = 5005,
-  Other = 5000
+  Other = 5000,
+  ServiceAlreadyExists = 5008
 }
 
 export type RpcSubscription = {
