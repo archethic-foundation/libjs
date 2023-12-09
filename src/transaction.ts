@@ -4,6 +4,7 @@ import TransactionSender from "./transaction_sender.js";
 import * as API from "./api.js";
 import Archethic from "./index.js";
 import { Ownership, TransactionFee } from "./types.js";
+import { SendTransactionResponse } from "./api/types.js";
 
 export default class Transaction {
   core: Archethic;
@@ -16,7 +17,7 @@ export default class Transaction {
     return new this.builder(this.core);
   }
 
-  send(tx: TransactionBuilder) {
+  send(tx: TransactionBuilder): Promise<SendTransactionResponse> {
     return this.core.rpcNode!.sendTransaction(tx);
   }
 
@@ -43,17 +44,17 @@ export class ExtendedTransactionBuilder extends TransactionBuilder {
   }
 
   //Override TransactionSender.send to use the node resolution
-  send(confirmationThreshold?: number, timeout?: number) {
+  send(confirmationThreshold?: number, timeout?: number): void {
     this.core.requestNode((endpoint) => this.sender.send(this, endpoint, confirmationThreshold, timeout));
   }
 
   //Use of composition as multi inheritance model
-  on(eventName: string, fun: Function) {
+  on(eventName: string, fun: Function): this {
     this.sender.on(eventName, fun);
     return this;
   }
 
-  unsubscribe(eventName: string) {
+  unsubscribe(eventName: string): this {
     this.sender.unsubscribe(eventName);
     return this;
   }
