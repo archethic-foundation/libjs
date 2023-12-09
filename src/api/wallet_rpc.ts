@@ -22,7 +22,7 @@ export class RpcRequest {
    * @param {Object} payload Request payload
    * @param {number} version Wallet Rpc protocol version
    */
-  constructor(origin: RpcRequestOrigin, payload = {}, version = 1) {
+  constructor(origin: RpcRequestOrigin, payload: object = {}, version: number = 1) {
     this.origin = origin;
     this.version = version;
     this.payload = payload;
@@ -38,8 +38,6 @@ export class ArchethicRPCClient {
   static _instance: ArchethicRPCClient;
   constructor() {
     this.origin = { name: "" };
-    this.client;
-    this.websocket;
     this._connectionStateEventTarget = new EventTarget();
     this._rpcNotificationEventTarget = new EventTarget();
   }
@@ -57,7 +55,7 @@ export class ArchethicRPCClient {
   /**
    * @param {RpcRequestOrigin} origin Identifying data about the client application.
    */
-  setOrigin(origin: RpcRequestOrigin): ArchethicRPCClient {
+  setOrigin(origin: RpcRequestOrigin): this {
     this.origin = origin;
     return this;
   }
@@ -203,7 +201,7 @@ export class ArchethicRPCClient {
    * @param {function(String)} listener
    * @return {ArchethicRPCClient}
    */
-  onconnectionstatechange(listener: Function): ArchethicRPCClient {
+  onconnectionstatechange(listener: Function): this {
     this._connectionStateEventTarget.addEventListener(ConnectionState.Connecting, () => {
       listener(ConnectionState.Connecting);
     });
@@ -219,7 +217,7 @@ export class ArchethicRPCClient {
   /**
    * @return {ArchethicRPCClient}
    */
-  unsubscribeconnectionstatechange() {
+  unsubscribeconnectionstatechange(): this {
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Connecting, null);
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Open, null);
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Closed, null);
