@@ -237,6 +237,7 @@ export type TransactionRPC = {
   previousPublicKey: string;
   previousSignature: string;
   originSignature?: string;
+  generateEncryptedSeedSC?: boolean;
 };
 
 export type TransactionFee = {
