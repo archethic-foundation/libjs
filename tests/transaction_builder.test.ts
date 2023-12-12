@@ -446,6 +446,13 @@ describe("Transaction builder", () => {
 
       expect(tx.generateEncryptedSeedSC).toEqual(generateEncryptedSeedSC);
     });
+    it("should affect the TransactionRPC", () => {
+      const generateEncryptedSeedSC = true;
+      const tx = new TransactionBuilder("transfer").setGenerateEncryptedSeedSC(generateEncryptedSeedSC);
+      const txRPC = tx.toNodeRPC()
+
+      expect(txRPC).toHaveProperty("generateEncryptedSeedSC", true);
+    });
   });
 
   describe("build", () => {

@@ -476,7 +476,8 @@ export default class TransactionBuilder {
       },
       previousPublicKey: uint8ArrayToHex(this.previousPublicKey),
       previousSignature: uint8ArrayToHex(this.previousSignature),
-      originSignature: this.originSignature && uint8ArrayToHex(this.originSignature)
+      originSignature: this.originSignature && uint8ArrayToHex(this.originSignature),
+      generateEncryptedSeedSC: this.generateEncryptedSeedSC
     };
   }
 
