@@ -242,7 +242,7 @@ export class ArchethicRPCClient {
    */
   async sendTransaction(transaction: TransactionBuilder | ExtendedTransactionBuilder): Promise<TransactionSuccess> {
     this._ensuresConnectionAlive();
-    return this.client?.request("sendTransaction", new RpcRequest(this.origin, transaction.toRPC()));
+    return this.client?.request("sendTransaction", new RpcRequest(this.origin, transaction.toWalletRPC()));
   }
 
   /**
@@ -258,7 +258,7 @@ export class ArchethicRPCClient {
     transactions: TransactionBuilder[] | ExtendedTransactionBuilder[]
   ): Promise<TransactionBuilder[] | ExtendedTransactionBuilder[]> {
     this._ensuresConnectionAlive();
-    const txs = transactions.map((tx) => tx.toRPC());
+    const txs = transactions.map((tx) => tx.toWalletRPC());
     return this.client!.request(
       "signTransactions",
       new RpcRequest(this.origin, {

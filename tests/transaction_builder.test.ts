@@ -446,12 +446,19 @@ describe("Transaction builder", () => {
 
       expect(tx.generateEncryptedSeedSC).toEqual(generateEncryptedSeedSC);
     });
-    it("should affect the TransactionRPC", () => {
+    it("should affect the WalletTransactionRPC", () => {
       const generateEncryptedSeedSC = true;
       const tx = new TransactionBuilder("transfer").setGenerateEncryptedSeedSC(generateEncryptedSeedSC);
-      const txRPC = tx.toNodeRPC()
+      const txRPC = tx.toWalletRPC();
 
       expect(txRPC).toHaveProperty("generateEncryptedSeedSC", true);
+    });
+    it("should not affect the NodeTransactionRPC", () => {
+      const generateEncryptedSeedSC = true;
+      const tx = new TransactionBuilder("transfer").setGenerateEncryptedSeedSC(generateEncryptedSeedSC);
+      const txRPC = tx.toNodeRPC();
+
+      expect(txRPC).not.toHaveProperty("generateEncryptedSeedSC", true);
     });
   });
 
@@ -625,13 +632,13 @@ describe("Transaction builder", () => {
     });
   });
 
-  describe("toRPC", () => {
+  describe("toWalletRPC", () => {
     it("should return a transaction object for RPC", () => {
       const tx = new TransactionBuilder("transfer")
         .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt(0.2193))
         .setContent("Hello world");
 
-      const txRPC = tx.toRPC();
+      const txRPC = tx.toWalletRPC();
 
       // @ts-ignore
       expect(txRPC.version).toStrictEqual(VERSION);

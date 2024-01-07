@@ -353,11 +353,11 @@ export default class TransactionBuilder {
       return concatUint8Arrays(intToUint8Array(secret.byteLength), secret, concatUint8Arrays(...authorizedKeysBuffer));
     });
 
-    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
+    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
       return concatUint8Arrays(transfer.to, bigIntToUint8Array(transfer.amount));
     });
 
-    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
+    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
       const bufTokenId = toByteArray(transfer.tokenId);
       return concatUint8Arrays(
         transfer.tokenAddress,
@@ -476,8 +476,7 @@ export default class TransactionBuilder {
       },
       previousPublicKey: uint8ArrayToHex(this.previousPublicKey),
       previousSignature: uint8ArrayToHex(this.previousSignature),
-      originSignature: this.originSignature && uint8ArrayToHex(this.originSignature),
-      generateEncryptedSeedSC: this.generateEncryptedSeedSC
+      originSignature: this.originSignature && uint8ArrayToHex(this.originSignature)
     };
   }
 
@@ -494,7 +493,7 @@ export default class TransactionBuilder {
    * content is normal
    * only transaction payload (no address/public key/signatures)
    */
-  toRPC(): object {
+  toWalletRPC(): object {
     return {
       version: this.version,
       type: this.type,
@@ -540,7 +539,8 @@ export default class TransactionBuilder {
             args: args
           };
         })
-      }
+      },
+      generateEncryptedSeedSC: this.generateEncryptedSeedSC
     };
   }
 }
