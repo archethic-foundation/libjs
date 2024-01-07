@@ -381,6 +381,13 @@ Add the code in the `data.code` section of the transaction
 
 - `code` is a string defining the smart contract
 
+#### setGenerateEncryptedSeedSC(flag)
+
+Set a flag to request a wallet to add the chain seed in the ownership of the transaction to create a smart contract.  
+This function is only usefull when sending / signing the transaction through a wallet. Signing and sending the transaction directly to the node will not use this flag.
+
+- `flag` is a boolean to request the node to add the chain seed in the ownership
+
 #### setContent(content)
 
 Add the content in the `data.content` section of the transaction
@@ -1018,6 +1025,22 @@ await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://gre
 const subscription = await archethic.rpcWallet.onAccountChange("account name", (account) => {
   console.log(JSON.stringify(account));
 });
+```
+
+### refreshCurrentAccount()
+
+Request the wallet to refresh current account info
+
+```js
+import Archethic from "@archethicjs/sdk";
+
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
+
+await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+
+await archethic.rpcWallet.refreshCurrentAccount();
+// Wallet account is refreshed with last blockchain informations
 ```
 
 ### unsubscribe(rpcSubscription)
