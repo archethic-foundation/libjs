@@ -15,7 +15,7 @@ ArchethicRPCClient.instance.setOrigin({ name: "Wallet RPC example application" }
 /** @type {Archethic | undefined} */
 let archethic = undefined;
 
-window.onload = function () {
+window.onload = function() {
   const endpoint = document.querySelector("#endpoint").value;
   console.log(`Endpoint : ${endpoint}`);
   const localArchethic = new Archethic(endpoint);
@@ -40,15 +40,21 @@ window.generate_transaction = async () => {
     .setCode(document.querySelector("#code").value)
     .setContent(content);
 
-  ucoTransfers.forEach(function (transfer) {
+  const code = document.querySelector("#code").value;
+  if (code != "") {
+    txBuilder.setCode(code);
+    txBuilder.setGenerateEncryptedSeedSC(true);
+  }
+
+  ucoTransfers.forEach(function(transfer) {
     txBuilder.addUCOTransfer(transfer.to, transfer.amount);
   });
 
-  tokenTransfers.forEach(function (transfer) {
+  tokenTransfers.forEach(function(transfer) {
     txBuilder.addTokenTransfer(transfer.to, transfer.amount, transfer.token, transfer.tokenId);
   });
 
-  recipients.forEach(function (recipient) {
+  recipients.forEach(function(recipient) {
     txBuilder.addRecipient(recipient);
   });
 
@@ -57,6 +63,7 @@ window.generate_transaction = async () => {
   archethic.rpcWallet
     .sendTransaction(txBuilder)
     .then((sendResult) => {
+      console.log(sendResult);
       document.querySelector("#transactionOutput #address").innerText = sendResult.transactionAddress;
       document.querySelector("#transactionOutput").style.visibility = "visible";
 
@@ -76,9 +83,11 @@ window.generate_transaction = async () => {
         );
     })
     .catch((sendError) => {
+      console.log(sendError.message);
       document.querySelector("#confirmed").style.display = "none";
       document.querySelector("#transaction_error").style.display = "block";
-      document.querySelector("#error_reason").innerText = JSON.stringify(sendError);
+      document.querySelector("#error_reason").innerText = sendError.message;
+      document.querySelector("#transactionOutput").style.visibility = "visible";
     })
     .finally(() => {
       sendTxButton.disabled = false;
@@ -209,7 +218,7 @@ document.querySelector("#content_upload").addEventListener("change", (event) => 
   const fileList = event.target.files;
 
   const fr = new FileReader();
-  fr.onload = function (e) {
+  fr.onload = function(e) {
     file_content = new Uint8Array(e.target.result);
   };
   fr.readAsArrayBuffer(fileList[0]);
@@ -229,7 +238,7 @@ window.addOwnership = () => {
   secretInput.setAttribute("id", "secret_" + ownershipIndex);
   secretInput.setAttribute("placeholder", "Secret to host");
   secretInput.setAttribute("class", "input");
-  secretInput.addEventListener("change", function (e) {
+  secretInput.addEventListener("change", function(e) {
     ownerships[ownershipIndex] = { secret: e.target.value, authorizedPublicKeys: [] };
   });
 
@@ -252,7 +261,7 @@ window.addOwnership = () => {
   authorizedPublicKeyButtonAdd.setAttribute("class", "button");
   authorizedPublicKeyButtonAdd.setAttribute("type", "button");
   authorizedPublicKeyButtonAdd.innerText = "Add public key";
-  authorizedPublicKeyButtonAdd.addEventListener("click", function () {
+  authorizedPublicKeyButtonAdd.addEventListener("click", function() {
     addPublicKey(ownershipIndex);
   });
 
@@ -260,7 +269,7 @@ window.addOwnership = () => {
   storageNoncePublicKeyButtonAdd.setAttribute("class", "button");
   storageNoncePublicKeyButtonAdd.setAttribute("type", "button");
   storageNoncePublicKeyButtonAdd.innerText = "Load storage nonce public key";
-  storageNoncePublicKeyButtonAdd.addEventListener("click", function () {
+  storageNoncePublicKeyButtonAdd.addEventListener("click", function() {
     loadStorageNoncePublicKey(ownershipIndex);
   });
 
