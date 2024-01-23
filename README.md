@@ -765,7 +765,7 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("https://testnet.archethic.net");
 await archethic.connect();
 
-const response = await archethic.rpcNode?.callFunction("0000AB...CD", "add", [1, 2]);
+const response = await archethic.network.callFunction("0000AB...CD", "add", [1, 2]);
 console.log(response);
 3;
 ```
