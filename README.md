@@ -1077,26 +1077,11 @@ await archethic.connect();
 
 await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
-archethic.rpcWallet
-  .sendTransaction({
-    type: "token",
-    version: 1,
-    data: {
-      content:
-        '{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}',
-      code: "",
-      ownerships: [],
-      ledger: {
-        uco: {
-          transfers: []
-        },
-        token: {
-          transfers: []
-        }
-      },
-      recipients: []
-    }
-  })
+const tx = archethic.transaction.new()
+        .setType("token")
+        .setContent('{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}')
+
+archethic.rpcWallet .sendTransaction(tx)
   .then((sendResult) => {
     console.log(JSON.stringify(sendResult));
     // { transactionAddress: "asdfasfsadf", nbConfirmations: 3, maxConfirmations: 3 }
@@ -1111,35 +1096,20 @@ archethic.rpcWallet
 Asks ArchethicWallet to sign multiple transactions.
 
 ```js
-import Archethic from "@archethicjs/sdk";
+import Archethic, { Utils } from "@archethicjs/sdk";
 
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
 await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
 
+const tx = archethic.transaction.new()
+        .setType("transfer")
+        .addTokenTransfer("0001ABCD...", Utils.toBigInt(12), "00001234...", 0)
+        .addRecipient("0001ABCD...", "swap")
+
 archethic.rpcWallet
-  .signTransactions([
-    {
-      type: "token",
-      version: 1,
-      data: {
-        content:
-          '{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}',
-        code: "",
-        ownerships: [],
-        ledger: {
-          uco: {
-            transfers: []
-          },
-          token: {
-            transfers: []
-          }
-        },
-        recipients: []
-      }
-    }
-  ])
+  .signTransactions(tx)
   .then((signedResult) => {
     console.log(JSON.stringify(signedResult));
     signedResult.forEach((signedTransaction) => {
