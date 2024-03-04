@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deploy a Smart Contract</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Deploy a Smart Contract</h1>
+
+      <form id="form" action="#">
+        <div class="mb-3">
+          <label for="endpoint" class="form-label">Endpoint</label>
+          <select id="endpoint" class="form-select" aria-label="Blockchain endpoint url">
+            <option value="http://localhost:4000" selected>http://localhost:4000</option>
+            <option value="https://testnet.archethic.net">https://testnet.archethic.net</option>
+            <option value="https://mainnet.archethic.net">https://mainnet.archethic.net</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="seed" class="form-label">Seed</label>
+          <input type="password" class="form-control" id="seed" />
+        </div>
+        <div class="mb-3">
+          <label for="code" class="form-label">Code</label>
+          <textarea class="form-control" id="code" rows="30">
+@version 1
+
+condition triggered_by: transaction, as: []
+actions triggered_by: transaction do
+  Contract.set_content "Hello world!"
+end  
+          </textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Deploy</button>
+        <div id="details"></div>
+        <div id="confirmations"></div>
+      </form>
+    </div>
+    <script src="dist/app.js"></script>
+  </body>
+</html>
