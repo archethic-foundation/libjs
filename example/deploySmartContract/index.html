@@ -5,8 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Deploy a Smart Contract</title>
-    <!-- Load the SDK -->
-    <script src="../../dist/archethic.browser.js"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -19,7 +17,7 @@
     <div class="container">
       <h1>Deploy a Smart Contract</h1>
 
-      <form action="#" onsubmit="return deploy(this);">
+      <form id="form" action="#">
         <div class="mb-3">
           <label for="endpoint" class="form-label">Endpoint</label>
           <select id="endpoint" class="form-select" aria-label="Blockchain endpoint url">
@@ -34,7 +32,14 @@
         </div>
         <div class="mb-3">
           <label for="code" class="form-label">Code</label>
-          <textarea class="form-control" id="code" rows="30"> </textarea>
+          <textarea class="form-control" id="code" rows="30">
+@version 1
+
+condition triggered_by: transaction, as: []
+actions triggered_by: transaction do
+  Contract.set_content "Hello world!"
+end  
+          </textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">Deploy</button>
@@ -42,111 +47,6 @@
         <div id="confirmations"></div>
       </form>
     </div>
-
-    <script type="text/javascript">
-      const $endpoint = document.getElementById("endpoint");
-      const $seed = document.getElementById("seed");
-      const $code = document.getElementById("code");
-
-      $code.value = `@version 1
-
-condition triggered_by: transaction, as: []
-actions triggered_by: transaction do
-  Contract.set_content "Hello world!"
-end`;
-
-      function displayConfirmations(nbConf, maxConf) {
-        const $confirmations = document.getElementById("confirmations");
-        const alertClass = nbConf == maxConf ? "alert-success" : "alert-info";
-        $confirmations.innerHTML = `<div class="alert ${alertClass}" role="alert">
-                Confirmations: ${nbConf}/${maxConf}
-            </div>`;
-      }
-
-      function displayError(reason) {
-        const $confirmations = document.getElementById("confirmations");
-        $confirmations.innerHTML = `<div class="alert alert-danger" role="alert">
-                ${reason}
-            </div>`;
-      }
-
-      function displayDetails(endpoint, genesisAddress, tx) {
-        const $details = document.getElementById("details");
-        const genesisHex = Archethic.Utils.uint8ArrayToHex(genesisAddress);
-        const addressHex = Archethic.Utils.uint8ArrayToHex(tx.address);
-        $details.innerHTML = `
-                Genesis address: <a target=_blank href="${endpoint}/explorer/chain?address=${genesisHex}">${genesisHex}</a>
-                <br />
-                Transaction address: <a target=_blank href="${endpoint}/explorer/transaction/${addressHex}">${addressHex}</a>
-            `;
-      }
-
-      function deploy(form) {
-        const endpoint = $endpoint.value;
-        const seed = $seed.value;
-        const code = $code.value;
-
-        if (!code || !seed || !endpoint) {
-          return false;
-        }
-
-        const archethic = new Archethic(endpoint);
-
-        archethic
-          .connect()
-          .then(async () => {
-            console.log("CONNECTED");
-            const genesisAddress = Archethic.Crypto.deriveAddress(seed, 0);
-            console.log("genesisAddress", genesisAddress);
-
-            const tx = await createTransaction(archethic, genesisAddress, seed, code);
-            console.log("tx", tx);
-            displayDetails(endpoint, genesisAddress, tx);
-
-            return tx
-              .on("confirmation", (nbConf, maxConf) => displayConfirmations(nbConf, maxConf))
-              .on("error", (_, err) => displayError(err))
-              .on("timeout", (_) => displayError("timeout"))
-              .send();
-          })
-          .catch((a) => {
-            console.error(a);
-          });
-
-        return false;
-      }
-
-      async function createTransaction(archethic, genesisAddress, seed, code) {
-        // get the storage nonce used to encode the seed
-        const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
-        console.log("storageNoncePublicKey", storageNoncePublicKey);
-
-        const index = await archethic.transaction.getTransactionIndex(genesisAddress);
-        console.log("index", index);
-
-        // encrypt the seed with secretKey
-        const secretKey = Archethic.Crypto.randomSecretKey();
-        const cipher = Archethic.Crypto.aesEncrypt(seed, secretKey);
-
-        // encrypt the secretKey with the storageNoncePublicKey so the nodes
-        // can decode the secretKey that is used to decode the seed
-        const authorizedKeys = [
-          {
-            publicKey: storageNoncePublicKey,
-            encryptedSecretKey: Archethic.Crypto.ecEncrypt(secretKey, storageNoncePublicKey)
-          }
-        ];
-
-        const originPrivateKey = Archethic.Utils.originPrivateKey;
-
-        return archethic.transaction
-          .new()
-          .setType("contract")
-          .setCode(code)
-          .addOwnership(cipher, authorizedKeys)
-          .build(seed, parseInt(index))
-          .originSign(originPrivateKey);
-      }
-    </script>
+    <script src="dist/app.js"></script>
   </body>
 </html>
