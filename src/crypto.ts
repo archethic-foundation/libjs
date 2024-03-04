@@ -182,7 +182,7 @@ export function IDToCurve(ID: number): Curve {
   }
 }
 
-export function derivePrivateKey(seed: string | Uint8Array, index: number): Uint8Array {
+export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): Uint8Array {
   //Convert seed to Uint8Array
   seed = CryptoJS.lib.WordArray.create(maybeStringToUint8Array(seed));
 
