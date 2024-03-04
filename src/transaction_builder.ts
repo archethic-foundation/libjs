@@ -267,7 +267,15 @@ export default class TransactionBuilder {
    * @param {string} curve Elliptic curve to use for the key generation
    * @param {string} hashAlgo Hash algorithm to use for the address generation
    */
-  build(seed: string | Uint8Array, index: number, curve: string = "ed25519", hashAlgo: string = "sha256") {
+  build(seed: string | Uint8Array, index: number = 0, curve: string = "ed25519", hashAlgo: string = "sha256") {
+    if(seed == undefined || seed == null) {
+      throw "Seed must be defined"
+    }
+
+    if(index == undefined || index == null) {
+      throw "Index must be defined"
+    }
+
     if (!Object.keys(Curve).includes(curve)) {
       throw (
         "Curve must be one of " +

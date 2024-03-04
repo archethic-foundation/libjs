@@ -182,7 +182,19 @@ export function IDToCurve(ID: number): Curve {
   }
 }
 
-export function derivePrivateKey(seed: string | Uint8Array, index: number): Uint8Array {
+export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): Uint8Array {
+  if(seed == undefined || seed == null) {
+    throw "Seed must be defined"
+  }
+
+  if(index == undefined || index == null) {
+    throw "Index must be defined"
+  }
+
+  if (index < 0) {
+    throw "Index must be a positive number"
+  }
+
   //Convert seed to Uint8Array
   seed = CryptoJS.lib.WordArray.create(maybeStringToUint8Array(seed));
 
@@ -217,6 +229,14 @@ export function deriveKeyPair(
   curve = Curve.ed25519,
   origin_id: number = SOFTWARE_ID
 ): Keypair {
+  if(seed == undefined || seed == null) {
+    throw "Seed must be defined"
+  }
+
+  if(index == undefined || index == null) {
+    throw "Index must be defined"
+  }
+
   if (index < 0) {
     throw "'index' must be a positive number";
   }
@@ -236,7 +256,7 @@ export function deriveKeyPair(
  */
 export function deriveAddress(
   seed: string | Uint8Array,
-  index: number,
+  index: number = 0,
   curve: Curve = Curve.ed25519,
   hashAlgo: HashAlgorithm = HashAlgorithm.sha256
 ): Uint8Array {
