@@ -81,7 +81,7 @@ Creates a new transaction to build (or update) a keychain by embedding the on-ch
 #### Example of keychain creation
 
 ```js
-import Archethic, { Crypto } from "@archethicjs/sdk";
+import Archethic, { Crypto, Keychain } from "@archethicjs/sdk";
 
 const accessSeed = "myseed";
 const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
