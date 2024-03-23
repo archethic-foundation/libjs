@@ -22,6 +22,7 @@ import sha3 from "js-sha3";
 import ed2curve from "ed2curve";
 // @ts-ignore
 import sjcl from "sjcl";
+import Keychain from "./keychain.js";
 
 const { sha3_512, sha3_256 } = sha3;
 const EC = ec;
@@ -592,4 +593,15 @@ function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Arra
  */
 export function getGenesisAddress(seed: string | Uint8Array) {
   return uint8ArrayToHex(deriveAddress(seed, 0));
+}
+
+/**
+ * Derives the genesis address for a given service from a keychain
+ * @param {Keychain} keychain The keychain used to derive the address
+ * @param {string} service The service for which to derive the address
+ * @param {string} [suffix=""] An optional suffix to append to the service before deriving the address
+ * @returns {string} The genesis address for the service in hexadecimal format
+ */
+export function getServiceGenesisAddress(keychain: Keychain, service: string, suffix = "") {
+  return uint8ArrayToHex(keychain.deriveAddress(service, 0, suffix));
 }
