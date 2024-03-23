@@ -107,15 +107,15 @@ export default class Keychain {
 
   buildTransaction(tx: TransactionBuilder, service: string, index: number, suffix: string = "") {
     if (!this.services[service]) {
-      throw "Service doesn't exist in the keychain";
+      throw new Error("Service doesn't exist in the keychain");
     }
 
     if (typeof index !== "number" || index < 0) {
-      throw "'index' must be a positive number";
+      throw Error("'index' must be a positive number");
     }
 
     if (typeof suffix !== "string") {
-      throw "'suffix must be a string";
+      throw Error("'suffix must be a string");
     }
 
     const keypair: Keypair = this.deriveKeypair(service, index, suffix);
@@ -163,24 +163,24 @@ export default class Keychain {
    * @param binary {Uint8Array}
    */
   static decode(binary: Uint8Array) {
-    var { bytes: version, pos: versionPos } = readBytes(binary, 0, 4);
-    var { byte: seedSize, pos: seedSizePos } = readByte(binary, versionPos, 1);
-    var { bytes: seed, pos: seedPos } = readBytes(binary, seedSizePos, seedSize);
-    var { byte: nbServices, pos: nbServicesPos } = readByte(binary, seedPos, 1);
+    let { bytes: version, pos: versionPos } = readBytes(binary, 0, 4);
+    let { byte: seedSize, pos: seedSizePos } = readByte(binary, versionPos, 1);
+    let { bytes: seed, pos: seedPos } = readBytes(binary, seedSizePos, seedSize);
+    let { byte: nbServices, pos: nbServicesPos } = readByte(binary, seedPos, 1);
 
     let keychain = new Keychain(seed, uint8ArrayToInt(version));
 
     for (let i = 0; i < nbServices; i++) {
-      var { byte: serviceNameLength, pos: serviceNameLengthPos } = readByte(binary, nbServicesPos, 1);
-      var { bytes: serviceName, pos: serviceNamePos } = readBytes(binary, serviceNameLengthPos, serviceNameLength);
-      var { byte: derivationPathLength, pos: derivationPathLengthPos } = readByte(binary, serviceNamePos, 1);
-      var { bytes: derivationPath, pos: derivationPathPos } = readBytes(
+      let { byte: serviceNameLength, pos: serviceNameLengthPos } = readByte(binary, nbServicesPos, 1);
+      let { bytes: serviceName, pos: serviceNamePos } = readBytes(binary, serviceNameLengthPos, serviceNameLength);
+      let { byte: derivationPathLength, pos: derivationPathLengthPos } = readByte(binary, serviceNamePos, 1);
+      let { bytes: derivationPath, pos: derivationPathPos } = readBytes(
         binary,
         derivationPathLengthPos,
         derivationPathLength
       );
-      var { byte: curveID, pos: curveIDPos } = readByte(binary, derivationPathPos, 1);
-      var { byte: hashAlgoID, pos: hashAlgoIDPos } = readByte(binary, curveIDPos, 1);
+      let { byte: curveID, pos: curveIDPos } = readByte(binary, derivationPathPos, 1);
+      let { byte: hashAlgoID, pos: hashAlgoIDPos } = readByte(binary, curveIDPos, 1);
 
       const serviceNameString = new TextDecoder().decode(serviceName);
       const derivationPathString = new TextDecoder().decode(derivationPath);
@@ -193,11 +193,11 @@ export default class Keychain {
 
   deriveKeypair(service: string, index: number = 0, pathSuffix: string = "") {
     if (!this.services[service]) {
-      throw "Service doesn't exist in the keychain";
+      throw Error("Service doesn't exist in the keychain");
     }
 
     if (index < 0) {
-      throw "'index' must be a positive number";
+      throw Error("'index' must be a positive number");
     }
 
     const { derivationPath, curve } = this.services[service];
@@ -206,11 +206,11 @@ export default class Keychain {
 
   deriveAddress(service: string, index: number = 0, pathSuffix: string = "") {
     if (!this.services[service]) {
-      throw "Service doesn't exist in the keychain";
+      throw Error("Service doesn't exist in the keychain");
     }
 
     if (index < 0) {
-      throw "'index' must be a positive number";
+      throw Error("'index' must be a positive number");
     }
 
     const { derivationPath, curve, hashAlgo } = this.services[service];
@@ -250,7 +250,7 @@ export default class Keychain {
 
         authentications.push(`did:archethic:${address_hex}#${service}`);
       } else {
-        throw "Purpose '" + purpose + "' is not yet supported";
+        throw Error("Purpose '" + purpose + "' is not yet supported");
       }
     }
 
@@ -264,17 +264,17 @@ export default class Keychain {
 
   ecEncryptServiceSeed(service: string, publicKeys: string[] | Uint8Array[], pathSuffix: string = "") {
     if (!Array.isArray(publicKeys)) {
-      throw "Authorized keys must be an array";
+      throw Error("Authorized keys must be an array");
     }
 
     if (!this.services[service]) {
-      throw "Service doesn't exist in the keychain";
+      throw Error("Service doesn't exist in the keychain");
     }
 
     const { derivationPath } = this.services[service];
 
     if (isPathWithIndex(derivationPath)) {
-      throw 'Service should have a derivation path without index (removing the last "/0")';
+      throw Error('Service should have a derivation path without index (removing the last "/0")');
     }
 
     const extendedSeed = deriveServiceSeed(this.seed, derivationPath, 0, pathSuffix);
