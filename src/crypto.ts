@@ -584,3 +584,12 @@ function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Arra
   }
   return hexToUint8Array(sjcl.codec.hex.fromBits(decrypted));
 }
+
+/**
+ * Generates the genesis address (the first address) from a given seed
+ * @param {string | Uint8Array} seed The seed used to generate the address. Can be a string or a Uint8Array
+ * @returns {string} The genesis address in hexadecimal format
+ */
+export function getGenesisAddress(seed: string | Uint8Array) {
+  return uint8ArrayToHex(deriveAddress(seed, 0));
+}
