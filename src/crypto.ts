@@ -355,7 +355,7 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
 
   switch (curve) {
     case 0: {
-      const { secretKey: secretKey } = nacl.sign.keyPair.fromSeed(pvBuf);
+      const { secretKey } = nacl.sign.keyPair.fromSeed(pvBuf);
       return nacl.sign.detached(data, secretKey);
     }
     case 1: {
@@ -528,7 +528,7 @@ export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array):
 
   const iv = wordArrayToUint8Array(CryptoJS.lib.WordArray.random(12));
 
-  const { tag: tag, encrypted: encrypted } = aesAuthEncrypt(data, key, iv);
+  const { tag, encrypted } = aesAuthEncrypt(data, key, iv);
 
   return concatUint8Arrays(new Uint8Array(iv), tag, encrypted);
 }
