@@ -50,7 +50,7 @@ export function hashAlgoToId(hashAlgo: HashAlgorithm): number {
     case HashAlgorithm.blake2b:
       return 4;
     default:
-      throw "Hash algorithm not supported";
+      throw new Error("Hash algorithm not supported");
   }
 }
 
@@ -71,7 +71,7 @@ export function IDToHashAlgo(ID: number): HashAlgorithm {
     case 4:
       return HashAlgorithm.blake2b;
     default:
-      throw "Hash algorithm not supported";
+      throw new Error("Hash algorithm not supported");
   }
 }
 /**
@@ -91,7 +91,7 @@ export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
     case HashAlgorithm.blake2b:
       return 4;
     default:
-      throw "Hash algorithm not supported";
+      throw new Error("Hash algorithm not supported");
   }
 }
 
@@ -126,7 +126,7 @@ export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm)
       return blake.blake2b(content);
     }
     default:
-      throw "Hash algorithm not supported";
+      throw new Error("Hash algorithm not supported");
   }
 }
 
@@ -161,7 +161,7 @@ export function curveToID(curve: Curve): number {
       return 2;
 
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -178,21 +178,21 @@ export function IDToCurve(ID: number): Curve {
     case 2:
       return Curve.secp256k1;
     default:
-      throw "Curve ID not supported";
+      throw new Error("Curve ID not supported");
   }
 }
 
 export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): Uint8Array {
-  if(seed == undefined || seed == null) {
-    throw "Seed must be defined"
+  if (seed == undefined || seed == null) {
+    throw new Error("Seed must be defined");
   }
 
-  if(index == undefined || index == null) {
-    throw "Index must be defined"
+  if (index == undefined || index == null) {
+    throw new Error("Index must be defined");
   }
 
   if (index < 0) {
-    throw "Index must be a positive number"
+    throw new Error("Index must be a positive number");
   }
 
   //Convert seed to Uint8Array
@@ -229,16 +229,16 @@ export function deriveKeyPair(
   curve = Curve.ed25519,
   origin_id: number = SOFTWARE_ID
 ): Keypair {
-  if(seed == undefined || seed == null) {
-    throw "Seed must be defined"
+  if (seed == undefined || seed == null) {
+    throw new Error("Seed must be defined");
   }
 
-  if(index == undefined || index == null) {
-    throw "Index must be defined"
+  if (index == undefined || index == null) {
+    throw new Error("Index must be defined");
   }
 
   if (index < 0) {
-    throw "'index' must be a positive number";
+    throw new Error("'index' must be a positive number");
   }
 
   const pvBuf = derivePrivateKey(seed, index);
@@ -335,7 +335,7 @@ function getKeypair(pvKey: string | Uint8Array, curve: Curve): { publicKey: Uint
       };
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -371,7 +371,7 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
       return Uint8Array.from(key.sign(msgHash).toDER());
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -407,7 +407,7 @@ export function verify(sig: string | Uint8Array, data: string | Uint8Array, publ
       return key.verify(msgHash, sig);
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -431,7 +431,7 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
       const curve25519pub = ed2curve.convertPublicKey(pubBuf);
 
       if (!curve25519pub) {
-        throw "public key in not a valid Ed25519 public key";
+        throw new Error("public key in not a valid Ed25519 public key");
       }
       const sharedKey = curve25519.sharedKey(ephemeralPrivateKey, curve25519pub);
       const { aesKey, iv } = deriveSecret(sharedKey);
@@ -461,7 +461,7 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
       return concatUint8Arrays(hexToUint8Array(ecdh.getPublic().encode("hex", false)), tag, encrypted);
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -513,7 +513,7 @@ export function ecDecrypt(ciphertext: string | Uint8Array, privateKey: string | 
       return aesAuthDecrypt(encrypted, aesKey, iv, tag);
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -610,7 +610,7 @@ function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Arra
     128
   );
   if (!sjcl.bitArray.equal(actualTag, tagBits)) {
-    throw "Invalid tag";
+    throw new Error("Invalid tag");
   }
   return hexToUint8Array(sjcl.codec.hex.fromBits(decrypted));
 }
