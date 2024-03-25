@@ -1,17 +1,17 @@
-import * as Crypto from "./crypto.js";
-import * as Utils from "./utils.js";
+import Account, { Keychain } from "./account.js";
 import * as Api from "./api.js";
-import { DirectEndpoint, Endpoint, WalletRPCEndpoint } from "./endpoint.js";
-import { ArchethicRPCClient } from "./api/wallet_rpc.js";
 import { NodeRPCClient } from "./api/node_rpc.js";
+import { ArchethicRPCClient } from "./api/wallet_rpc.js";
+import * as Crypto from "./crypto.js";
+import { Endpoint, WalletRPCEndpoint } from "./endpoint.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
-import Account, { Keychain } from "./account.js";
+import * as Utils from "./utils.js";
 
-export { Utils, Crypto, Keychain };
+export { Crypto, Keychain, Utils };
 
 export default class Archethic {
-  endpoint: DirectEndpoint | WalletRPCEndpoint;
+  endpoint: Endpoint;
   rpcWallet: ArchethicRPCClient | undefined;
   rpcNode: NodeRPCClient | undefined;
   transaction: Transaction;
@@ -35,7 +35,9 @@ export default class Archethic {
     if (this.endpoint instanceof WalletRPCEndpoint) {
       await this.endpoint.resolve();
     }
-    const nodes = await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
+    const nodes = this.endpoint.nodeEndpoint === null ?
+      [] :
+      await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
 
     let nearestEndpoints = nodes.map(({ ip, port }) => {
       return `http://${ip}:${port}`;

@@ -1,14 +1,18 @@
 import { ArchethicRPCClient } from "./api/wallet_rpc.js";
 
-export class Endpoint {
+export abstract class Endpoint {
+  abstract get isRpcAvailable(): boolean;
+  abstract get origin(): string;
+  abstract get nodeEndpoint(): URL | null;
+
   /**
    * @param {String} endpoint
-   * @return {DirectEndpoint | WalletRPCEndpoint}
+   * @return {Endpoint}
    */
-  static build(endpoint: string): DirectEndpoint | WalletRPCEndpoint {
+  static build(endpoint: string): Endpoint {
     const url: URL = new URL(endpoint);
 
-    if (url.protocol === "ws:") {
+    if (WalletRPCEndpoint.handlesProtocol(url.protocol)) {
       return new WalletRPCEndpoint(endpoint);
     }
 
@@ -20,7 +24,7 @@ export class Endpoint {
   }
 }
 
-export class DirectEndpoint {
+export class DirectEndpoint implements Endpoint {
   public origin: string;
   public nodeEndpoint: URL;
   /**
@@ -42,11 +46,18 @@ export class DirectEndpoint {
   }
 }
 
-export class WalletRPCEndpoint {
+export class WalletRPCEndpoint implements Endpoint {
   public rpcClient: ArchethicRPCClient;
   public origin: string;
   private rpcEndpoint: URL;
-  public nodeEndpoint: URL | string;
+  public nodeEndpoint: URL | null;
+
+  static WEBCHANNEL_PROTOCOL = "wc:";
+  static WEBSOCKET_PROTOCOL = "ws:";
+  static handlesProtocol(scheme: string) {
+    return scheme === this.WEBCHANNEL_PROTOCOL || scheme === this.WEBSOCKET_PROTOCOL;
+  }
+
   /**
    * @return {Boolean}
    */
@@ -67,14 +78,23 @@ export class WalletRPCEndpoint {
     /** @type {URL} */
     this.rpcEndpoint = new URL(endpoint);
 
-    this.nodeEndpoint = "";
+    this.nodeEndpoint = null;
   }
 
   async resolve() {
-    await this.rpcClient.connect(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
+
+    await this.rpcClient.connectWebsocket(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
 
     await this.rpcClient.getEndpoint().then((response) => {
       this.nodeEndpoint = new URL(response["endpointUrl"]);
     });
+  }
+
+  private async connect(): Promise<void> {
+    if (this.rpcEndpoint.protocol === WalletRPCEndpoint.WEBSOCKET_PROTOCOL) {
+      return this.rpcClient.connectWebsocket(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
+    }
+    // return this.rpcClient.connect(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
+
   }
 }
