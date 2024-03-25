@@ -1,4 +1,7 @@
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
+import { ExtendedTransactionBuilder } from "../transaction";
+import TransactionBuilder from "../transaction_builder";
+import { Service } from "../types";
 import {
   AccountIdentity,
   ConnectionState,
@@ -6,12 +9,9 @@ import {
   RpcNotification,
   RpcRequestOrigin,
   RpcSubscription,
-  TransactionSuccess,
-  SignedTransaction
+  SignedTransaction,
+  TransactionSuccess
 } from "./types.js";
-import { Service } from "../types";
-import TransactionBuilder from "../transaction_builder";
-import { ExtendedTransactionBuilder } from "../transaction";
 
 export class RpcRequest {
   private origin: RpcRequestOrigin;
@@ -29,10 +29,91 @@ export class RpcRequest {
   }
 }
 
+enum StreamChannelState {
+  CONNECTING,
+  OPEN,
+  CLOSING,
+  CLOSED,
+}
+interface StreamChannel<T> {
+  get state(): StreamChannelState;
+
+  connect(): Promise<void>;
+  close(): Promise<void>;
+  send(data: T): Promise<void>;
+  onReceive: ((data: T) => Promise<void>) | null;
+  onReady: (() => Promise<void>) | null;
+  onClose: ((reason: string) => Promise<void>) | null;
+}
+
+class WebsocketStreamChannel implements StreamChannel<string> {
+  private websocket: WebSocket;
+
+  constructor(
+    websocket: WebSocket
+  ) {
+    this.websocket = websocket;
+  }
+
+  async connect(): Promise<void> { }
+
+  async close(): Promise<void> {
+    this.websocket.close();
+  }
+
+  async send(data: string): Promise<void> {
+    await this.websocket.send(data);
+  }
+
+  private _onReceive: ((data: string) => Promise<void>) | null = null;
+  get onReceive() { return this._onReceive };
+  set onReceive(onReceive: ((data: string) => Promise<void>) | null) {
+    this._onReceive = onReceive;
+
+    this.websocket.onmessage =
+      this._onReceive === null ?
+        null :
+        (event) => {
+          this._onReceive!(event.data.toString());
+        }
+  }
+
+  private _onReady: (() => Promise<void>) | null = null;
+  get onReady() { return this._onReady };
+  set onReady(onReady: (() => Promise<void>) | null) {
+    this._onReady = onReady;
+    this.websocket.onopen = this._onReady === null ?
+      null :
+      (_) => {
+        this._onReady!();
+      }
+  }
+
+  private _onClose: ((reason: string) => Promise<void>) | null = null;
+  get onClose() { return this._onClose };
+  set onClose(onClose: ((reason: string) => Promise<void>) | null) {
+    this._onClose = onClose;
+    this.websocket.onclose = this._onClose === null ?
+      null :
+      (event) => {
+        this._onClose!(event.reason);
+      }
+  }
+
+  get state(): StreamChannelState {
+    switch (this.websocket.readyState) {
+      case WebSocket.CONNECTING: return StreamChannelState.CONNECTING;
+      case WebSocket.OPEN: return StreamChannelState.OPEN;
+      case WebSocket.CLOSING: return StreamChannelState.CLOSING;
+      default: return StreamChannelState.CLOSED;
+    }
+  }
+}
+
 export class ArchethicRPCClient {
   private origin: RpcRequestOrigin;
   private client: JSONRPCServerAndClient | undefined;
-  private websocket: WebSocket | undefined;
+  private channel: StreamChannel<string> | undefined;
   private _connectionStateEventTarget: EventTarget;
   private _rpcNotificationEventTarget: EventTarget;
   static _instance: ArchethicRPCClient;
@@ -70,19 +151,29 @@ export class ArchethicRPCClient {
    * @param {number} port
    * @returns {Promise<void>}
    */
-  async connect(host: string, port: number): Promise<void> {
+  async connectWebsocket(host: string, port: number): Promise<void> {
+    await this.connect(new WebsocketStreamChannel(new WebSocket(`ws://${host}:${port}`)));
+  }
+
+
+  /**
+   *
+   * @param {StreamChannel} streamChannel
+   * @returns {Promise<void>}
+   */
+  async connect(streamChannel: StreamChannel<string>): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.connectionState != ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
-      this.websocket = new WebSocket(`ws://${host}:${port}`);
+      this.channel = streamChannel;
       this._dispatchConnectionState();
 
       this.client = new JSONRPCServerAndClient(
         new JSONRPCServer(),
         new JSONRPCClient((request) => {
           try {
-            this.websocket?.send(JSON.stringify(request));
+            this.channel?.send(JSON.stringify(request));
             return Promise.resolve();
           } catch (error) {
             return Promise.reject(error);
@@ -101,17 +192,17 @@ export class ArchethicRPCClient {
         );
       });
 
-      this.websocket.onmessage = (event) => {
-        this.client?.receiveAndSend(JSON.parse(event.data.toString()));
+      this.channel.onReceive = async (data) => {
+        this.client?.receiveAndSend(JSON.parse(data));
       };
 
       // On close, make sure to reject all the pending requests to prevent hanging.
-      this.websocket.onclose = (event) => {
-        this.client?.rejectAllPendingRequests(`Connection is closed (${event.reason}).`);
+      this.channel.onClose = async (reason) => {
+        this.client?.rejectAllPendingRequests(`Connection is closed (${reason}).`);
         this.close();
       };
 
-      this.websocket.onopen = (_) => {
+      this.channel.onReady = async () => {
         resolve();
         this._dispatchConnectionState();
       };
@@ -122,9 +213,9 @@ export class ArchethicRPCClient {
    * @return {Promise<void>}
    */
   async close(): Promise<void> {
-    this.websocket?.close();
+    this.channel?.close();
     this.client = undefined;
-    this.websocket = undefined;
+    this.channel = undefined;
     this._dispatchConnectionState();
   }
 
@@ -185,16 +276,16 @@ export class ArchethicRPCClient {
    * @return {ConnectionState}
    */
   get connectionState(): ConnectionState {
-    const state = this.websocket?.readyState;
-    switch (state) {
-      case WebSocket.CLOSING:
+    switch (this.channel?.state) {
+      case StreamChannelState.CLOSING:
         return ConnectionState.Closing;
-      case WebSocket.CONNECTING:
+      case StreamChannelState.CONNECTING:
         return ConnectionState.Connecting;
-      case WebSocket.OPEN:
+      case StreamChannelState.OPEN:
         return ConnectionState.Open;
+      default:
+        return ConnectionState.Closed;
     }
-    return ConnectionState.Closed;
   }
 
   /**
