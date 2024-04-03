@@ -383,7 +383,7 @@ Add the code in the `data.code` section of the transaction
 
 #### setGenerateEncryptedSeedSC(flag)
 
-Set a flag to request a wallet to add the chain seed in the ownership of the transaction to create a smart contract.  
+Set a flag to request a wallet to add the chain seed in the ownership of the transaction to create a smart contract.
 This function is only usefull when sending / signing the transaction through a wallet. Signing and sending the transaction directly to the node will not use this flag.
 
 - `flag` is a boolean to request the node to add the chain seed in the ownership
@@ -942,7 +942,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 ```
 
 ### onconnectionstatechange(callback)
@@ -955,12 +958,10 @@ import Archethic from "@archethicjs/sdk"
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+})
 
 archethic.rpcWallet.onconnectionstatechange(
   (rpcConnectionState) {
@@ -982,7 +983,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
 archethic.rpcWallet.getAccounts().then((accounts) => {
   accounts.forEach((account) => {
@@ -1001,7 +1005,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url "https://great_app.com"
+});
 
 archethic.rpcWallet.getServices().then((services) => {
   services.forEach((service) => {
@@ -1020,7 +1027,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
 const subscription = await archethic.rpcWallet.onAccountChange("account name", (account) => {
   console.log(JSON.stringify(account));
@@ -1037,7 +1047,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
 await archethic.rpcWallet.refreshCurrentAccount();
 // Wallet account is refreshed with last blockchain informations
@@ -1053,12 +1066,10 @@ import Archethic from "@archethicjs/sdk"
 const archethic = new Archethic("ws://localhost:12345")
 await archethic.connect()
 
-await archethic.rpcWallet.setOrigin(
-  new RpcRequestOrigin(
-    "My DApp",
-    "https://great_app.com",
-  )
-)
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+})
 
 const subscription // subscription from a previous call (onAccountChange for example)
 
@@ -1075,13 +1086,20 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
-const tx = archethic.transaction.new()
-        .setType("token")
-        .setContent('{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}')
+const tx = archethic.transaction
+  .new()
+  .setType("token")
+  .setContent(
+    '{ "name": "NFT 001", "supply": 100000000, "type": "non-fungible", "symbol": "NFT1", "aeip": [2], "properties": {}}'
+  );
 
-archethic.rpcWallet .sendTransaction(tx)
+archethic.rpcWallet
+  .sendTransaction(tx)
   .then((sendResult) => {
     console.log(JSON.stringify(sendResult));
     // { transactionAddress: "asdfasfsadf", nbConfirmations: 3, maxConfirmations: 3 }
@@ -1101,12 +1119,16 @@ import Archethic, { Utils } from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
-const tx = archethic.transaction.new()
-        .setType("transfer")
-        .addTokenTransfer("0001ABCD...", Utils.toBigInt(12), "00001234...", 0)
-        .addRecipient("0001ABCD...", "swap")
+const tx = archethic.transaction
+  .new()
+  .setType("transfer")
+  .addTokenTransfer("0001ABCD...", Utils.toBigInt(12), "00001234...", 0)
+  .addRecipient("0001ABCD...", "swap");
 
 archethic.rpcWallet
   .signTransactions(tx)
@@ -1132,7 +1154,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
 archethic.rpcWallet
   .addService("myService")
@@ -1154,7 +1179,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
 archethic.rpcWallet.keychainDeriveKeypair("myService", 1, "suffix").then((result) => {
   console.log(result["publicKey"]);
@@ -1171,7 +1199,10 @@ import Archethic from "@archethicjs/sdk";
 const archethic = new Archethic("ws://localhost:12345");
 await archethic.connect();
 
-await archethic.rpcWallet.setOrigin(new RpcRequestOrigin("My DApp", "https://great_app.com"));
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
 
 archethic.rpcWallet.keychainDeriveAddress("myService", 1, "suffix").then((result) => {
   console.log(result["address"]);
