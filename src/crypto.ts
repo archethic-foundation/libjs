@@ -1,10 +1,11 @@
-import { Curve, HashAlgorithm, Keypair } from "./types.js";
+import { AuthorizedKeyUserInput, Curve, HashAlgorithm, Keypair } from "./types.js";
 import {
   concatUint8Arrays,
   hexToUint8Array,
   intToUint8Array,
   maybeHexToUint8Array,
   maybeStringToUint8Array,
+  maybeUint8ArrayToHex,
   uint8ArrayToHex,
   wordArrayToUint8Array
 } from "./utils.js";
@@ -604,4 +605,34 @@ export function getGenesisAddress(seed: string | Uint8Array) {
  */
 export function getServiceGenesisAddress(keychain: Keychain, service: string, suffix = "") {
   return uint8ArrayToHex(keychain.deriveAddress(service, 0, suffix));
+}
+/**
+ * Encrypts a secret using a given public key
+ * @param {string | Uint8Array} secret The secret to encrypt
+ * @param {string | Uint8Array} publicKey The public key to use for encryption
+ * @returns {Object} An object containing the encrypted secret and an array of authorized keys, each with an encrypted secret key and a public key
+ * @example
+ * const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
+ * const { encryptedSecret, authorizedKeys } = encryptSecret(Crypto.randomSecretKey(), storageNoncePublicKey);
+ * const code = "" // The contract code
+ * const tx = await archethic.transaction
+ *  .new()
+ *  .setType("contract")
+ *  .setCode(code)
+ *  .addOwnership(encryptedSecret, authorizedKeys)
+ *  .build(seed, 0)
+ *  .originSign(originPrivateKey)
+ *  .send();
+ */
+export function encryptSecret(
+  secret: string | Uint8Array,
+  publicKey: string | Uint8Array
+): { encryptedSecret: Uint8Array; authorizedKeys: AuthorizedKeyUserInput[] } {
+  const aesKey = randomSecretKey();
+  const encryptedSecret = aesEncrypt(secret, aesKey);
+  const encryptedAesKey = uint8ArrayToHex(ecEncrypt(aesKey, publicKey));
+  const authorizedKeys: AuthorizedKeyUserInput[] = [
+    { encryptedSecretKey: encryptedAesKey, publicKey: maybeUint8ArrayToHex(publicKey) }
+  ];
+  return { encryptedSecret, authorizedKeys };
 }
