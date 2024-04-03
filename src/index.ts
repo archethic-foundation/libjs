@@ -55,6 +55,7 @@ export default class Archethic {
     } catch (err) {
       this.nearestEndpoints.delete(node);
       if (this.nearestEndpoints.size == 0) {
+        console.log(err);
         throw "Cannot reach Archethic node";
       }
       return this.requestNode(call);
