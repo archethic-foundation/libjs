@@ -122,8 +122,8 @@ export function bigIntToUint8Array(number: number): Uint8Array {
  */
 export function uint8ArrayToInt(bytes: Uint8Array): number {
   let value = 0;
-  for (let i = 0; i < bytes.length; i++) {
-    value = value * 256 + bytes[i];
+  for (const element of bytes) {
+    value = value * 256 + element;
   }
   return value;
 }
