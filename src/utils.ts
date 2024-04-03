@@ -7,7 +7,7 @@ export const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C6
 /**
  * Convert CryptoJS.lib.WordArray to Uint8Array
  */
-export function wordArrayToUint8Array(wordArray: any): Uint8Array {
+export function wordArrayToUint8Array(wordArray: { sigBytes: number; words: number[] }): Uint8Array {
   const dataArray = new Uint8Array(wordArray.sigBytes);
   for (let i = 0x0; i < wordArray.sigBytes; i++) {
     dataArray[i] = (wordArray.words[i >>> 0x2] >>> (0x18 - (i % 0x4) * 0x8)) & 0xff;
@@ -35,16 +35,16 @@ export function sortObjectKeysASC(term: any): any {
   // array: map over elements
   if (Array.isArray(term)) return term.map((item: any) => sortObjectKeysASC(item));
 
-  if (term instanceof Map)
-    // we can't sort keys of a map
-    // because the keys aren't strings
-    // FIXME: this might cause an issue because elixir order & javascript order may differ
-    return term;
+  if (term instanceof Map) {
+    const sortedEntries = [...term.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+    const sortedMap = new Map(sortedEntries.map(([key, value]) => [key, sortObjectKeysASC(value)]));
+    return sortedMap;
+  }
 
   // object: sort and map over elements
   if (isObject(term))
     return Object.keys(term)
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .reduce((newObj: any, key: string) => {
         newObj[key] = sortObjectKeysASC(term[key]);
         return newObj;
