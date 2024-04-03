@@ -12,6 +12,7 @@ import {
 import { Service } from "../types";
 import TransactionBuilder from "../transaction_builder";
 import { ExtendedTransactionBuilder } from "../transaction";
+import TransportWebSocket from "isomorphic-ws";
 
 export class RpcRequest {
   private origin: RpcRequestOrigin;
@@ -32,7 +33,7 @@ export class RpcRequest {
 export class ArchethicRPCClient {
   private origin: RpcRequestOrigin;
   private client: JSONRPCServerAndClient | undefined;
-  private websocket: WebSocket | undefined;
+  private websocket: TransportWebSocket | undefined;
   private _connectionStateEventTarget: EventTarget;
   private _rpcNotificationEventTarget: EventTarget;
   static _instance: ArchethicRPCClient;
@@ -75,7 +76,7 @@ export class ArchethicRPCClient {
       if (this.connectionState != ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
-      this.websocket = new WebSocket(`ws://${host}:${port}`);
+      this.websocket = new TransportWebSocket(`ws://${host}:${port}`);
       this._dispatchConnectionState();
 
       this.client = new JSONRPCServerAndClient(
@@ -187,11 +188,11 @@ export class ArchethicRPCClient {
   get connectionState(): ConnectionState {
     const state = this.websocket?.readyState;
     switch (state) {
-      case WebSocket.CLOSING:
+      case TransportWebSocket.CLOSING:
         return ConnectionState.Closing;
-      case WebSocket.CONNECTING:
+      case TransportWebSocket.CONNECTING:
         return ConnectionState.Connecting;
-      case WebSocket.OPEN:
+      case TransportWebSocket.OPEN:
         return ConnectionState.Open;
     }
     return ConnectionState.Closed;
