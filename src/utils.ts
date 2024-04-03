@@ -1,5 +1,3 @@
-import { Buffer } from "buffer";
-
 /**
  *
  * Return the Initial Origin Private Key
@@ -178,7 +176,9 @@ export function concatUint8Arrays(...arrays: Uint8Array[]): Uint8Array {
  * @param {Uint8Array} bytes Uint8Array
  */
 export function uint8ArrayToHex(bytes: Uint8Array): string {
-  return Buffer.from(bytes).toString("hex");
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
