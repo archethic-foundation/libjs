@@ -102,17 +102,17 @@ export class ArchethicRPCClient {
         );
       });
 
-      this.websocket.onmessage = (event) => {
+      this.websocket.onmessage = (event: any) => {
         this.client?.receiveAndSend(JSON.parse(event.data.toString()));
       };
 
       // On close, make sure to reject all the pending requests to prevent hanging.
-      this.websocket.onclose = (event) => {
+      this.websocket.onclose = (event: any) => {
         this.client?.rejectAllPendingRequests(`Connection is closed (${event.reason}).`);
         this.close();
       };
 
-      this.websocket.onopen = (_) => {
+      this.websocket.onopen = (_: any) => {
         resolve();
         this._dispatchConnectionState();
       };
