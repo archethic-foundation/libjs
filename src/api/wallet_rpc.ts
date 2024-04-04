@@ -36,7 +36,7 @@ export class ArchethicRPCClient {
   private websocket: TransportWebSocket | undefined;
   private _connectionStateEventTarget: EventTarget;
   private _rpcNotificationEventTarget: EventTarget;
-  static _instance: ArchethicRPCClient;
+  private static _instance: ArchethicRPCClient | undefined;
   constructor() {
     this.origin = { name: "" };
     this._connectionStateEventTarget = new EventTarget();
@@ -48,7 +48,7 @@ export class ArchethicRPCClient {
    */
   static get instance(): ArchethicRPCClient {
     if (!this._instance) {
-      this._instance = new ArchethicRPCClient();
+      this._instance = new this();
     }
     return this._instance;
   }
