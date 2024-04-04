@@ -110,36 +110,32 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
     case TYPE_FLOAT:
       return nextUint8(iter) == 1 ? fromBigInt(VarInt.deserialize(iter)) : fromBigInt(VarInt.deserialize(iter) * -1);
 
-    case TYPE_STR:
+    case TYPE_STR: {
       const strLen = VarInt.deserialize(iter);
-
       let bytes = [];
       for (let i = 0; i < strLen; i++) {
         bytes.push(nextUint8(iter));
       }
-
       return deserializeString(Uint8Array.from(bytes));
+    }
 
-    case TYPE_LIST:
+    case TYPE_LIST: {
       const listLen = VarInt.deserialize(iter);
-
       let list = [];
       for (let i = 0; i < listLen; i++) {
         list.push(do_deserialize_v1(iter));
       }
-
       return list;
+    }
 
-    case TYPE_MAP:
+    case TYPE_MAP: {
       const keysLen = VarInt.deserialize(iter);
-
-      // we use a map here because keys can be of any type
-      let map = new Map();
+      let map = new Map(); // we use a map here because keys can be of any type
       for (let i = 0; i < keysLen; i++) {
         map.set(do_deserialize_v1(iter), do_deserialize_v1(iter));
       }
-
       return Object.fromEntries(map.entries());
+    }
   }
 }
 
