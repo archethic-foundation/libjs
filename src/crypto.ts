@@ -33,66 +33,36 @@ export function randomSecretKey(): Uint8Array {
   return wordArrayToUint8Array(CryptoJS.lib.WordArray.random(32));
 }
 
-/**
- * Converts a hash algorithm to an id
- * @param hashAlgo Hash algorithm
- */
-export function hashAlgoToId(hashAlgo: HashAlgorithm): number {
-  switch (hashAlgo) {
-    case HashAlgorithm.sha256:
-      return 0;
-    case HashAlgorithm.sha512:
-      return 1;
-    case HashAlgorithm.sha3_256:
-      return 2;
-    case HashAlgorithm.sha3_512:
-      return 3;
-    case HashAlgorithm.blake2b:
-      return 4;
-    default:
-      throw new Error("Hash algorithm not supported");
-  }
-}
+const hashAlgoMap = {
+  [HashAlgorithm.sha256]: 0,
+  [HashAlgorithm.sha512]: 1,
+  [HashAlgorithm.sha3_256]: 2,
+  [HashAlgorithm.sha3_512]: 3,
+  [HashAlgorithm.blake2b]: 4
+};
 
 /**
  * Get the hash algo name from the hash algorithm ID
  * @param {number} ID Hash algorithm's ID
  */
 export function IDToHashAlgo(ID: number): HashAlgorithm {
-  switch (ID) {
-    case 0:
-      return HashAlgorithm.sha256;
-    case 1:
-      return HashAlgorithm.sha512;
-    case 2:
-      return HashAlgorithm.sha3_256;
-    case 3:
-      return HashAlgorithm.sha3_512;
-    case 4:
-      return HashAlgorithm.blake2b;
-    default:
-      throw new Error("Hash algorithm not supported");
+  const hashAlgo = Object.keys(hashAlgoMap).find((key) => hashAlgoMap[key as HashAlgorithm] === ID);
+  if (hashAlgo === undefined) {
+    throw new Error("Hash algorithm not supported");
   }
+  return hashAlgo as HashAlgorithm;
 }
+
 /**
  * Get the ID of a given hash algorithm
  * @params {String} hashAlgo Hash algorithm
  */
 export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
-  switch (hashAlgo) {
-    case HashAlgorithm.sha256:
-      return 0;
-    case HashAlgorithm.sha512:
-      return 1;
-    case HashAlgorithm.sha3_256:
-      return 2;
-    case HashAlgorithm.sha3_512:
-      return 3;
-    case HashAlgorithm.blake2b:
-      return 4;
-    default:
-      throw new Error("Hash algorithm not supported");
+  const ID = hashAlgoMap[hashAlgo];
+  if (ID === undefined) {
+    throw new Error("Hash algorithm not supported");
   }
+  return ID;
 }
 
 /**
