@@ -223,7 +223,7 @@ export function toByteArray(number: number): Uint8Array {
 
   arr.push(number % 256);
 
-  return Uint8Array.from(arr.toReversed());
+  return new Uint8Array(arr).reverse();
 }
 
 /**
