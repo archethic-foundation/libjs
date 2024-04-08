@@ -22,7 +22,7 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
   private port: chrome.runtime.Port | null = null
   private _state: AWCStreamChannelState = AWCStreamChannelState.CLOSED
 
-  constructor(extensionId: string) {
+  constructor(extensionId: string | undefined) {
     if (extensionId === undefined) throw new Error('Archethic Wallet Web extension not available');
     this.extensionId = extensionId
   }
