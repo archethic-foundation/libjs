@@ -1,4 +1,7 @@
-import { ArchethicRPCClient } from "./api/wallet_rpc.js";
+import { ConnectionState } from "./api/types.js";
+import { AWCWebBrowserExtension } from "./api/wallet_rpc.browserextension.js";
+import { ArchethicWalletClient } from "./api/wallet_rpc.js";
+import { AWCWebsocketStreamChannel } from "./api/wallet_rpc.websocket.js";
 
 export abstract class Endpoint {
   abstract get isRpcAvailable(): boolean;
@@ -6,17 +9,21 @@ export abstract class Endpoint {
   abstract get nodeEndpoint(): URL | null;
 
   /**
-   * @param {String} endpoint
+   * @param {String | undefined} endpoint
    * @return {Endpoint}
    */
-  static build(endpoint: string): Endpoint {
-    const url: URL = new URL(endpoint);
-
-    if (WalletRPCEndpoint.handlesProtocol(url.protocol)) {
-      return new WalletRPCEndpoint(endpoint);
+  static build(endpoint: string | undefined): Endpoint {
+    if (endpoint === undefined) {
+      console.log('Using AWC client');
+      return new AWCEndpoint(
+        AWCWebBrowserExtension.awc ??
+        new ArchethicWalletClient(new AWCWebsocketStreamChannel(`ws://localhost:12345`))
+      )
     }
 
+    const url: URL = new URL(endpoint);
     if (url.protocol === "http:" || url.protocol === "https:") {
+      console.log('Using direct endpoint');
       return new DirectEndpoint(endpoint);
     }
 
@@ -46,21 +53,13 @@ export class DirectEndpoint implements Endpoint {
   }
 }
 
-export class WalletRPCEndpoint implements Endpoint {
-  public rpcClient: ArchethicRPCClient;
-  public origin: string;
-  private rpcEndpoint: URL;
-  public nodeEndpoint: URL | null;
 
-  static WEBCHANNEL_PROTOCOL = "wc:";
-  static WEBSOCKET_PROTOCOL = "ws:";
-  static handlesProtocol(scheme: string) {
-    return scheme === this.WEBCHANNEL_PROTOCOL || scheme === this.WEBSOCKET_PROTOCOL;
-  }
+export class AWCEndpoint extends Endpoint {
+  // public readonly channel: AWCStreamChannel<string>;
+  public readonly rpcClient: ArchethicWalletClient;
+  public readonly origin: string;
+  private _nodeEndpoint: URL | null;
 
-  /**
-   * @return {Boolean}
-   */
   get isRpcAvailable(): boolean {
     return true;
   }
@@ -68,33 +67,29 @@ export class WalletRPCEndpoint implements Endpoint {
   /**
    * @param {String} endpoint
    */
-  constructor(endpoint: string) {
-    /** @type {ArchethicRPCClient} */
-    this.rpcClient = ArchethicRPCClient.instance;
+  constructor(client: ArchethicWalletClient) {
+    super()
+
+    // this.channel = channel;
+
+    /** @type {ArchethicWalletClient} */
+    this.rpcClient = client;
 
     /** @type {String} */
-    this.origin = endpoint;
+    this.origin = 'AWC';
 
-    /** @type {URL} */
-    this.rpcEndpoint = new URL(endpoint);
-
-    this.nodeEndpoint = null;
+    this._nodeEndpoint = null;
   }
+
+  get nodeEndpoint(): URL | null { return this._nodeEndpoint }
 
   async resolve() {
-
-    await this.rpcClient.connectWebsocket(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
+    if (this.rpcClient.connectionState !== ConnectionState.Open) {
+      await this.rpcClient.connect();
+    }
 
     await this.rpcClient.getEndpoint().then((response) => {
-      this.nodeEndpoint = new URL(response["endpointUrl"]);
+      this._nodeEndpoint = new URL(response["endpointUrl"]);
     });
-  }
-
-  private async connect(): Promise<void> {
-    if (this.rpcEndpoint.protocol === WalletRPCEndpoint.WEBSOCKET_PROTOCOL) {
-      return this.rpcClient.connectWebsocket(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
-    }
-    // return this.rpcClient.connect(this.rpcEndpoint.hostname, parseInt(this.rpcEndpoint.port));
-
   }
 }

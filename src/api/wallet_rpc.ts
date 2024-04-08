@@ -1,8 +1,7 @@
-import TransportWebSocket from "isomorphic-ws";
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
-import { ExtendedTransactionBuilder } from "../transaction";
-import TransactionBuilder from "../transaction_builder";
-import { Service } from "../types";
+import { ExtendedTransactionBuilder } from "../transaction.js";
+import TransactionBuilder from "../transaction_builder.js";
+import { Service } from "../types.js";
 import {
   AccountIdentity,
   ConnectionState,
@@ -13,6 +12,7 @@ import {
   SignedTransaction,
   TransactionSuccess
 } from "./types.js";
+
 
 export class RpcRequest {
   private origin: RpcRequestOrigin;
@@ -30,14 +30,16 @@ export class RpcRequest {
   }
 }
 
-enum StreamChannelState {
+export enum AWCStreamChannelState {
   CONNECTING,
   OPEN,
   CLOSING,
   CLOSED,
 }
-interface StreamChannel<T> {
-  get state(): StreamChannelState;
+
+
+export interface AWCStreamChannel<T> {
+  get state(): AWCStreamChannelState;
 
   connect(): Promise<void>;
   close(): Promise<void>;
@@ -47,91 +49,19 @@ interface StreamChannel<T> {
   onClose: ((reason: string) => Promise<void>) | null;
 }
 
-class WebsocketStreamChannel implements StreamChannel<string> {
-  private websocket: TransportWebSocket | undefined;
 
-  constructor(
-    websocket: TransportWebSocket
-  ) {
-    this.websocket = websocket;
-  }
-
-  async connect(): Promise<void> { }
-
-  async close(): Promise<void> {
-    this.websocket.close();
-  }
-
-  async send(data: string): Promise<void> {
-    await this.websocket.send(data);
-  }
-
-  private _onReceive: ((data: string) => Promise<void>) | null = null;
-  get onReceive() { return this._onReceive };
-  set onReceive(onReceive: ((data: string) => Promise<void>) | null) {
-    this._onReceive = onReceive;
-
-    this.websocket.onmessage =
-      this._onReceive === null ?
-        null :
-        (event: any) => {
-          this._onReceive!(event.data.toString());
-        }
-  }
-
-  private _onReady: (() => Promise<void>) | null = null;
-  get onReady() { return this._onReady };
-  set onReady(onReady: (() => Promise<void>) | null) {
-    this._onReady = onReady;
-    this.websocket.onopen = this._onReady === null ?
-      null :
-      (_: any) => {
-        this._onReady!();
-      }
-  }
-
-  private _onClose: ((reason: string) => Promise<void>) | null = null;
-  get onClose() { return this._onClose };
-  set onClose(onClose: ((reason: string) => Promise<void>) | null) {
-    this._onClose = onClose;
-    this.websocket.onclose = this._onClose === null ?
-      null :
-      (event: any) => {
-        this._onClose!(event.reason);
-      }
-  }
-
-  get state(): StreamChannelState {
-    switch (this.websocket.readyState) {
-      case TransportWebSocket.CONNECTING: return StreamChannelState.CONNECTING;
-      case TransportWebSocket.OPEN: return StreamChannelState.OPEN;
-      case TransportWebSocket.CLOSING: return StreamChannelState.CLOSING;
-      default: return StreamChannelState.CLOSED;
-    }
-  }
-}
-
-export class ArchethicRPCClient {
+export class ArchethicWalletClient {
   private origin: RpcRequestOrigin;
   private client: JSONRPCServerAndClient | undefined;
-  private channel: StreamChannel<string> | undefined;
+  private _channel: AWCStreamChannel<string>;
   private _connectionStateEventTarget: EventTarget;
   private _rpcNotificationEventTarget: EventTarget;
-  static _instance: ArchethicRPCClient;
-  constructor() {
+
+  constructor(channel: AWCStreamChannel<string>) {
     this.origin = { name: "" };
     this._connectionStateEventTarget = new EventTarget();
     this._rpcNotificationEventTarget = new EventTarget();
-  }
-
-  /**
-   * @return {ArchethicRPCClient}
-   */
-  static get instance(): ArchethicRPCClient {
-    if (!this._instance) {
-      this._instance = new ArchethicRPCClient();
-    }
-    return this._instance;
+    this._channel = channel;
   }
 
   /**
@@ -146,35 +76,26 @@ export class ArchethicRPCClient {
     this._connectionStateEventTarget.dispatchEvent(new Event(this.connectionState));
   }
 
-  /**
-   *
-   * @param {string} host
-   * @param {number} port
-   * @returns {Promise<void>}
-   */
-  async connectWebsocket(host: string, port: number): Promise<void> {
-    await this.connect(new WebsocketStreamChannel(new WebSocket(`ws://${host}:${port}`)));
-  }
-
 
   /**
    *
-   * @param {StreamChannel} streamChannel
+   * @param {AWCStreamChannel} streamChannel
    * @returns {Promise<void>}
    */
-  async connect(streamChannel: StreamChannel<string>): Promise<void> {
+  async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
+      console.log('Connection attempt');
+
       if (this.connectionState != ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
-      this.channel = streamChannel;
       this._dispatchConnectionState();
 
       this.client = new JSONRPCServerAndClient(
         new JSONRPCServer(),
         new JSONRPCClient((request) => {
           try {
-            this.channel?.send(JSON.stringify(request));
+            this._channel?.send(JSON.stringify(request));
             return Promise.resolve();
           } catch (error) {
             return Promise.reject(error);
@@ -193,20 +114,22 @@ export class ArchethicRPCClient {
         );
       });
 
-      this.channel.onReceive = async (data) => {
+      this._channel.onReceive = async (data) => {
         this.client?.receiveAndSend(JSON.parse(data));
       };
 
       // On close, make sure to reject all the pending requests to prevent hanging.
-      this.channel.onClose = async (reason) => {
+      this._channel.onClose = async (reason) => {
         this.client?.rejectAllPendingRequests(`Connection is closed (${reason}).`);
         this.close();
       };
 
-      this.channel.onReady = async () => {
+      this._channel.onReady = async () => {
         resolve();
         this._dispatchConnectionState();
       };
+
+      this._channel.connect();
     });
   }
 
@@ -214,9 +137,8 @@ export class ArchethicRPCClient {
    * @return {Promise<void>}
    */
   async close(): Promise<void> {
-    this.channel?.close();
+    this._channel?.close();
     this.client = undefined;
-    this.channel = undefined;
     this._dispatchConnectionState();
   }
 
@@ -277,12 +199,12 @@ export class ArchethicRPCClient {
    * @return {ConnectionState}
    */
   get connectionState(): ConnectionState {
-    switch (this.channel?.state) {
-      case StreamChannelState.CLOSING:
+    switch (this._channel?.state) {
+      case AWCStreamChannelState.CLOSING:
         return ConnectionState.Closing;
-      case StreamChannelState.CONNECTING:
+      case AWCStreamChannelState.CONNECTING:
         return ConnectionState.Connecting;
-      case StreamChannelState.OPEN:
+      case AWCStreamChannelState.OPEN:
         return ConnectionState.Open;
       default:
         return ConnectionState.Closed;
@@ -291,7 +213,7 @@ export class ArchethicRPCClient {
 
   /**
    * @param {function(String)} listener
-   * @return {ArchethicRPCClient}
+   * @return {ArchethicWalletClient}
    */
   onconnectionstatechange(listener: Function): this {
     this._connectionStateEventTarget.addEventListener(ConnectionState.Connecting, () => {
@@ -307,7 +229,7 @@ export class ArchethicRPCClient {
   }
 
   /**
-   * @return {ArchethicRPCClient}
+   * @return {ArchethicWalletClient}
    */
   unsubscribeconnectionstatechange(): this {
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Connecting, null);
