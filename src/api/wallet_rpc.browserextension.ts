@@ -19,7 +19,7 @@ export class AWCWebBrowserExtension {
 
 export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<string> {
   private extensionId: string
-  private port: chrome.runtime.Port | null = null
+  private _port: chrome.runtime.Port | null = null
   private _state: AWCStreamChannelState = AWCStreamChannelState.CLOSED
 
   constructor(extensionId: string | undefined) {
@@ -28,11 +28,6 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
   }
 
   async connect(): Promise<void> {
-    this.port = chrome.runtime.connect(this.extensionId)
-    this.port.onMessage.addListener((message: string, _) => {
-      console.log(`Received message ${message}`)
-      if (this.onReceive !== null) this.onReceive(message);
-    })
     this._connectionReady()
   }
 
@@ -46,12 +41,27 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
     if (this.onReady !== null) this.onReady()
   }
 
+  get port(): chrome.runtime.Port {
+    if (this._port !== null) return this._port
+    this._port = chrome.runtime.connect(this.extensionId)
+    this._port.onDisconnect.addListener(() => {
+      this._port = null
+    })
+    this._port.onMessage.addListener((message: string, _) => {
+      console.log(`Received message ${message}`)
+      if (this.onReceive !== null) this.onReceive(message);
+    })
+    return this._port
+  }
+
   async close(): Promise<void> {
-    this.port?.disconnect();
+    this._port?.disconnect();
+    this._port = null;
+    this._connectionClosed()
   }
 
   async send(data: string): Promise<void> {
-    await this.port?.postMessage(data);
+    await this.port.postMessage(data);
   }
 
   public onReceive: ((data: string) => Promise<void>) | null = null;
