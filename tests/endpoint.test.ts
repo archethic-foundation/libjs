@@ -1,5 +1,5 @@
-import { Endpoint, WalletRPCEndpoint } from "../src/endpoint";
-import { ArchethicRPCClient } from "../src/api/wallet_rpc";
+import { ArchethicWalletClient } from "../src/api/wallet_rpc";
+import { AWCEndpoint, Endpoint } from "../src/endpoint";
 
 describe("Endpoint", () => {
   it("should create a non RPC endpoint", () => {
@@ -10,11 +10,11 @@ describe("Endpoint", () => {
   });
 
   it("should create an RPC endpoint", () => {
-    const endpoint = Endpoint.build("ws://localhost:12345");
+    const endpoint = Endpoint.build(undefined);
     expect(endpoint.isRpcAvailable).toBe(true);
 
-    if (endpoint instanceof WalletRPCEndpoint) {
-      expect(endpoint.rpcClient).toBeInstanceOf(ArchethicRPCClient);
+    if (endpoint instanceof AWCEndpoint) {
+      expect(endpoint.rpcClient).toBeInstanceOf(ArchethicWalletClient);
     }
   });
 });
