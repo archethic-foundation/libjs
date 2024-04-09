@@ -55,7 +55,6 @@ export class DirectEndpoint implements Endpoint {
 
 
 export class AWCEndpoint extends Endpoint {
-  // public readonly channel: AWCStreamChannel<string>;
   public readonly rpcClient: ArchethicWalletClient;
   public readonly origin: string;
   private _nodeEndpoint: URL | null;
