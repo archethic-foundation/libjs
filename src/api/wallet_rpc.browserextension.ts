@@ -29,22 +29,21 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
 
   async connect(): Promise<void> {
     this.port = chrome.runtime.connect(this.extensionId)
-    this.port.onMessage.addListener((message, _) => {
+    this.port.onMessage.addListener((message: string, _) => {
       console.log(`Received message ${message}`)
-      if (this._onReceive === null) return
-      this._onReceive(message);
+      if (this.onReceive !== null) this.onReceive(message);
     })
-    this.port.onDisconnect.addListener(() => {
-      if (this._onClose === null) return
+    this._connectionReady()
+  }
 
-      this._state = AWCStreamChannelState.CLOSED;
-      this._onClose('');
-    })
+  _connectionClosed() {
+    this._state = AWCStreamChannelState.CLOSED;
+    if (this.onClose !== null) this.onClose('')
+  }
 
+  _connectionReady() {
     this._state = AWCStreamChannelState.OPEN;
-    if (this._onReady !== null) {
-      this._onReady()
-    }
+    if (this.onReady !== null) this.onReady()
   }
 
   async close(): Promise<void> {
@@ -55,23 +54,11 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
     await this.port?.postMessage(data);
   }
 
-  private _onReceive: ((data: string) => Promise<void>) | null = null;
-  get onReceive() { return this._onReceive };
-  set onReceive(onReceive: ((data: string) => Promise<void>) | null) {
-    this._onReceive = onReceive;
-  }
+  public onReceive: ((data: string) => Promise<void>) | null = null;
 
-  private _onReady: (() => Promise<void>) | null = null;
-  get onReady() { return this._onReady };
-  set onReady(onReady: (() => Promise<void>) | null) {
-    this._onReady = onReady;
-  }
+  public onReady: (() => Promise<void>) | null = null;
 
-  private _onClose: ((reason: string) => Promise<void>) | null = null;
-  get onClose() { return this._onClose };
-  set onClose(onClose: ((reason: string) => Promise<void>) | null) {
-    this._onClose = onClose;
-  }
+  public onClose: ((reason: string) => Promise<void>) | null = null;
 
   get state(): AWCStreamChannelState {
     return this._state

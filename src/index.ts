@@ -10,7 +10,14 @@ import Network from "./network.js";
 import Transaction from "./transaction.js";
 import * as Utils from "./utils.js";
 
-export { AWCWebBrowserExtensionStreamChannel, ArchethicWalletClient, ConnectionState, Crypto, Keychain, Utils };
+export {
+  AWCWebBrowserExtensionStreamChannel,
+  ArchethicWalletClient,
+  ConnectionState,
+  Crypto,
+  Keychain,
+  Utils
+};
 
 export default class Archethic {
   endpoint: Endpoint;

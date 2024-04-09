@@ -7,14 +7,7 @@ let archethic = undefined;
 
 window.onload = async () => {
   await _connect()
-
-  // document.querySelector("#endpoint").addEventListener('change', () => {
-  //   _connect();
-  // });
 };
-
-
-
 
 window.get_current_account = async () => {
   const currentAccount = await archethic.rpcWallet.getCurrentAccount();
