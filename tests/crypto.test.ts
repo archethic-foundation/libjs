@@ -1,7 +1,6 @@
-import { deriveKeyPair, hash, sign, verify } from "../src/crypto";
+import { deriveKeyPair, hash, sign, verify, ecDecrypt, ecEncrypt } from "../src/crypto";
 import { uint8ArrayToHex } from "../src/utils";
 import { Curve, HashAlgorithm } from "../src/types";
-import { ecDecrypt, ecEncrypt } from "../src/crypto";
 
 describe("crypto", () => {
   describe("hash", () => {
