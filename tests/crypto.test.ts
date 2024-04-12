@@ -1,4 +1,4 @@
-import { deriveKeyPair, hash, sign, verify, ecDecrypt, ecEncrypt } from "../src/crypto";
+import { deriveKeyPair, ecDecrypt, ecEncrypt, encryptSecret, hash, sign, verify } from "../src/crypto";
 import { uint8ArrayToHex } from "../src/utils";
 import { Curve, HashAlgorithm } from "../src/types";
 
@@ -113,6 +113,72 @@ describe("crypto", () => {
       const keypair = deriveKeyPair("seed", 0, Curve.secp256k1);
       const ciphertext = ecEncrypt(blob, keypair.publicKey);
       expect(ecDecrypt(ciphertext, keypair.privateKey)).toStrictEqual(blob);
+    });
+  });
+
+  describe("encryptSecret", () => {
+    it("should encrypt a secret using a public key", () => {
+      const keypair = deriveKeyPair("seed", 0);
+      const secret = "mySecret";
+      const publicKey = uint8ArrayToHex(keypair.publicKey);
+      const result = encryptSecret(secret, publicKey);
+
+      expect(result).toStrictEqual({
+        encryptedSecret: result.encryptedSecret,
+        authorizedKeys: [
+          {
+            publicKey: result.authorizedKeys[0].publicKey,
+            encryptedSecretKey: result.authorizedKeys[0].encryptedSecretKey
+          }
+        ]
+      });
+    });
+
+    it("should return an object with encryptedSecret and authorizedKeys", () => {
+      const keypair = deriveKeyPair("seed", 0);
+      const secret = "mySecret";
+      const publicKey = uint8ArrayToHex(keypair.publicKey);
+      const result = encryptSecret(secret, publicKey);
+
+      expect(result).toHaveProperty("encryptedSecret");
+      expect(result).toHaveProperty("authorizedKeys");
+      expect(result.authorizedKeys[0]).toHaveProperty("encryptedSecretKey");
+      expect(result.authorizedKeys[0]).toHaveProperty("publicKey");
+    });
+
+    it("should return different results for different secrets", () => {
+      const keypair = deriveKeyPair("seed", 0);
+      const secret1 = "mySecret1";
+      const secret2 = "mySecret2";
+      const publicKey = uint8ArrayToHex(keypair.publicKey);
+      const result1 = encryptSecret(secret1, publicKey);
+      const result2 = encryptSecret(secret2, publicKey);
+
+      expect(result1.encryptedSecret).not.toEqual(result2.encryptedSecret);
+    });
+
+    it("should return different results for different public keys", () => {
+      const keypair1 = deriveKeyPair("seed", 0);
+      const keypair2 = deriveKeyPair("seed2", 0);
+      const secret = "mySecret";
+      const publicKey1 = uint8ArrayToHex(keypair1.publicKey);
+      const publicKey2 = uint8ArrayToHex(keypair2.publicKey);
+      const result1 = encryptSecret(secret, publicKey1);
+      const result2 = encryptSecret(secret, publicKey2);
+
+      expect(result1.authorizedKeys[0].encryptedSecretKey).not.toEqual(result2.authorizedKeys[0].encryptedSecretKey);
+    });
+
+    it("should return the diferent result with different curve", () => {
+      const keypair1 = deriveKeyPair("seed", 0, Curve.ed25519);
+      const keypair2 = deriveKeyPair("seed", 0, Curve.P256);
+      const secret = "mySecret";
+      const publicKey1 = uint8ArrayToHex(keypair1.publicKey);
+      const publicKey2 = uint8ArrayToHex(keypair2.publicKey);
+      const result1 = encryptSecret(secret, publicKey1);
+      const result2 = encryptSecret(secret, publicKey2);
+
+      expect(result1.authorizedKeys[0].encryptedSecretKey).not.toEqual(result2.authorizedKeys[0].encryptedSecretKey);
     });
   });
 });
