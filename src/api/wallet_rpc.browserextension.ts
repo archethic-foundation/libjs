@@ -41,8 +41,18 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
     if (this.onReady !== null) this.onReady()
   }
 
-  get port(): chrome.runtime.Port {
-    if (this._port !== null) return this._port
+  async port(): Promise<chrome.runtime.Port> {
+    if (this._port !== null) {
+      console.log(`Popup extension already running`)
+      return this._port
+    }
+
+    console.log(`Wait for popup extension ...`)
+    await chrome.runtime.sendMessage(this.extensionId, 'waitForExtensionPopup')
+    console.log(`... ready`)
+
+
+    console.log(`Connecting to popup extension ...`)
     this._port = chrome.runtime.connect(this.extensionId)
     this._port.onDisconnect.addListener(() => {
       this._port = null
@@ -51,6 +61,7 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
       console.log(`Received message ${message}`)
       if (this.onReceive !== null) this.onReceive(message);
     })
+    console.log(`... ready`)
     return this._port
   }
 
@@ -61,7 +72,8 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
   }
 
   async send(data: string): Promise<void> {
-    await this.port.postMessage(data);
+    const port = await this.port()
+    await port.postMessage(data)
   }
 
   public onReceive: ((data: string) => Promise<void>) | null = null;
