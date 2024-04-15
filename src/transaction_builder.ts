@@ -11,10 +11,8 @@ import {
   bigIntToUint8Array,
   concatUint8Arrays,
   intToUint8Array,
-  isObject,
   maybeHexToUint8Array,
   maybeStringToUint8Array,
-  sortObjectKeysASC,
   toByteArray,
   uint8ArrayToHex
 } from "./utils.js";
@@ -89,11 +87,11 @@ export default class TransactionBuilder {
    */
   setType(type: UserTypeTransaction | string) {
     if (!Object.keys(UserTypeTransaction).includes(type)) {
-      throw (
+      throw new Error(
         "Transaction type must be one of " +
-        Object.keys(UserTypeTransaction)
-          .map((t) => `'${t}'`)
-          .join(", ")
+          Object.keys(UserTypeTransaction)
+            .map((t) => `'${t}'`)
+            .join(", ")
       );
     }
     this.type = type as UserTypeTransaction;
@@ -130,7 +128,7 @@ export default class TransactionBuilder {
     secret = maybeStringToUint8Array(secret);
 
     if (!Array.isArray(authorizedKeys)) {
-      throw "Authorized keys must be an array";
+      throw new Error("Authorized keys must be an array");
     }
 
     const filteredAuthorizedKeys: AuthorizedKey[] = [];
@@ -165,7 +163,7 @@ export default class TransactionBuilder {
     to = maybeHexToUint8Array(to);
 
     if (isNaN(amount) || amount <= 0) {
-      throw "UCO transfer amount must be a positive number";
+      throw new Error("UCO transfer amount must be a positive number");
     }
 
     this.data.ledger.uco.transfers.push({ to, amount });
@@ -184,11 +182,11 @@ export default class TransactionBuilder {
     tokenAddress = maybeHexToUint8Array(tokenAddress);
 
     if (isNaN(amount) || amount <= 0) {
-      throw "Token transfer amount must be a positive number";
+      throw new Error("Token transfer amount must be a positive number");
     }
 
     if (isNaN(tokenId) || tokenId < 0) {
-      throw "'tokenId' must be a valid integer >= 0";
+      throw new Error("'tokenId' must be a valid integer >= 0");
     }
 
     this.data.ledger.token.transfers.push({
@@ -210,11 +208,11 @@ export default class TransactionBuilder {
     const address = maybeHexToUint8Array(to);
 
     if (action && typeof action != "string") {
-      throw "`action` must be a string";
+      throw new Error("`action` must be a string");
     }
 
     if (args && !Array.isArray(args)) {
-      throw "`args` must be an array";
+      throw new Error("`args` must be an array");
     }
 
     if (action && !args) {
@@ -268,28 +266,28 @@ export default class TransactionBuilder {
    * @param {string} hashAlgo Hash algorithm to use for the address generation
    */
   build(seed: string | Uint8Array, index: number = 0, curve: string = "ed25519", hashAlgo: string = "sha256") {
-    if(seed == undefined || seed == null) {
-      throw "Seed must be defined"
+    if (seed == undefined || seed == null) {
+      throw new Error("Seed must be defined");
     }
 
-    if(index == undefined || index == null) {
-      throw "Index must be defined"
+    if (index == undefined || index == null) {
+      throw new Error("Index must be defined");
     }
 
     if (!Object.keys(Curve).includes(curve)) {
-      throw (
+      throw new Error(
         "Curve must be one of " +
-        Object.keys(Curve)
-          .map((t) => `'${t}'`)
-          .join(", ")
+          Object.keys(Curve)
+            .map((t) => `'${t}'`)
+            .join(", ")
       );
     }
     if (!Object.keys(HashAlgorithm).includes(hashAlgo)) {
-      throw (
+      throw new Error(
         "Hash algorithm must be one of " +
-        Object.keys(HashAlgorithm)
-          .map((t) => `'${t}'`)
-          .join(", ")
+          Object.keys(HashAlgorithm)
+            .map((t) => `'${t}'`)
+            .join(", ")
       );
     }
 
@@ -361,11 +359,11 @@ export default class TransactionBuilder {
       return concatUint8Arrays(intToUint8Array(secret.byteLength), secret, concatUint8Arrays(...authorizedKeysBuffer));
     });
 
-    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
+    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
       return concatUint8Arrays(transfer.to, bigIntToUint8Array(transfer.amount));
     });
 
-    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
+    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
       const bufTokenId = toByteArray(transfer.tokenId);
       return concatUint8Arrays(
         transfer.tokenAddress,

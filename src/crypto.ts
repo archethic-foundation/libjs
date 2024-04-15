@@ -33,66 +33,36 @@ export function randomSecretKey(): Uint8Array {
   return wordArrayToUint8Array(CryptoJS.lib.WordArray.random(32));
 }
 
-/**
- * Converts a hash algorithm to an id
- * @param hashAlgo Hash algorithm
- */
-export function hashAlgoToId(hashAlgo: HashAlgorithm): number {
-  switch (hashAlgo) {
-    case HashAlgorithm.sha256:
-      return 0;
-    case HashAlgorithm.sha512:
-      return 1;
-    case HashAlgorithm.sha3_256:
-      return 2;
-    case HashAlgorithm.sha3_512:
-      return 3;
-    case HashAlgorithm.blake2b:
-      return 4;
-    default:
-      throw "Hash algorithm not supported";
-  }
-}
+const hashAlgoMap = {
+  [HashAlgorithm.sha256]: 0,
+  [HashAlgorithm.sha512]: 1,
+  [HashAlgorithm.sha3_256]: 2,
+  [HashAlgorithm.sha3_512]: 3,
+  [HashAlgorithm.blake2b]: 4
+};
 
 /**
  * Get the hash algo name from the hash algorithm ID
  * @param {number} ID Hash algorithm's ID
  */
 export function IDToHashAlgo(ID: number): HashAlgorithm {
-  switch (ID) {
-    case 0:
-      return HashAlgorithm.sha256;
-    case 1:
-      return HashAlgorithm.sha512;
-    case 2:
-      return HashAlgorithm.sha3_256;
-    case 3:
-      return HashAlgorithm.sha3_512;
-    case 4:
-      return HashAlgorithm.blake2b;
-    default:
-      throw "Hash algorithm not supported";
+  const hashAlgo = Object.keys(hashAlgoMap).find((key) => hashAlgoMap[key as HashAlgorithm] === ID);
+  if (hashAlgo === undefined) {
+    throw new Error("Hash algorithm not supported");
   }
+  return hashAlgo as HashAlgorithm;
 }
+
 /**
  * Get the ID of a given hash algorithm
  * @params {String} hashAlgo Hash algorithm
  */
 export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
-  switch (hashAlgo) {
-    case HashAlgorithm.sha256:
-      return 0;
-    case HashAlgorithm.sha512:
-      return 1;
-    case HashAlgorithm.sha3_256:
-      return 2;
-    case HashAlgorithm.sha3_512:
-      return 3;
-    case HashAlgorithm.blake2b:
-      return 4;
-    default:
-      throw "Hash algorithm not supported";
+  const ID = hashAlgoMap[hashAlgo];
+  if (ID === undefined) {
+    throw new Error("Hash algorithm not supported");
   }
+  return ID;
 }
 
 /**
@@ -126,7 +96,7 @@ export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm)
       return blake.blake2b(content);
     }
     default:
-      throw "Hash algorithm not supported";
+      throw new Error("Hash algorithm not supported");
   }
 }
 
@@ -161,7 +131,7 @@ export function curveToID(curve: Curve): number {
       return 2;
 
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -178,21 +148,21 @@ export function IDToCurve(ID: number): Curve {
     case 2:
       return Curve.secp256k1;
     default:
-      throw "Curve ID not supported";
+      throw new Error("Curve ID not supported");
   }
 }
 
 export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): Uint8Array {
-  if(seed == undefined || seed == null) {
-    throw "Seed must be defined"
+  if (seed == undefined || seed == null) {
+    throw new Error("Seed must be defined");
   }
 
-  if(index == undefined || index == null) {
-    throw "Index must be defined"
+  if (index == undefined || index == null) {
+    throw new Error("Index must be defined");
   }
 
   if (index < 0) {
-    throw "Index must be a positive number"
+    throw new Error("Index must be a positive number");
   }
 
   //Convert seed to Uint8Array
@@ -229,16 +199,16 @@ export function deriveKeyPair(
   curve = Curve.ed25519,
   origin_id: number = SOFTWARE_ID
 ): Keypair {
-  if(seed == undefined || seed == null) {
-    throw "Seed must be defined"
+  if (seed == undefined || seed == null) {
+    throw new Error("Seed must be defined");
   }
 
-  if(index == undefined || index == null) {
-    throw "Index must be defined"
+  if (index == undefined || index == null) {
+    throw new Error("Index must be defined");
   }
 
   if (index < 0) {
-    throw "'index' must be a positive number";
+    throw new Error("'index' must be a positive number");
   }
 
   const pvBuf = derivePrivateKey(seed, index);
@@ -335,7 +305,7 @@ function getKeypair(pvKey: string | Uint8Array, curve: Curve): { publicKey: Uint
       };
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -355,7 +325,7 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
 
   switch (curve) {
     case 0: {
-      const { secretKey: secretKey } = nacl.sign.keyPair.fromSeed(pvBuf);
+      const { secretKey } = nacl.sign.keyPair.fromSeed(pvBuf);
       return nacl.sign.detached(data, secretKey);
     }
     case 1: {
@@ -371,7 +341,7 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
       return Uint8Array.from(key.sign(msgHash).toDER());
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -407,7 +377,7 @@ export function verify(sig: string | Uint8Array, data: string | Uint8Array, publ
       return key.verify(msgHash, sig);
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -431,7 +401,7 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
       const curve25519pub = ed2curve.convertPublicKey(pubBuf);
 
       if (!curve25519pub) {
-        throw "public key in not a valid Ed25519 public key";
+        throw new Error("public key in not a valid Ed25519 public key");
       }
       const sharedKey = curve25519.sharedKey(ephemeralPrivateKey, curve25519pub);
       const { aesKey, iv } = deriveSecret(sharedKey);
@@ -461,7 +431,7 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
       return concatUint8Arrays(hexToUint8Array(ecdh.getPublic().encode("hex", false)), tag, encrypted);
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -513,7 +483,7 @@ export function ecDecrypt(ciphertext: string | Uint8Array, privateKey: string | 
       return aesAuthDecrypt(encrypted, aesKey, iv, tag);
     }
     default:
-      throw "Curve not supported";
+      throw new Error("Curve not supported");
   }
 }
 
@@ -528,7 +498,7 @@ export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array):
 
   const iv = wordArrayToUint8Array(CryptoJS.lib.WordArray.random(12));
 
-  const { tag: tag, encrypted: encrypted } = aesAuthEncrypt(data, key, iv);
+  const { tag, encrypted } = aesAuthEncrypt(data, key, iv);
 
   return concatUint8Arrays(new Uint8Array(iv), tag, encrypted);
 }
@@ -610,7 +580,7 @@ function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Arra
     128
   );
   if (!sjcl.bitArray.equal(actualTag, tagBits)) {
-    throw "Invalid tag";
+    throw new Error("Invalid tag");
   }
   return hexToUint8Array(sjcl.codec.hex.fromBits(decrypted));
 }

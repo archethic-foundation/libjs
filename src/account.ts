@@ -65,7 +65,7 @@ export default class Account {
     );
 
     if (accessOwnerships.length == 0) {
-      throw "Keychain doesn't exist";
+      throw new Error("Keychain doesn't exist");
     }
 
     const { secret: accessSecret, authorizedPublicKeys: accessAuthorizedKeys } = accessOwnerships[0];
