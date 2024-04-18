@@ -1,4 +1,4 @@
-import { deriveKeyPair, hash, sign, verify, ecDecrypt, ecEncrypt } from "../src/crypto";
+import { deriveKeyPair, hash, sign, verify, ecDecrypt, ecEncrypt, isValidAddress } from "../src/crypto";
 import { uint8ArrayToHex } from "../src/utils";
 import { Curve, HashAlgorithm } from "../src/types";
 
@@ -113,6 +113,63 @@ describe("crypto", () => {
       const keypair = deriveKeyPair("seed", 0, Curve.secp256k1);
       const ciphertext = ecEncrypt(blob, keypair.publicKey);
       expect(ecDecrypt(ciphertext, keypair.privateKey)).toStrictEqual(blob);
+    });
+  });
+
+  describe("isValidAddress", () => {
+    it("should return false when the address is not hex", () => {
+      expect(isValidAddress("zzz")).toBeFalsy();
+    });
+
+    it("should return false when the curve id not valid", () => {
+      expect(isValidAddress("0500B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeFalsy();
+    });
+
+    it("should return false when the hash algo not valid", () => {
+      expect(isValidAddress("0009B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeFalsy();
+    });
+
+    it("should return false when the hash digest's length not valid", () => {
+      expect(isValidAddress("0000B54236A41380EC0D184FD3C643772243E2541F638F33C")).toBeFalsy();
+      expect(isValidAddress("0001B54236A41380EC0D184FD3C643772243E2541F638F33C")).toBeFalsy();
+      expect(isValidAddress("0002B54236A41380EC0D184FD3C643772243E2541F638F33C")).toBeFalsy();
+      expect(isValidAddress("0003B54236A41380EC0D184FD3C643772243E2541F638F33C")).toBeFalsy();
+      expect(isValidAddress("0004B54236A41380EC0D184FD3C643772243E2541F638F33C")).toBeFalsy();
+    });
+
+    it("should be valid with several curves", () => {
+      expect(isValidAddress("0000B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeTruthy();
+      expect(isValidAddress("0100B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeTruthy();
+      expect(isValidAddress("0200B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeTruthy();
+    });
+
+    it("should be valid with several hash algorithms", () => {
+      //SHA256
+      expect(isValidAddress("0000B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeTruthy();
+
+      //SHA512
+      expect(
+        isValidAddress(
+          "00015BE81A5EA91C1284D1D5EAC4F1CCB129DF4E6AE07D9A0EF2AF5E7907C0A990AD7779C848F52CF1617AC754E56EDF25C33539BEE56E44F46C216B9E6020BE391B"
+        )
+      ).toBeTruthy();
+
+      //SHA3_256
+      expect(isValidAddress("0002B54236A41380EC0D184FD3C643772243E2541F638F33C9AC5591C8E15B1D79B3")).toBeTruthy();
+
+      //SHA3_512
+      expect(
+        isValidAddress(
+          "00035BE81A5EA91C1284D1D5EAC4F1CCB129DF4E6AE07D9A0EF2AF5E7907C0A990AD7779C848F52CF1617AC754E56EDF25C33539BEE56E44F46C216B9E6020BE391B"
+        )
+      ).toBeTruthy();
+
+      //BLAKE2B
+      expect(
+        isValidAddress(
+          "00045BE81A5EA91C1284D1D5EAC4F1CCB129DF4E6AE07D9A0EF2AF5E7907C0A990AD7779C848F52CF1617AC754E56EDF25C33539BEE56E44F46C216B9E6020BE391B"
+        )
+      ).toBeTruthy();
     });
   });
 });
