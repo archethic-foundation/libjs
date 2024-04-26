@@ -98,21 +98,28 @@ describe("Utils", () => {
 
   describe("toBigInt", () => {
     it("should return Big Int with 8 decimals by default", () => {
-      expect(toBigInt(12.5345)).toBe(1_253_450_000);
+      expect(toBigInt(12.5345)).toStrictEqual(1_253_450_000);
+      expect(toBigInt(12.5345) % 1).toStrictEqual(0);
     });
 
     it("should return Big Int with decimals passed in param", () => {
-      expect(toBigInt(12.5345, 6)).toBe(12_534_500);
+      expect(toBigInt(12.5345, 6)).toStrictEqual(12_534_500);
+      expect(toBigInt(12.5345, 6) % 1).toStrictEqual(0);
+    });
+
+    it("should return rounded Big Int with decimals passed in param", () => {
+      expect(toBigInt(120139.69456927, 7)).toStrictEqual(1_201_396_945_693);
+      expect(toBigInt(120139.69456927, 7) % 1).toStrictEqual(0);
     });
   });
 
   describe("fromBigInt", () => {
     it("should return 8 decimals number by default", () => {
-      expect(fromBigInt(1_253_450_000)).toBe(12.5345);
+      expect(fromBigInt(1_253_450_000)).toStrictEqual(12.5345);
     });
 
     it("should return decimals number with decimals passed in param", () => {
-      expect(fromBigInt(12_534_500, 6)).toBe(12.5345);
+      expect(fromBigInt(12_534_500, 6)).toStrictEqual(12.5345);
     });
   });
 
