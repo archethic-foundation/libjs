@@ -130,18 +130,16 @@ export function uint8ArrayToInt(bytes: Uint8Array): number {
 
 /**
  * Convert any number into a big int for 10^8 decimals
- * @param number Number to convert
- * @param decimal Number of decimals
+ * @param {number} number Number to convert
+ * @param {number} decimal Number of decimals
+ * @returns {number} Converted number
  */
 export function toBigInt(number: number, decimal: number = 8): number {
   // This is a workaroud of float weird behavior
   // 94.03999999999999 * 100_000_000 = 9404000000
   // 94.03999999999999 * 10*10*10*10*10*10*10*10 = 9403999999
-  let nb = number;
-  for (let i = 0; i < decimal; i++) {
-    nb = nb * 10;
-  }
-  return Math.trunc(nb);
+  const multiplied = number * Math.pow(10, decimal);
+  return Math.round(multiplied);
 }
 
 /**
