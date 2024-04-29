@@ -513,37 +513,36 @@ export function ecDecrypt(ciphertext: string | Uint8Array, privateKey: string | 
 }
 
 /**
- * Encrypt a data for a given public key using AES algorithm
+ * Encrypt a data for a given AES key using AES algorithm
  * @param {string | Uint8Array} data Data to encrypt
- * @param {string | Uint8Array} key Public key for the shared secret encryption
+ * @param {string | Uint8Array} aesKey AES key (Symmetric key)
  * @returns {Uint8Array} Encrypted data
  */
-export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array): Uint8Array {
-  key = maybeHexToUint8Array(key);
+export function aesEncrypt(data: string | Uint8Array, aesKey: string | Uint8Array): Uint8Array {
+  aesKey = maybeHexToUint8Array(aesKey);
   data = maybeStringToUint8Array(data);
 
   const iv = wordArrayToUint8Array(CryptoJS.lib.WordArray.random(12));
-
-  const { tag, encrypted } = aesAuthEncrypt(data, key, iv);
+  const { tag, encrypted } = aesAuthEncrypt(data, aesKey, iv);
 
   return concatUint8Arrays(new Uint8Array(iv), tag, encrypted);
 }
 
 /**
- * Decrypt a data for a given private key using AES algorithm
+ * Decrypt a data for a given AES key using AES algorithm
  * @param {string | Uint8Array} cipherText Data to decrypt
- * @param {string | Uint8Array} key Private key for the shared secret decryption
+ * @param {string | Uint8Array} aesKey AES key (Symmetric key)
  * @returns {Uint8Array} Decrypted data
  */
-export function aesDecrypt(cipherText: string | Uint8Array, key: string | Uint8Array): Uint8Array {
+export function aesDecrypt(cipherText: string | Uint8Array, aesKey: string | Uint8Array): Uint8Array {
   cipherText = maybeHexToUint8Array(cipherText);
-  key = maybeHexToUint8Array(key);
+  aesKey = maybeHexToUint8Array(aesKey);
 
   const iv = cipherText.slice(0, 12);
   const tag = cipherText.slice(12, 12 + 16);
   const encrypted = cipherText.slice(28, cipherText.length);
 
-  return aesAuthDecrypt(encrypted, key, iv, tag);
+  return aesAuthDecrypt(encrypted, aesKey, iv, tag);
 }
 
 /**
