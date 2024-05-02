@@ -12,7 +12,8 @@
     "test": "jest",
     "build": "tsc && node build.js",
     "prepublishOnly": "npm run build",
-    "postpublish": "rm -r dist"
+    "postpublish": "rm -r dist",
+    "docs": "typedoc"
   },
   "repository": {
     "type": "git",
@@ -38,7 +39,14 @@
     "nock": "^13.3.0",
     "prettier": "3.1.0",
     "ts-jest": "^29.1.0",
-    "ts-jest-resolver": "^2.0.1"
+    "ts-jest-resolver": "^2.0.1",
+    "typedoc": "^0.25.13",
+    "typedoc-plugin-coverage": "^3.1.0",
+    "typedoc-plugin-extra-footer": "^1.0.1",
+    "typedoc-plugin-extras": "^3.0.0",
+    "typedoc-plugin-merge-modules": "^5.1.0",
+    "typedoc-plugin-missing-exports": "^2.2.0",
+    "typedoc-plugin-rename-defaults": "^0.7.0"
   },
   "dependencies": {
     "@absinthe/socket": "^0.2.1",

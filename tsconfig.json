@@ -14,5 +14,41 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true
   },
-  "exclude": ["node_modules", "dist", "tests"]
+  "exclude": ["node_modules", "dist", "tests"],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "entryPointStrategy": "expand",
+    "categorizeByGroup": true,
+    "plugin": [
+      "typedoc-plugin-coverage",
+      "typedoc-plugin-missing-exports",
+      "typedoc-plugin-merge-modules",
+      "typedoc-plugin-extra-footer",
+      "typedoc-plugin-extras"
+    ],
+    "out": "docs",
+    "exclude": ["src/api/absinthe.ts", "src/api.ts", "src/typed_encoding.ts", "src/varint.ts"],
+    "includeVersion": true,
+    "excludeProtected": true,
+    "excludePrivate": true,
+    "excludeExternals": true,
+    "excludeInternal": true,
+    "hideGenerator": true,
+    "placeInternalsInOwningModule": false,
+    "internalModule": "internal",
+    "mergeModulesRenameDefaults": true,
+    "mergeModulesMergeMode": "module",
+    "navigation": {
+      "includeCategories": false,
+      "includeGroups": false,
+      "includeFolders": false
+    },
+    "coverageLabel": "document",
+    "customCss": "src/assets/docs/styles.css",
+    "extraFooter": "<div style='text-align: center;'><img src='/docs/coverage.svg' alt='Coverage' /></div>",
+    "extraFooterNoDefaultWrapper": true,
+    "favicon": "https://github.com/archethic-foundation/archethic-assets/blob/main/assets/logos/archethic/Archethic%20-%20Logo%20crystal.png?raw=true",
+    "customTitle": "Archethic SDK",
+    "footerLastModified": true
+  }
 }
