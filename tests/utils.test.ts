@@ -97,19 +97,29 @@ describe("Utils", () => {
   });
 
   describe("toBigInt", () => {
-    it("should return Big Int with 8 decimals by default", () => {
+    it("should return Big Int of an 4 decimal digit with 8 decimals by default", () => {
       expect(toBigInt(12.5345)).toStrictEqual(1_253_450_000);
       expect(toBigInt(12.5345) % 1).toStrictEqual(0);
     });
 
-    it("should return Big Int with decimals passed in param", () => {
+    it("should return Big Int of an 4 decimal digit with 6 decimals passed in param", () => {
       expect(toBigInt(12.5345, 6)).toStrictEqual(12_534_500);
       expect(toBigInt(12.5345, 6) % 1).toStrictEqual(0);
     });
 
-    it("should return rounded Big Int with decimals passed in param", () => {
-      expect(toBigInt(120139.69456927, 7)).toStrictEqual(1_201_396_945_693);
+    it("should return a Big Int of an 8 decimal digit with 7 decimal in param without rounding", () => {
+      expect(toBigInt(120139.69456927, 7)).toStrictEqual(1_201_396_945_692);
       expect(toBigInt(120139.69456927, 7) % 1).toStrictEqual(0);
+    });
+
+    it("should return a Big Int of an 14 decimal digit with 8 decimal in param without rounding", () => {
+      expect(toBigInt(94.03999999999999, 8)).toStrictEqual(9_403_999_999);
+      expect(toBigInt(94.03999999999999, 8) % 1).toStrictEqual(0);
+    });
+
+    it("should return Big Int of an interger with 8 decimals passed in param", () => {
+      expect(toBigInt(125345, 8)).toStrictEqual(12_534_500_000_000);
+      expect(toBigInt(125345, 8) % 1).toStrictEqual(0);
     });
   });
 

@@ -138,8 +138,17 @@ export function toBigInt(number: number, decimal: number = 8): number {
   // This is a workaroud of float weird behavior
   // 94.03999999999999 * 100_000_000 = 9404000000
   // 94.03999999999999 * 10*10*10*10*10*10*10*10 = 9403999999
-  const multiplied = number * Math.pow(10, decimal);
-  return Math.round(multiplied);
+  let [int, dec] = String(number).split(".");
+  if (dec) {
+    if (dec.length < decimal) {
+      dec = dec.padEnd(decimal, "0");
+    } else {
+      dec = dec.slice(0, decimal);
+    }
+  } else {
+    dec = "0".repeat(decimal);
+  }
+  return Number(int + dec);
 }
 
 /**
