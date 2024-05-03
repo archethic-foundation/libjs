@@ -49,11 +49,15 @@ const hashAlgoMap = {
  * @returns {HashAlgorithm} Hash algorithm's name
  */
 export function IDToHashAlgo(ID: number): HashAlgorithm {
-  const hashAlgo = Object.keys(hashAlgoMap).find((key) => hashAlgoMap[key as HashAlgorithm] === ID);
+  const hashAlgo = findHashAlgoById(ID);
   if (hashAlgo === undefined) {
     throw new Error("Hash algorithm not supported");
   }
   return hashAlgo as HashAlgorithm;
+}
+
+function findHashAlgoById(ID: number) {
+  return Object.keys(hashAlgoMap).find((key) => hashAlgoMap[key as HashAlgorithm] === ID);
 }
 
 /**
@@ -614,6 +618,63 @@ function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Arra
     throw new Error("Invalid tag");
   }
   return hexToUint8Array(sjcl.codec.hex.fromBits(decrypted));
+}
+
+/**
+ * Determines if an address is valid
+ * @param { string | UIntArray } address Address to verify
+ */
+export function isValidAddress(address: string | Uint8Array): boolean {
+  try {
+    const addressBinary = maybeHexToUint8Array(address);
+    const curveId = addressBinary[0];
+    if (!validCurveId(curveId)) {
+      return false;
+    }
+
+    const hashAlgoId = addressBinary[1];
+    if (!validHashAlgoId(hashAlgoId)) {
+      return false;
+    }
+
+    const digest = addressBinary.slice(2, addressBinary.length);
+    return validHash(findHashAlgoById(hashAlgoId) as HashAlgorithm, digest);
+  } catch (e) {
+    return false;
+  }
+}
+
+function validCurveId(id: number): boolean {
+  try {
+    IDToCurve(id);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function validHashAlgoId(id: number): boolean {
+  try {
+    IDToHashAlgo(id);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function validHash(hashAlgo: HashAlgorithm, digest: Uint8Array) {
+  switch (hashAlgo) {
+    case HashAlgorithm.sha256:
+      return digest.length == 32;
+    case HashAlgorithm.sha512:
+      return digest.length == 64;
+    case HashAlgorithm.sha3_256:
+      return digest.length == 32;
+    case HashAlgorithm.sha3_512:
+      return digest.length == 64;
+    case HashAlgorithm.blake2b:
+      return digest.length == 64;
+  }
 }
 
 /**
