@@ -7,7 +7,15 @@ import {
   uint8ArrayToInt,
   wordArrayToUint8Array
 } from "./utils.js";
-import { Curve, HashAlgorithm, Keypair, Services } from "./types.js";
+import {
+  Curve,
+  DIDDocument,
+  DIDVerificationMethod,
+  HashAlgorithm,
+  Keypair,
+  Services,
+  ecEncryptServiceSeed
+} from "./types.js";
 import TransactionBuilder from "./transaction_builder.js";
 import {
   curveToID,
@@ -34,6 +42,17 @@ export default class Keychain {
   services: Services;
   authorizedPublicKeys: Uint8Array[];
 
+  /**
+   * Create a new keychain
+   * @param {String | Uint8Array} seed Seed of the keychain
+   * @param {number} version Version of the keychain
+   * @example
+   * ```ts
+   * import { Keychain } from "@archethicjs/sdk";
+   *
+   * const keychain = new Keychain("myseed");
+   * ```
+   */
   constructor(seed: string | Uint8Array, version: number = 1) {
     if (typeof seed === "string") {
       this.seed = new TextEncoder().encode(seed);
@@ -47,19 +66,30 @@ export default class Keychain {
   }
 
   /**
-   * Add a service to the keychain
+   * Add a service into the keychain
+   * @param {String} name Name of the service to add
+   * @param {String} derivationPath Crypto derivation path
+   * @param {Curve} curve Elliptic curve to use
+   * @param {HashAlgorithm} hashAlgo Hash algo
+   * @returns {Keychain} The keychain instance
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
    *
-   * @param {String} name
-   * @param {String} derivationPath
-   * @param {Curve} curve
-   * @param {HashAlgorithm} hashAlgo
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const accessKeychainSeed = "myseed";
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * keychain.addService("nft1", "m/650'/1/0")
+   * ```
    */
   addService(
     name: string,
     derivationPath: string,
     curve: Curve = Curve.ed25519,
     hashAlgo: HashAlgorithm = HashAlgorithm.sha256
-  ) {
+  ): this {
     this.services[name] = {
       derivationPath: derivationPath,
       curve: curve,
@@ -70,19 +100,44 @@ export default class Keychain {
 
   /**
    * Remove a service from the keychain
-   * @param {String} name
+   * @param {String} name Name of the service to add
+   * @returns {Keychain} The keychain instance
+   * @example
+   * ```ts
+   * import Archethic, { Crypto } from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const accessSeed = "myseed";
+   * const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * keychain.removeService("uco");
+   * ```
    */
-  removeService(name: string) {
+  removeService(name: string): this {
     delete this.services[name];
     return this;
   }
 
   /**
    * Add a public key to the authorized public keys list
+   * @param {String | Uint8Array} key Public key to add
+   * @returns {Keychain} The keychain instance
+   * @example
+   * ```ts
+   * import Archethic, { Crypto } from "@archethicjs/sdk";
    *
-   * @param {String | Uint8Array} key
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const accessSeed = "myseed";
+   * const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * keychain.addAuthorizedPublicKey(publicKey);
+   * ```
    */
-  addAuthorizedPublicKey(key: string | Uint8Array) {
+  addAuthorizedPublicKey(key: string | Uint8Array): this {
     key = maybeHexToUint8Array(key);
 
     // prevent duplicate
@@ -94,18 +149,54 @@ export default class Keychain {
 
   /**
    * Remove a public key from the authorized public keys list
+   * @param {String | Uint8Array} key Public key to remove
+   * @returns {Keychain} The keychain instance
+   * @example
+   * ```ts
+   * import Archethic, { Crypto } from "@archethicjs/sdk";
    *
-   * @param {String | Uint8Array} key
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const accessSeed = "myseed";
+   * const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * keychain.removeAuthorizedPublicKey(publicKey);
+   * ```
    */
-  removeAuthorizedPublicKey(key: string | Uint8Array) {
+  removeAuthorizedPublicKey(key: string | Uint8Array): this {
     this.authorizedPublicKeys = this.authorizedPublicKeys.filter((k) => {
       // javascript can't compare objects so we compare strings
-      return uint8ArrayToHex(k) != uint8ArrayToHex(maybeHexToUint8Array(key));
+      return uint8ArrayToHex(k) !== uint8ArrayToHex(maybeHexToUint8Array(key));
     });
     return this;
   }
 
-  buildTransaction(tx: TransactionBuilder, service: string, index: number, suffix: string = "") {
+  /**
+   * Generate address, previousPublicKey, previousSignature of the transaction and serialize it
+   * @param tx The transaction to build is an instance of TransactionBuilder
+   * @param service The service name to use for getting the derivation path, the curve and the hash algo
+   * @param index The number of transactions in the chain, to generate the actual and the next public key (see the cryptography section)
+   * @param suffix Additional information to add to a service derivation path (default to empty)
+   * @returns {TransactionBuilder} The transaction with the address, previousPublicKey and previousSignature set
+   * @throws {Error} If the service doesn't exist in the keychain
+   * @throws {Error} If the index is not a positive number
+   * @throws {Error} If the suffix is not a string
+   * @example
+   * Notice that the function also sign the TransactionBuilder given in param, so getting the return is not mandatory
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   *
+   * const index = archethic.transaction.getTransactionIndex(keychain.deriveAddress("uco", 0));
+   * const signedTx = keychain.buildTransaction(tx, "uco", index);
+   * ```
+   */
+  buildTransaction(tx: TransactionBuilder, service: string, index: number, suffix: string = ""): TransactionBuilder {
     if (!this.services[service]) {
       throw new Error("Service doesn't exist in the keychain");
     }
@@ -132,10 +223,12 @@ export default class Keychain {
   }
   /**
    * Encode the keychain
+   * @returns {Uint8Array} The keychain encoded in binary
+   * @internal
    */
   encode(): Uint8Array {
-    let servicesBuffer = [];
-    for (let service in this.services) {
+    const servicesBuffer = [];
+    for (const service of Object.keys(this.services)) {
       const { derivationPath, curve, hashAlgo } = this.services[service];
       servicesBuffer.push(
         concatUint8Arrays(
@@ -161,26 +254,28 @@ export default class Keychain {
   /**
    * Decode a keychain from a binary
    * @param binary {Uint8Array}
+   * @returns {Keychain} The keychain decoded from the binary
+   * @internal
    */
-  static decode(binary: Uint8Array) {
-    let { bytes: version, pos: versionPos } = readBytes(binary, 0, 4);
-    let { byte: seedSize, pos: seedSizePos } = readByte(binary, versionPos, 1);
-    let { bytes: seed, pos: seedPos } = readBytes(binary, seedSizePos, seedSize);
+  static decode(binary: Uint8Array): Keychain {
+    const { bytes: version, pos: versionPos } = readBytes(binary, 0, 4);
+    const { byte: seedSize, pos: seedSizePos } = readByte(binary, versionPos, 1);
+    const { bytes: seed, pos: seedPos } = readBytes(binary, seedSizePos, seedSize);
     let { byte: nbServices, pos: nbServicesPos } = readByte(binary, seedPos, 1);
 
-    let keychain = new Keychain(seed, uint8ArrayToInt(version));
+    const keychain = new Keychain(seed, uint8ArrayToInt(version));
 
     for (let i = 0; i < nbServices; i++) {
-      let { byte: serviceNameLength, pos: serviceNameLengthPos } = readByte(binary, nbServicesPos, 1);
-      let { bytes: serviceName, pos: serviceNamePos } = readBytes(binary, serviceNameLengthPos, serviceNameLength);
-      let { byte: derivationPathLength, pos: derivationPathLengthPos } = readByte(binary, serviceNamePos, 1);
-      let { bytes: derivationPath, pos: derivationPathPos } = readBytes(
+      const { byte: serviceNameLength, pos: serviceNameLengthPos } = readByte(binary, nbServicesPos, 1);
+      const { bytes: serviceName, pos: serviceNamePos } = readBytes(binary, serviceNameLengthPos, serviceNameLength);
+      const { byte: derivationPathLength, pos: derivationPathLengthPos } = readByte(binary, serviceNamePos, 1);
+      const { bytes: derivationPath, pos: derivationPathPos } = readBytes(
         binary,
         derivationPathLengthPos,
         derivationPathLength
       );
-      let { byte: curveID, pos: curveIDPos } = readByte(binary, derivationPathPos, 1);
-      let { byte: hashAlgoID, pos: hashAlgoIDPos } = readByte(binary, curveIDPos, 1);
+      const { byte: curveID, pos: curveIDPos } = readByte(binary, derivationPathPos, 1);
+      const { byte: hashAlgoID, pos: hashAlgoIDPos } = readByte(binary, curveIDPos, 1);
 
       const serviceNameString = new TextDecoder().decode(serviceName);
       const derivationPathString = new TextDecoder().decode(derivationPath);
@@ -191,7 +286,27 @@ export default class Keychain {
     return keychain;
   }
 
-  deriveKeypair(service: string, index: number = 0, pathSuffix: string = "") {
+  /**
+   * Derive a keypair for the given service at the index given
+   * @param service Service name to identify the derivation path to use.
+   * @param index Chain index to derive (default to 0).
+   * @param pathSuffix Additional information to add to a service derivation path (default to empty).
+   * @returns {Keypair} The keypair derived from the keychain seed, the service derivation path, the index and the path suffix.
+   * @throws {Error} If the service doesn't exist in the keychain.
+   * @throws {Error} If the index is not a positive number.
+   * @throws {Error} If the pathSuffix is not a string.
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * const { publicKey } = keychain.deriveKeypair("uco", 0);
+   * ```
+   */
+  deriveKeypair(service: string, index: number = 0, pathSuffix: string = ""): Keypair {
     if (!this.services[service]) {
       throw Error("Service doesn't exist in the keychain");
     }
@@ -204,7 +319,27 @@ export default class Keychain {
     return deriveArchethicKeypair(this.seed, derivationPath, index, curve, pathSuffix);
   }
 
-  deriveAddress(service: string, index: number = 0, pathSuffix: string = "") {
+  /**
+   * Derive an address for the given service at the index given
+   * @param service Service name to identify the derivation path to use.
+   * @param index Chain index to derive (default to 0).
+   * @param pathSuffix Additional information to add to a service derivation path (default to empty).
+   * @returns {Uint8Array} The address derived from the keychain seed, the service derivation path, the index and the path suffix.
+   * @throws {Error} If the service doesn't exist in the keychain.
+   * @throws {Error} If the index is not a positive number.
+   * @throws {Error} If the pathSuffix is not a string.
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * const genesisUCOAddress = keychain.deriveAddress("uco", 0);
+   * ```
+   */
+  deriveAddress(service: string, index: number = 0, pathSuffix: string = ""): Uint8Array {
     if (!this.services[service]) {
       throw Error("Service doesn't exist in the keychain");
     }
@@ -222,14 +357,37 @@ export default class Keychain {
     return concatUint8Arrays(Uint8Array.from([curveID]), Uint8Array.from(hashedPublicKey));
   }
 
-  toDID() {
+  /**
+   * Return a Decentralized Identity document from the keychain. (This is used in the transaction's content of the keychain tx)
+   * @returns {Object} The Decentralized Identity document
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const keychain = await archethic.account.getKeychain(accessKeychainSeed);
+   * const did  = keychain.toDID()
+   * console.log(did)
+   * {
+   *   "@context": [
+   *      "https://www.w3.org/ns/did/v1"
+   *   ],
+   *   "id": "did:archethic:keychain_address",
+   *   "authentification": servicesMaterials, //list of public keys of the services
+   *   "verificationMethod": servicesMaterials //list of public keys of the services
+   * }
+   * ```
+   */
+  toDID(): DIDDocument {
     const address = deriveAddress(this.seed, 0);
     const address_hex = uint8ArrayToHex(address);
 
-    let verificationMethods = [];
-    let authentications = [];
+    const verificationMethods: DIDVerificationMethod[] = [];
+    const authentications = [];
 
-    for (let service in this.services) {
+    for (const service of Object.keys(this.services)) {
       const { derivationPath, curve } = this.services[service];
 
       const purpose = derivationPath
@@ -238,7 +396,7 @@ export default class Keychain {
         .at(1);
 
       //Only support of archethic derivation scheme for now
-      if (purpose == "650") {
+      if (purpose === "650") {
         const { publicKey } = deriveArchethicKeypair(this.seed, derivationPath, 0, curve);
 
         verificationMethods.push({
@@ -250,7 +408,7 @@ export default class Keychain {
 
         authentications.push(`did:archethic:${address_hex}#${service}`);
       } else {
-        throw Error("Purpose '" + purpose + "' is not yet supported");
+        throw Error(`Purpose '${purpose}' is not yet supported`);
       }
     }
 
@@ -262,7 +420,36 @@ export default class Keychain {
     };
   }
 
-  ecEncryptServiceSeed(service: string, publicKeys: string[] | Uint8Array[], pathSuffix: string = "") {
+  /**
+   * Use ec encryption on the seed for the list of authorizedPublicKeys
+   * @param service Service name to identify the derivation path to use.
+   * @param publicKeys List of public keys to encrypt the service seed.
+   * @param pathSuffix Additional information to add to a service derivation path (default to empty).
+   * @returns {Object} The encrypted secret and the list of authorized public keys with their encrypted secret key.
+   * @throws {Error} If the authorized keys are not an array.
+   * @throws {Error} If the service doesn't exist in the keychain.
+   * @throws {Error} If the service derivation path has an index.
+   * @example
+   * ```ts
+   * import Archethic, { Keychain, Crypto } from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("http://testnet.archethic.net");
+   * await archethic.connect();
+   *
+   * const keychain = new Keychain(Crypto.randomSecretKey()).addService("uco", "m/650'/uco");
+   *
+   * const storageNonce = await archethic.network.getStorageNoncePublicKey();
+   *
+   * const { secret, authorizedPublicKeys } = keychain.ecEncryptServiceSeed("uco", [storageNonce]);
+   * // secret and authorizedPublicKeys can be used to create an ownership
+   * const tx = archethic.transaction.new().addOwnership(secret, authorizedPublicKeys);
+   * ```
+   */
+  ecEncryptServiceSeed(
+    service: string,
+    publicKeys: string[] | Uint8Array[],
+    pathSuffix: string = ""
+  ): ecEncryptServiceSeed {
     if (!Array.isArray(publicKeys)) {
       throw Error("Authorized keys must be an array");
     }
@@ -327,18 +514,25 @@ function deriveServiceSeed(seed: string | Uint8Array, derivationPath: string, in
 }
 
 function isPathWithIndex(path: string) {
-  let servicePath: string[] = path.split("/");
-  return servicePath.length == 4 && servicePath[3] == "0";
+  const servicePath: string[] = path.split("/");
+  return servicePath.length === 4 && servicePath[3] === "0";
 }
 
 function replaceDerivationPathIndex(path: string, suffix: string, index: number): string {
-  let servicePath: string[] = path.split("/").slice(0, -1);
+  const servicePath: string[] = path.split("/").slice(0, -1);
   // @ts-ignore
   const serviceName = servicePath.pop().concat(suffix);
   return servicePath.concat([serviceName, `${index}`]).join("/");
 }
 
-export function keyToJWK(publicKey: Uint8Array, keyID: string) {
+/**
+ * Convert a public key to a JWK
+ * @param publicKey Public key to convert
+ * @param keyID Key ID to set in the JWK
+ * @returns {Object} The JWK
+ * @internal
+ */
+export function keyToJWK(publicKey: Uint8Array, keyID: string): object | undefined {
   const curveID = publicKey[0];
   const key = publicKey.slice(2, publicKey.length);
 
@@ -375,6 +569,7 @@ function readByte(binary: Uint8Array, pos: number, size: number): { byte: number
     pos: pos + size
   };
 }
+
 function readBytes(binary: Uint8Array, pos: number, size: number): { bytes: Uint8Array; pos: number } {
   return {
     bytes: binary.slice(pos, pos + size),

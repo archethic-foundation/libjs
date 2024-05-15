@@ -7,19 +7,35 @@ import { RpcError } from "./api/types.js";
 
 const senderContext = "SENDER";
 
+/**
+ * @internal
+ */
 export default class TransactionSender {
+  /** @event */
   onSent: Function[];
+  /** @event */
   onConfirmation: Function[];
+  /** @event */
   onFullConfirmation: Function[];
+  /** @event */
   onRequiredConfirmation: Function[];
+  /** @event */
   onError: Function[];
+  /** @event */
   onTimeout: Function[];
+  /** @private */
   confirmationNotifier: any;
+  /** @private */
   errorNotifier: any;
+  /** @private */
   absintheSocket: AbsintheSocket | undefined;
+  /** @private */
   nbConfirmationReceived: number;
+  /** @private */
   timeout: NodeJS.Timeout | undefined;
+  /** @private */
   core: Archethic;
+  /** @hidden */
   constructor(archethic: Archethic) {
     this.core = archethic;
 
@@ -38,12 +54,8 @@ export default class TransactionSender {
     this.nbConfirmationReceived = 0;
   }
 
-  /**
-   * Add listener on specific event
-   * @param {String} event Event to subscribe
-   * @param {Function} func Function to call when event triggered
-   */
-  on(event: string, func: Function) {
+  /** @private */
+  on(event: string, func: Function): this {
     switch (event) {
       case "sent":
         this.onSent.push(func);
@@ -70,12 +82,13 @@ export default class TransactionSender {
         break;
 
       default:
-        throw new Error("Event " + event + " is not supported");
+        throw new Error(`Event ${event} is not supported`);
     }
 
     return this;
   }
 
+  /** @private */
   async send(
     tx: TransactionBuilder,
     endpoint: string,
@@ -94,7 +107,7 @@ export default class TransactionSender {
 
     // Create web socket
     const { host, protocol } = new URL(endpoint);
-    const ws_protocol = protocol == "https:" ? "wss" : "ws";
+    const ws_protocol = protocol === "https:" ? "wss" : "ws";
 
     this.absintheSocket = absinthe.create(`${ws_protocol}://${host}/socket`);
 
@@ -119,6 +132,7 @@ export default class TransactionSender {
     return this;
   }
 
+  /** @private */
   unsubscribe(event: string | undefined = undefined) {
     if (event) {
       switch (event) {
@@ -151,7 +165,7 @@ export default class TransactionSender {
           break;
 
         default:
-          throw new Error("Event " + event + " is not supported");
+          throw new Error(`Event ${event} is not supported`);
       }
     } else {
       absinthe.cancel(this.absintheSocket as AbsintheSocket, this.confirmationNotifier);
@@ -217,7 +231,7 @@ function handleConfirmation(
   this.nbConfirmationReceived = nbConfirmations;
 
   // Unsubscribe to error on first confirmation
-  if (nbConfirmations == 1) absinthe.cancel(this.absintheSocket as AbsintheSocket, this.errorNotifier);
+  if (nbConfirmations === 1) absinthe.cancel(this.absintheSocket as AbsintheSocket, this.errorNotifier);
 
   this.onConfirmation.forEach((func) => func(nbConfirmations, maxConfirmations, this));
 
@@ -227,7 +241,7 @@ function handleConfirmation(
     clearTimeout(this.timeout);
   }
 
-  if (nbConfirmations == maxConfirmations) {
+  if (nbConfirmations === maxConfirmations) {
     clearTimeout(this.timeout);
 
     absinthe.cancel(this.absintheSocket as AbsintheSocket, this.confirmationNotifier);

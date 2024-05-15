@@ -41,6 +41,8 @@ function getTransactionTypeId(type: UserTypeTransaction): number {
       return 5;
     case UserTypeTransaction.code_approval:
       return 6;
+    default:
+      return 0;
   }
 }
 
@@ -56,6 +58,7 @@ export default class TransactionBuilder {
 
   /**
    * Create a new instance of the transaction builder
+   * @param {UserTypeTransaction | string} type Transaction {@link UserTypeTransaction | type} is the string defining the type of transaction to generate
    */
   constructor(type: UserTypeTransaction | string = UserTypeTransaction.transfer) {
     this.version = VERSION;
@@ -83,9 +86,11 @@ export default class TransactionBuilder {
 
   /**
    * Set the type of the transaction
-   * @param {String} type Transaction type
+   * @param {UserTypeTransaction | string} type Transaction {@link UserTypeTransaction | type} is the string defining the type of transaction to generate
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @throws {Error} If the transaction type is not valid
    */
-  setType(type: UserTypeTransaction | string) {
+  setType(type: UserTypeTransaction | string): this {
     if (!Object.keys(UserTypeTransaction).includes(type)) {
       throw new Error(
         "Transaction type must be one of " +
@@ -100,18 +105,20 @@ export default class TransactionBuilder {
 
   /**
    * Add smart contract code to the transcation
-   * @param {string} code Smart contract code
+   * @param {string} code Smart contract code is a string defining the smart contract
+   * @returns {TransactionBuilder} The transaction builder instance
    */
-  setCode(code: string) {
+  setCode(code: string): this {
     this.data.code = new TextEncoder().encode(code);
     return this;
   }
 
   /**
    * Add a content to the transaction
-   * @param {String | Uint8Array} content Hosted content
+   * @param {string | Uint8Array} content Hosted content
+   * @returns {TransactionBuilder} The transaction builder instance
    */
-  setContent(content: string | Uint8Array) {
+  setContent(content: string | Uint8Array): this {
     if (typeof content == "string") {
       content = new TextEncoder().encode(content);
     }
@@ -120,11 +127,35 @@ export default class TransactionBuilder {
   }
 
   /**
-   * Add an ownership with a secret and its authorized public keys
+   * Add an ownership in the data.ownerships section of the transaction with a secret and its related authorized public keys to be able to decrypt it.
+   *
+   * This aims to prove the ownership or the delegatation of some secret to a given list of public keys.
    * @param {string | Uint8Array} secret Secret encrypted (hexadecimal or binary buffer)
-   * @param {AuthorizedKeyUserInput[]} authorizedKeys List of authorized keys
+   * @param {AuthorizedKeyUserInput[]} authorizedKeys List of authorized keys to decrypt the secret (publicKey and encryptedSecretKey)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @throws {Error} If the authorized keys are not an array
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   * import Crypto from "@archethicjs/crypto";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * const seed = "myseed";
+   * const genesisAddress = Crypto.deriveAddress(seed, 0);
+   * const index = await archethic.transaction.getTransactionIndex(genesisAddress);
+   * const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
+   * const { encryptedSecret, authorizedKeys } = Crypto.encryptSecret(Crypto.randomSecretKey(), storageNoncePublicKey);
+   * const tx = archethic.transaction.new()
+   *   .setType("contract")
+   *   .setCode("...")
+   *   .addOwnership(encryptedSecret, authorizedKeys)
+   *   .build(seed, index)
+   *   .originSign(Utils.originPrivateKey)
+   *   .send();
+   * ```
    */
-  addOwnership(secret: string | Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]) {
+  addOwnership(secret: string | Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]): this {
     secret = maybeStringToUint8Array(secret);
 
     if (!Array.isArray(authorizedKeys)) {
@@ -158,8 +189,10 @@ export default class TransactionBuilder {
    * Add a UCO transfer to the transaction
    * @param {string | Uint8Array} to Address of the recipient (hexadecimal or binary buffer)
    * @param {number} amount Amount of UCO to transfer (in bigint)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @throws {Error} If the amount is not a positive number
    */
-  addUCOTransfer(to: string | Uint8Array, amount: number) {
+  addUCOTransfer(to: string | Uint8Array, amount: number): this {
     to = maybeHexToUint8Array(to);
 
     if (isNaN(amount) || amount <= 0) {
@@ -176,8 +209,16 @@ export default class TransactionBuilder {
    * @param {number} amount Amount of UCO to transfer (in bigint)
    * @param {string | Uint8Array} tokenAddress Address of token to spend (hexadecimal or binary buffer)
    * @param {number} tokenId ID of the token to use (default to 0)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @throws {Error} If the amount is not a positive number
+   * @throws {Error} If the tokenId is not a valid integer
    */
-  addTokenTransfer(to: string | Uint8Array, amount: number, tokenAddress: string | Uint8Array, tokenId: number = 0) {
+  addTokenTransfer(
+    to: string | Uint8Array,
+    amount: number,
+    tokenAddress: string | Uint8Array,
+    tokenId: number = 0
+  ): this {
     to = maybeHexToUint8Array(to);
     tokenAddress = maybeHexToUint8Array(tokenAddress);
 
@@ -203,8 +244,74 @@ export default class TransactionBuilder {
    * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
    * @param {string} action The named action
    * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @throws {Error} If the action is not a string
+   * @throws {Error} If the args is not an array
+   * @example Smart contract example
+   * ```
+   * @ version 1
+   * condition triggered_by: transaction, on: vote(candidate), as: [
+   *     content: (
+   *       # check incoming vote
+   *       valid_candidate? = List.in?(["Miss Scarlett", "Colonel Mustard"], candidate)
+   *
+   *       # check incoming voter
+   *       valid_voter? = !List.in?(
+   *         State.get("voters_genesis_addresses", []),
+   *         Chain.get_genesis_address(transaction.address)
+   *       )
+   *
+   *       valid_candidate? && valid_voter?
+   *     )
+   * ]
+   *
+   * actions triggered_by: transaction, on: vote(candidate) do
+   *     scarlett_votes = State.get("Miss Scarlett", 0)
+   *     mustard_votes = State.get("Colonel Mustard", 0)
+   *     voters = State.get("voters_genesis_addresses", [])
+   *
+   *     if candidate == "Miss Scarlett" do
+   *       scarlett_votes = scarlett_votes + 1
+   *     end
+   *     if candidate == "Colonel Mustard" do
+   *       mustard_votes = mustard_votes + 1
+   *     end
+   *
+   *     # Add the current voter genesis address to the list
+   *     # So he/she cannot vote twice
+   *     voters = List.prepend(voters, Chain.get_genesis_address(transaction.address))
+   *
+   *     State.set("Miss Scarlett", scarlett_votes)
+   *     State.set("Colonel Mustard", mustard_votes)
+   *     State.set("voters_genesis_addresses", voters)
+   * end
+   *
+   * export fun get_votes() do
+   *   [
+   *     scarlett: State.get("Miss Scarlett", 0),
+   *     mustard: State.get("Colonel Mustard", 0)
+   *   ]
+   * end
+   * ```
+   * @example Usage example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * const seed = "myseed";
+   * const genesisAddress = Crypto.deriveAddress(seed, 0);
+   * const index = await archethic.transaction.getTransactionIndex(genesisAddress);
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addRecipient("0000bc96b1a9751d3750edb9381a55b5b4e4fb104c10b0b6c9a00433ec464637bfab", "vote", ["Miss Scarlett"])
+   *   .build(seed, index)
+   *   .originSign(Utils.originPrivateKey)
+   *   .send();
+   * ```
    */
-  addRecipient(to: string | Uint8Array, action?: string, args?: any[]) {
+  addRecipient(to: string | Uint8Array, action?: string, args?: any[]): this {
     const address = maybeHexToUint8Array(to);
 
     if (action && typeof action != "string") {
@@ -227,8 +334,25 @@ export default class TransactionBuilder {
    * Set the transaction builder with Previous Publickey and Previous Signature
    * @param {string | Uint8Array} prevSign Previous Signature (hexadecimal)
    * @param {string | Uint8Array} prevPubKey Previous PublicKey (hexadecimal)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42);
+   *
+   * const signaturePayload = tx.previousSignaturePayload();
+   * const prevSign = someFunctionToGetSignature(signaturePayload);
+   * const prevPubKey = someFunctionToGetPubKey();
+   * tx.setPreviousSignatureAndPreviousPublicKey(prevSign, prevPubKey);
+   * ```
    */
-  setPreviousSignatureAndPreviousPublicKey(prevSign: string | Uint8Array, prevPubKey: string | Uint8Array) {
+  setPreviousSignatureAndPreviousPublicKey(prevSign: string | Uint8Array, prevPubKey: string | Uint8Array): this {
     prevSign = maybeHexToUint8Array(prevSign);
     prevPubKey = maybeHexToUint8Array(prevPubKey);
 
@@ -240,9 +364,23 @@ export default class TransactionBuilder {
   /**
    * Set the transaction builder with address (required for originSign)
    * @param {string | Uint8Array} addr Address (hexadecimal | Uint8Array)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
    *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42);
+   *
+   * const txAddress = someFunctionToGetTxAddress();
+   * tx.setAddress(txAddress);
+   * ```
    */
-  setAddress(addr: string | Uint8Array) {
+  setAddress(addr: string | Uint8Array): this {
     addr = maybeHexToUint8Array(addr);
 
     this.address = addr;
@@ -252,8 +390,9 @@ export default class TransactionBuilder {
   /**
    * Add a encrypted (by storage nonce public key) seed in the transaction's ownerships to allow nodes to manage smart contract
    * @param {boolean} generateEncryptedSeedSC Generate encrypted seed for smart contract
+   * @returns {TransactionBuilder} The transaction builder instance
    */
-  setGenerateEncryptedSeedSC(generateEncryptedSeedSC: boolean) {
+  setGenerateEncryptedSeedSC(generateEncryptedSeedSC: boolean): this {
     this.generateEncryptedSeedSC = generateEncryptedSeedSC;
     return this;
   }
@@ -264,13 +403,29 @@ export default class TransactionBuilder {
    * @param {number} index Number of transaction on the chain
    * @param {string} curve Elliptic curve to use for the key generation
    * @param {string} hashAlgo Hash algorithm to use for the address generation
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @throws {Error} If the seed is not defined
+   * @throws {Error} If the index is not defined
+   * @throws {Error} If the curve is not valid
+   * @throws {Error} If the hash algorithm is not valid
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   *
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
+   *   .build("mysuperpassphraseorseed", 0);
+   * ```
    */
-  build(seed: string | Uint8Array, index: number = 0, curve: string = "ed25519", hashAlgo: string = "sha256") {
-    if (seed == undefined || seed == null) {
+  build(seed: string | Uint8Array, index: number = 0, curve: string = "ed25519", hashAlgo: string = "sha256"): this {
+    if (seed === undefined || seed === null) {
       throw new Error("Seed must be defined");
     }
 
-    if (index == undefined || index == null) {
+    if (index === undefined || index === null) {
       throw new Error("Index must be defined");
     }
 
@@ -305,8 +460,24 @@ export default class TransactionBuilder {
   /**
    * Sign the transaction with an origin private key
    * @param {string | Uint8Array} privateKey Origin Private Key (hexadecimal or binary buffer)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   *
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer(
+   *     "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+   *     0.42
+   *   )
+   *   .build("myseed", 0);
+   *   .originSign(Utils.originPrivateKey)
+   * ```
    */
-  originSign(privateKey: string | Uint8Array) {
+  originSign(privateKey: string | Uint8Array): this {
     privateKey = maybeHexToUint8Array(privateKey);
 
     this.originSignature = sign(this.originSignaturePayload(), privateKey);
@@ -316,15 +487,48 @@ export default class TransactionBuilder {
   /**
    * Set the Txn's originSignature, method called from hardware_libs
    * @param {string | Uint8Array} signature Origin Signature (hexadecimal or binary)
+   * @returns {TransactionBuilder} The transaction builder instance
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   *
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
+   *   .build("mysuperpassphraseorseed", 0);
+   *
+   * const originPayload = tx.originSignaturePayload();
+   * const originSignature = someFunctionToGetSignature(originPayload);
+   * tx.setOriginSign(originSignature);
+   * ```
    */
-  setOriginSign(signature: string | Uint8Array) {
+  setOriginSign(signature: string | Uint8Array): this {
     signature = maybeHexToUint8Array(signature);
 
     this.originSignature = signature;
     return this;
   }
 
-  originSignaturePayload() {
+  /**
+   * Get an Uint8Array payload to be signed with the origin private key of the device
+   * @returns {Uint8Array} The payload for the origin signature
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   *
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42)
+   *   .build(seed, originPrivateKey);
+   *
+   * const originPayload = tx.originSignaturePayload();
+   * ```
+   */
+  originSignaturePayload(): Uint8Array {
     const payloadForPreviousSignature = this.previousSignaturePayload();
     return concatUint8Arrays(
       payloadForPreviousSignature,
@@ -335,12 +539,23 @@ export default class TransactionBuilder {
   }
 
   /**
-   * Generate the payload for the previous signature by encoding address,  type and data
+   * Generate the payload for the previous signature by encoding address, type and data
+   * @returns {Uint8Array} The payload for the previous signature
+   * @example
+   * import Archethic from "@archethicjs/sdk";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   *
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 0.42);
+   *
+   * const signaturePayload = tx.previousSignaturePayload();
    */
-  previousSignaturePayload() {
+  previousSignaturePayload(): Uint8Array {
     const bufCodeSize = intToUint8Array(this.data.code.length);
 
-    let contentSize = this.data.content.length;
+    const contentSize = this.data.content.length;
 
     const bufContentSize = intToUint8Array(contentSize);
 
@@ -375,7 +590,7 @@ export default class TransactionBuilder {
     });
 
     const recipientsBuffer = this.data.recipients.map(({ address, action, args }) => {
-      if (action == undefined || args == undefined) {
+      if (action === undefined || args === undefined) {
         return concatUint8Arrays(
           // 0 = unnamed action
           Uint8Array.from([0]),
@@ -430,7 +645,9 @@ export default class TransactionBuilder {
   }
 
   /**
-   * JSON RPC API SEND_TRANSACTION
+   * Export the transaction generated into a JSON-RPC object
+   * @returns {TransactionRPC} The JSON-RPC representation of the transaction
+   * @private
    */
   toNodeRPC(): TransactionRPC {
     return {
@@ -487,8 +704,23 @@ export default class TransactionBuilder {
   }
 
   /**
-   * REST API (deprecated, replaced by JSON RPC API)
-   * content is hexadecimal
+   * Export the transaction generated into JSON
+   * @returns {string} The JSON representation of the transaction
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   *
+   * const tx = archethic.transaction
+   *   .new()
+   *   .setType("transfer")
+   *   .addUCOTransfer(
+   *     "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
+   *     0.42
+   *   )
+   *   .build("mysuperpassphraseorseed", 0);
+   *   .toJSON();
+   * ```
    */
   toJSON(): string {
     return JSON.stringify(this.toNodeRPC());
@@ -498,6 +730,8 @@ export default class TransactionBuilder {
    * Wallet RPC API
    * content is normal
    * only transaction payload (no address/public key/signatures)
+   * @returns {object} The JSON representation of the transaction for the wallet RPC API
+   * @private
    */
   toWalletRPC(): object {
     return {

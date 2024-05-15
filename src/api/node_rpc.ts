@@ -12,8 +12,8 @@ import TransactionBuilder from "../transaction_builder";
 import { TransactionFee } from "../types";
 
 export class NodeRPCClient {
-  private client: TypedJSONRPCClient<NodeRpcMethods>;
-  private core: Archethic;
+  private readonly client: TypedJSONRPCClient<NodeRpcMethods>;
+  private readonly core: Archethic;
   constructor(archethic: Archethic) {
     this.core = archethic;
     this.client = new JSONRPCClient((request) => this.handleRequest(request));
@@ -26,7 +26,7 @@ export class NodeRPCClient {
    * @param {any[]}  args
    * @returns {Promise<void>}
    */
-  async callFunction(contractAddress: string, functionName: string, args: any[]) {
+  async callFunction(contractAddress: string, functionName: string, args: any[]): Promise<void> {
     return this.client.request("contract_fun", {
       contract: contractAddress,
       function: functionName,

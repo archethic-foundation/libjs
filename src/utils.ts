@@ -1,11 +1,12 @@
 /**
- *
  * Return the Initial Origin Private Key
  */
 export const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
 
 /**
  * Convert CryptoJS.lib.WordArray to Uint8Array
+ * @param wordArray
+ * @returns {Uint8Array} Uint8Array
  */
 export function wordArrayToUint8Array(wordArray: { sigBytes: number; words: number[] }): Uint8Array {
   const dataArray = new Uint8Array(wordArray.sigBytes);
@@ -18,16 +19,18 @@ export function wordArrayToUint8Array(wordArray: { sigBytes: number; words: numb
 /**
  * Check if a string is a valid hex string
  * @param str
+ * @returns {boolean} True if string is a valid hex string
  */
-export function isHex(str: string) {
+export function isHex(str: string): boolean {
   return /^[0-9a-fA-F]+$/.test(str);
 }
 
 /**
  * Check if given variable is an object
  * @param variable
+ * @returns {boolean} True if variable is an object
  */
-export function isObject(variable: any) {
+export function isObject(variable: any): boolean {
   return typeof variable === "object" && !Array.isArray(variable) && variable !== null;
 }
 
@@ -37,8 +40,7 @@ export function sortObjectKeysASC(term: any): any {
 
   if (term instanceof Map) {
     const sortedEntries = [...term.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-    const sortedMap = new Map(sortedEntries.map(([key, value]) => [key, sortObjectKeysASC(value)]));
-    return sortedMap;
+    return new Map(sortedEntries.map(([key, value]) => [key, sortObjectKeysASC(value)]));
   }
 
   // object: sort and map over elements
@@ -56,6 +58,7 @@ export function sortObjectKeysASC(term: any): any {
 /**
  * Convert a hex string to a Uint8Array
  * @param str
+ * @returns Uint8Array
  */
 export function hexToUint8Array(str: string): Uint8Array {
   if (!isHex(str)) {
@@ -108,6 +111,7 @@ export function intToUint8Array(int: number): Uint8Array {
 /**
  * Encode a big integer into a Uint8Array (8 bytes)
  * @param {Number} number Number to encode
+ * @returns {Uint8Array} Encoded big integer
  */
 export function bigIntToUint8Array(number: number): Uint8Array {
   const buffer = new ArrayBuffer(8);
@@ -119,6 +123,7 @@ export function bigIntToUint8Array(number: number): Uint8Array {
 /**
  * Decode byte array (4 bytes) into a integer
  * @param {Uint8Array} bytes Bytes array to decode
+ * @returns {number} Decoded integer
  */
 export function uint8ArrayToInt(bytes: Uint8Array): number {
   let value = 0;
@@ -132,6 +137,7 @@ export function uint8ArrayToInt(bytes: Uint8Array): number {
  * Convert any number into a big int for 10^8 decimals
  * @param number Number to convert
  * @param decimal Number of decimals
+ * @returns {number} Big int number
  */
 export function toBigInt(number: number, decimal: number = 8): number {
   // This is a workaroud of float weird behavior
@@ -148,6 +154,7 @@ export function toBigInt(number: number, decimal: number = 8): number {
  * Convert a big int number of 10^8 decimals into a decimal number
  * @param number Number to convert
  * @param decimal Number of decimals
+ * @returns {number} Decimal number
  */
 export function fromBigInt(number: number, decimal: number = 8): number {
   return number / Math.pow(10, decimal);
@@ -156,15 +163,16 @@ export function fromBigInt(number: number, decimal: number = 8): number {
 /**
  * Concatenate multiple Uint8Array into one
  * @param {Uint8Array[]} arrays
+ * @returns {Uint8Array} Concatenated Uint8Array
  */
 export function concatUint8Arrays(...arrays: Uint8Array[]): Uint8Array {
   let totalLength = 0;
-  for (let arr of arrays) {
+  for (const arr of arrays) {
     totalLength += arr.length;
   }
-  let result = new Uint8Array(totalLength);
+  const result = new Uint8Array(totalLength);
   let offset = 0;
-  for (let arr of arrays) {
+  for (const arr of arrays) {
     result.set(arr, offset);
     offset += arr.length;
   }
@@ -185,15 +193,15 @@ const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 
 /**
  * Encode an Uint8Array into a base64url string
- * @param arraybuffer
+ * @param {ArrayBuffer} arraybuffer Uint8Array
+ * @returns {string} base64url string
  */
 export function base64url(arraybuffer: ArrayBuffer): string {
-  let bytes = new Uint8Array(arraybuffer),
-    i,
-    len = bytes.length,
-    base64 = "";
+  const bytes = new Uint8Array(arraybuffer);
+  const len = bytes.length;
+  let base64 = "";
 
-  for (i = 0; i < len; i += 3) {
+  for (let i = 0; i < len; i += 3) {
     base64 += chars[bytes[i] >> 2];
     base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
     base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
@@ -211,6 +219,8 @@ export function base64url(arraybuffer: ArrayBuffer): string {
 
 /**
  * Convert any number into a byte array
+ * @param number Number to convert
+ * @returns {Uint8Array} Byte array
  */
 export function toByteArray(number: number): Uint8Array {
   if (number === 0) return Uint8Array.from([0]);
@@ -228,9 +238,8 @@ export function toByteArray(number: number): Uint8Array {
 
 /**
  * Alias of uint8ArrayToInt
- *
  * @param bytes
- * @returns the number
+ * @returns number
  */
 export function fromByteArray(bytes: Uint8Array): number {
   return uint8ArrayToInt(bytes);
@@ -240,7 +249,7 @@ export function fromByteArray(bytes: Uint8Array): number {
  * Return the next Uint8 from an iterator of Uint8Array
  * There is an assumption on success
  * @param iter
- * @returns
+ * @returns the next Uint8
  */
 export function nextUint8(iter: IterableIterator<[number, number]>): number {
   return iter.next().value[1];
@@ -249,7 +258,7 @@ export function nextUint8(iter: IterableIterator<[number, number]>): number {
 /**
  * String to Uint8Array
  * @param str
- * @returns
+ * @returns Uint8Array
  */
 export function serializeString(str: string): Uint8Array {
   return new TextEncoder().encode(str);
@@ -257,8 +266,8 @@ export function serializeString(str: string): Uint8Array {
 
 /**
  * Uint8Array to String
- * @param str
- * @returns
+ * @param encoded_str
+ * @returns string
  */
 export function deserializeString(encoded_str: Uint8Array): string {
   return new TextDecoder().decode(encoded_str);

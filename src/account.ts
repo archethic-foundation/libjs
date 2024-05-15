@@ -12,12 +12,56 @@ import { maybeUint8ArrayToHex, uint8ArrayToHex } from "./utils.js";
 import Archethic from "./index.js";
 import { ExtendedTransactionBuilder } from "./transaction.js";
 
+/**
+ * Account class to manage {@link Keychain | keychains}
+ */
 export default class Account {
+  /** @private */
   core: Archethic;
+  /** @hidden */
   constructor(core: Archethic) {
     this.core = core;
   }
 
+  /**
+   * Creates a new transaction to build (or update) a keychain by embedding the on-chain encrypted wallet
+   * @param keychain - The keychain to create
+   * @param transactionChainIndex - The index of the transaction created (0 for new keychain)
+   * @returns An instance of the ExtendedTransactionBuilder
+   * @example Keychain creation
+   * ```ts
+   * import Archethic, { Crypto, Keychain } from "@archethicjs/sdk";
+   *
+   * const accessSeed = "myseed";
+   * const { publicKey } = Crypto.deriveKeyPair(accessSeed, 0);
+   * const keychain = new Keychain(Crypto.randomSecretKey())
+   *   .addService("uco", "m/650'/0/0")
+   *   .addAuthorizedPublicKey(publicKey);
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * const tx = archethic.account.newKeychainTransaction(keychain, 0);
+   * // The transaction can then be signed with origin private key
+   * ```
+   *
+   * @example Keychain update
+   * ```ts
+   * import Archethic, { Crypto } from "@archethicjs/sdk";
+   *
+   * const accessSeed = "myseed";
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * let keychain = await archethic.account.getKeychain(accessSeed);
+   * keychain.addService("mywallet", "m/650'/1/0");
+   *
+   * // determine the new transaction index
+   * const keychainGenesisAddress = Crypto.deriveAddress(keychain.seed, 0);
+   * const transactionChainIndex = await archethic.transaction.getTransactionIndex(keychainGenesisAddress);
+   *
+   * const tx = archethic.account.newKeychainTransaction(keychain, transactionChainIndex);
+   * // The transaction can then be signed with origin private key
+   * ```
+   */
   newKeychainTransaction(keychain: Keychain, transactionChainIndex: number): ExtendedTransactionBuilder {
     const aesKey = randomSecretKey();
 
@@ -28,13 +72,27 @@ export default class Account {
       };
     });
 
-    return new this.core.transaction.builder(this.core)
+    return new ExtendedTransactionBuilder(this.core)
       .setType("keychain")
       .setContent(JSON.stringify(keychain.toDID()))
       .addOwnership(aesEncrypt(keychain.encode(), aesKey), authorizedKeys)
       .build(keychain.seed, transactionChainIndex);
   }
 
+  /**
+   * Creates a new keychain access transaction to allow a seed and its key to access a keychain
+   * @param seed - Keychain access's seed
+   * @param keychainAddress - Keychain's tx address
+   * @returns An instance of the ExtendedTransactionBuilder
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * const tx = archethic.account.newAccessTransaction("myseed", "0000AB...CD");
+   *
+   */
   newAccessTransaction(seed: string | Uint8Array, keychainAddress: string | Uint8Array): ExtendedTransactionBuilder {
     const aesKey = randomSecretKey();
 
@@ -49,12 +107,25 @@ export default class Account {
       }
     ];
 
-    return new this.core.transaction.builder(this.core)
+    return new ExtendedTransactionBuilder(this.core)
       .setType("keychain_access")
       .addOwnership(aesEncrypt(keychainAddress, aesKey), authorizedKeys)
       .build(seed, 0);
   }
 
+  /**
+   * Retrieve a keychain from the keychain access transaction and decrypt the wallet to retrieve the services associated
+   * @param seed - Keychain access's seed
+   * @returns The keychain object
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk"
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net")
+   * await archethic.connect()
+   * const keychain = await archethic.account.getKeychain("myseed")
+   * ```
+   */
   async getKeychain(seed: string | Uint8Array) {
     const { publicKey: accessPublicKey, privateKey: accessPrivateKey } = deriveKeyPair(seed, 0);
     const accessKeychainAddress = deriveAddress(seed, 1);
@@ -64,7 +135,7 @@ export default class Account {
       uint8ArrayToHex(accessKeychainAddress)
     );
 
-    if (accessOwnerships.length == 0) {
+    if (accessOwnerships.length === 0) {
       throw new Error("Keychain doesn't exist");
     }
 
@@ -99,7 +170,7 @@ export default class Account {
     const keychainAESKey = ecDecrypt(keychainSecretKey, accessPrivateKey);
     const encodedKeychain = aesDecrypt(keychainSecret, keychainAESKey);
 
-    let keychain = Keychain.decode(encodedKeychain);
+    const keychain = Keychain.decode(encodedKeychain);
 
     keychainAuthorizedKeys.forEach(({ publicKey }) => {
       keychain.addAuthorizedPublicKey(publicKey);
@@ -108,5 +179,3 @@ export default class Account {
     return keychain;
   }
 }
-
-export { Keychain };

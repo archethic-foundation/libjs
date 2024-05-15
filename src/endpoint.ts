@@ -1,5 +1,6 @@
 import { ArchethicRPCClient } from "./api/wallet_rpc.js";
 
+/** @internal */
 export class Endpoint {
   /**
    * @param {String} endpoint
@@ -20,6 +21,9 @@ export class Endpoint {
   }
 }
 
+/**
+ * Direct endpoint class
+ */
 export class DirectEndpoint {
   public origin: string;
   public nodeEndpoint: URL;
@@ -42,10 +46,13 @@ export class DirectEndpoint {
   }
 }
 
+/**
+ * Wallet RPC endpoint class
+ */
 export class WalletRPCEndpoint {
   public rpcClient: ArchethicRPCClient;
   public origin: string;
-  private rpcEndpoint: URL;
+  private readonly rpcEndpoint: URL;
   public nodeEndpoint: URL | string;
   /**
    * @return {Boolean}

@@ -15,9 +15,9 @@ import { ExtendedTransactionBuilder } from "../transaction";
 import TransportWebSocket from "isomorphic-ws";
 
 export class RpcRequest {
-  private origin: RpcRequestOrigin;
-  private version: number;
-  private payload: {};
+  private readonly origin: RpcRequestOrigin;
+  private readonly version: number;
+  private readonly payload: {};
   /**
    * @param {RpcRequestOrigin} origin Application emitting the request
    * @param {Object} payload Request payload
@@ -34,8 +34,8 @@ export class ArchethicRPCClient {
   private origin: RpcRequestOrigin;
   private client: JSONRPCServerAndClient | undefined;
   private websocket: TransportWebSocket | undefined;
-  private _connectionStateEventTarget: EventTarget;
-  private _rpcNotificationEventTarget: EventTarget;
+  private readonly _connectionStateEventTarget: EventTarget;
+  private readonly _rpcNotificationEventTarget: EventTarget;
   private static _instance: ArchethicRPCClient | undefined;
   constructor() {
     this.origin = { name: "" };
@@ -73,7 +73,7 @@ export class ArchethicRPCClient {
    */
   async connect(host: string, port: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.connectionState != ConnectionState.Closed) {
+      if (this.connectionState !== ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
       this.websocket = new TransportWebSocket(`ws://${host}:${port}`);
@@ -130,7 +130,7 @@ export class ArchethicRPCClient {
   }
 
   _ensuresConnectionAlive(): void {
-    if (this.client == null || this.connectionState != ConnectionState.Open)
+    if (this.client === null || this.connectionState !== ConnectionState.Open)
       throw new Error("RPC connection must be alive.");
   }
 
@@ -194,8 +194,9 @@ export class ArchethicRPCClient {
         return ConnectionState.Connecting;
       case TransportWebSocket.OPEN:
         return ConnectionState.Open;
+      default:
+        return ConnectionState.Closed;
     }
-    return ConnectionState.Closed;
   }
 
   /**
@@ -337,7 +338,11 @@ export class ArchethicRPCClient {
    * @param {String} pathSuffix
    * @returns {Promise<{"publicKey": string}>}
    */
-  async keychainDeriveKeypair(serviceName: string, index = 0, pathSuffix = ""): Promise<{ publicKey: string }> {
+  async keychainDeriveKeypair(
+    serviceName: string,
+    index: number = 0,
+    pathSuffix: string = ""
+  ): Promise<{ publicKey: string }> {
     this._ensuresConnectionAlive();
 
     return this.client?.request(
