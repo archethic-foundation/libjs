@@ -1,3 +1,5 @@
+@import url("https://fonts.cdnfonts.com/css/telegraf");
+
 :root {
   /* Archethic Neutral */
   --neutral-1000: #000000;
@@ -412,8 +414,7 @@ body {
   background: var(--color-background);
   background: var(--color-background-gradient);
   font-family:
-    Telegraf,
-    telegraf-fallback,
+    "Telegraf",
     sans-serif,
     -apple-system,
     BlinkMacSystemFont,
