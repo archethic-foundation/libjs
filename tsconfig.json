@@ -45,10 +45,10 @@
     },
     "coverageLabel": "document",
     "customCss": "src/assets/docs/styles.css",
-    "extraFooter": "<div style='text-align: center;'><img src='/docs/coverage.svg' alt='Coverage' /></div>",
+    "extraFooter": "<div style='text-align: center; vertical-align: middle;'><img src='https://github.com/archethic-foundation/libjs/blob/master/docs/coverage.svg' alt='Coverage' /></div>",
     "extraFooterNoDefaultWrapper": true,
     "favicon": "https://github.com/archethic-foundation/archethic-assets/blob/main/assets/logos/archethic/Archethic%20-%20Logo%20crystal.png?raw=true",
-    "customTitle": "Archethic SDK",
+    "customTitle": "<div><img style='vertical-align: middle;' src='https://github.com/archethic-foundation/archethic-assets/blob/main/assets/logos/archethic/Archethic%20-%20Logo%20crystal.png?raw=true' alt='Archethic' height='32' /> <span>Archethic SDK</span></div>",
     "footerLastModified": true
   }
 }
