@@ -28,9 +28,10 @@
         <form>
           <div class="box">
             <label for="endpoint">Node endpoint</label> <br /><br />
-            <input type="text" class="input" value="http://localhost:4000" id="endpoint" />
+            <div class="column"><input type="text" class="input" value="ws://localhost:12345" id="endpoint" /></div>
+            <div class="column"><span id="connectionStatus"></span></div>
           </div>
-          <div class="box">
+          <div class="box" id="seedConfig">
             <label for="seed">Enter your seed/passphrase</label>
             <input
               type="password"
@@ -47,7 +48,7 @@
               <option value="secp256k1">secp256k1</option>
             </select>
           </div>
-          <div class="box">
+          <div class="box" id="txIndexForm">
             <label for="index">Transaction index</label>
             <input type="number" class="input" min="0" id="index" value="0" />
           </div>

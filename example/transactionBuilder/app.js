@@ -1,4 +1,5 @@
 import Archethic, { Utils, Crypto } from "@archethicjs/sdk";
+import { ExtendedTransactionBuilder } from "../../dist/transaction";
 
 const { toBigInt } = Utils;
 
@@ -10,25 +11,76 @@ let tokenTransfers = [];
 let recipients = [];
 let ownerships = [];
 
-let endpoint = document.querySelector("#endpoint").value;
+/** @type {Archethic | undefined} */
+let archethic = undefined;
 
-let archethic = new Archethic(endpoint);
-archethic.connect();
+/** @type { AccountIdentity | undefined} */
+let walletAccount = undefined;
+
+async function connectEndpoint() {
+  const endpoint = document.querySelector("#endpoint").value;
+  const localArchethic = new Archethic(endpoint);
+  document.querySelector("#connectionStatus").textContent = "";
+
+  if (localArchethic.endpoint.isRpcAvailable) {
+    document.querySelector("#seedConfig").style.display = "none";
+    document.querySelector("#txIndexForm").style.display = "none";
+    localArchethic.rpcWallet.onconnectionstatechange(async (state) => {
+      let status = "";
+      switch (state) {
+        case "WalletRPCConnection_connecting":
+          status = "Connecting";
+          break;
+        case "WalletRPCConnection_closed":
+          status = "Connection closed";
+          break;
+        case "WalletRPCConnection_open":
+          const { endpointUrl } = await localArchethic.rpcWallet.getEndpoint();
+          walletAccount = await localArchethic.rpcWallet.getCurrentAccount();
+          let networkName;
+          switch (endpointUrl) {
+            case "https://mainnet.archethic.net":
+              networkName = `<a href="${endpointUrl}" target="_blank">mainnet</a>`;
+              break;
+            case "https://testnet.archethic.net":
+              networkName = `<a href="${endpointUrl}" target="_blank">devnet</a>`;
+              break;
+            default:
+              networkName = `<a href="${endpointUrl}" target="_blank">devnet</a>`;
+              break;
+          }
+
+          status = `Connected as <strong>${walletAccount.shortName}</strong> to ${networkName}`;
+          break;
+      }
+      document.querySelector("#connectionStatus").innerHTML = status;
+    });
+  }
+  await localArchethic.connect();
+  if (!localArchethic.endpoint.isRpcAvailable) {
+    document.querySelector("#seedConfig").style.display = "block";
+    document.querySelector("#txIndexForm").style.display = "block";
+    document.querySelector("#connectionStatus").textContent = "Connected";
+  }
+
+  archethic = localArchethic;
+}
+
+window.onload = async function () {
+  await connectEndpoint();
+};
 
 document.querySelector("#endpoint").addEventListener("change", async function () {
-  archethic = new Archethic(this.value);
-  archethic.connect();
+  await connectEndpoint();
 });
+
+let txBuilder = undefined;
 
 window.generate_transaction = async () => {
   transaction = null;
   document.querySelector("#transactionOutput").style.visibility = "hidden";
 
   const seed = document.querySelector("#seed").value;
-  const index = document.querySelector("#index").value;
-  const curve = document.querySelector("#curve").value;
-  const endpoint = document.querySelector("#endpoint").value;
-  const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
 
   const code = document.querySelector("#code").value;
   if (code != "") {
@@ -60,7 +112,7 @@ window.generate_transaction = async () => {
     content = file_content;
   }
 
-  let txBuilder = archethic.transaction
+  txBuilder = archethic.transaction
     .new()
     .setType(document.querySelector("#type").value)
     .setCode(document.querySelector("#code").value)
@@ -93,15 +145,30 @@ window.generate_transaction = async () => {
     txBuilder.addRecipient(address, action, args);
   });
 
-  transaction = txBuilder.build(seed, parseInt(index), curve).originSign(originPrivateKey);
-
-  document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(transaction.address);
+  await signTransaction();
+  document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(signedTx.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
-  const result = await archethic.transaction.getTransactionFee(transaction);
+  const result = await archethic.transaction.getTransactionFee(signedTx);
   const amount = Utils.fromBigInt(result.fee);
   const usdValue = (result.rates.usd * amount).toFixed(4);
   document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
 };
+
+/** @type {ExtendedTransactionBuilder | undefined} */
+let signedTx = undefined;
+
+async function signTransaction() {
+  if (archethic.rpcWallet && archethic.rpcWallet.connectionState == "WalletRPCConnection_open") {
+    const signedTxs = await archethic.rpcWallet.signTransactions(walletAccount.serviceName, "", [txBuilder]);
+    signedTx = signedTxs[0];
+  } else {
+    const seed = document.querySelector("#seed").value;
+    const index = document.querySelector("#index").value;
+    const curve = document.querySelector("#curve").value;
+    const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
+    signedTx = txBuilder.build(seed, parseInt(index), curve).originSign(originPrivateKey);
+  }
+}
 
 window.onClickAddStorageNoncePublicKey = async () => {
   const storageNonce = await archethic.network.getStorageNoncePublicKey();
@@ -238,10 +305,20 @@ window.onClickAddRecipient = () => {
 };
 
 window.sendTransaction = async () => {
-  const endpoint = document.querySelector("#endpoint").value;
   document.querySelector("#confirmations").innerText = 0;
 
-  transaction
+  let explorerLink;
+  const transactionAddress = Utils.uint8ArrayToHex(signedTx.address);
+
+  if (archethic.rpcWallet && archethic.rpcWallet.connectionState == "WalletRPCConnection_open") {
+    const { endpointUrl } = await archethic.rpcWallet.getEndpoint();
+    explorerLink = endpointUrl + "/explorer/transaction/" + transactionAddress;
+  } else {
+    const endpoint = document.querySelector("#endpoint").value;
+    explorerLink = endpoint + "/explorer/transaction/" + transactionAddress;
+  }
+
+  signedTx
     .on("confirmation", (nbConfirmations, maxConfirmations) => {
       document.querySelector("#transaction_error").style.display = "none";
       document.querySelector("#confirmed").style.display = "block";
@@ -255,11 +332,8 @@ window.sendTransaction = async () => {
     })
     .on("sent", () => {
       document.querySelector("#success").style.display = "block";
-      document.querySelector("#tx_address_link").innerText =
-        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address);
-      document
-        .querySelector("#tx_address_link")
-        .setAttribute("href", endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address));
+      document.querySelector("#tx_address_link").innerText = explorerLink;
+      document.querySelector("#tx_address_link").setAttribute("href", explorerLink);
     })
     .send();
 };
