@@ -1,4 +1,4 @@
-import Archethic, { Utils, Crypto } from "@archethicjs/sdk";
+import Archethic, { Utils, Crypto, Contract } from "@archethicjs/sdk";
 import { ExtendedTransactionBuilder } from "../../dist/transaction";
 
 const { toBigInt } = Utils;
@@ -257,51 +257,84 @@ window.onClickAddTokenTransfer = async () => {
   document.querySelector("#token_id").value = "0";
 };
 
-window.onClickAddRecipient = () => {
-  const $address = document.querySelector("#recipient");
-  const $action = document.querySelector("#action");
-  const $argsJson = document.querySelector("#args_json");
-  const $argsJsonErr = document.querySelector("#args_json_error");
-  const $list = document.querySelector("#recipients");
+let namedParams = [];
 
-  const address = $address.value;
-  const action = $action.value;
-  const argsJson = $argsJson.value;
-
-  if (address == "") return;
-
-  $argsJsonErr.textContent = "";
-
-  if (action == "" && argsJson == "") {
-    // update state
-    recipients.push({ address });
-
-    // update list
-    if ($list.textContent != "") $list.textContent = $list.textContent + "\n";
-    $list.textContent = $list.textContent + address;
-
-    // reset form
-    $address.value = "";
-    $action.value = "";
-    $argsJson.value = "";
-  } else {
-    try {
-      const args = JSON.parse(argsJson);
-      // update state
-      recipients.push({ address, action, args });
-
-      // update list
-      if ($list.textContent != "") $list.textContent = $list.textContent + "\n";
-      $list.textContent = $list.textContent + `${address} - ${action} - ${argsJson}`;
-
-      // reset form
-      $address.value = "";
-      $action.value = "";
-      $argsJson.value = "";
-    } catch (e) {
-      $argsJsonErr.textContent = "Invalid JSON:" + e.message;
-    }
+window.onChangeRecipient = async () => {
+  const address = document.querySelector("#recipient").value;
+  const contractCode = await archethic.network.getContractCode(address);
+  if (contractCode == "") {
+    return;
   }
+
+  document.querySelector("#namedActionsContainer").style.display = "block";
+
+  Contract.extractActionsFromContract(contractCode).forEach((action) => {
+    const option = document.createElement("option");
+    option.text = action.name;
+    option.value = action.name;
+    const select = document.querySelector("#namedActions");
+    select.appendChild(option);
+
+    const paramsContainerId = "action_" + action.name;
+    const paramsContainer = document.createElement("div");
+    paramsContainer.setAttribute("id", paramsContainerId);
+    paramsContainer.setAttribute("style", "display: none");
+    paramsContainer.setAttribute("class", "namedActionParams");
+
+    action.parameters.forEach((parameter, index) => {
+      const inputId = paramsContainerId + "_param_" + parameter;
+      const paramLabel = document.createElement("label");
+      paramLabel.innerText = parameter;
+      paramLabel.setAttribute("for", inputId);
+
+      const paramInput = document.createElement("input");
+      paramInput.setAttribute("id", inputId);
+      paramInput.setAttribute("class", "input");
+      paramInput.addEventListener("change", function (e) {
+        const value = e.target.value;
+        namedParams[index] = value;
+      });
+
+      paramsContainer.appendChild(paramLabel);
+      paramsContainer.appendChild(paramInput);
+    });
+
+    document.querySelector("#namedActionsParameters").appendChild(paramsContainer);
+  });
+};
+
+window.pickNamedAction = function () {
+  document.querySelectorAll(".namedActionParams").forEach((elem) => {
+    elem.style.display = "none";
+  });
+  const select = document.querySelector("#namedActions");
+  document.querySelector("#action_" + select.value).style.display = "block";
+};
+
+window.onClickAddRecipient = () => {
+  const recipientAddress = document.querySelector("#recipient").value;
+  const namedAction = document.querySelector("#namedActions").value;
+  const recipientList = document.querySelector("#recipients");
+
+  if (namedAction != "") {
+    recipients.push({ address: recipientAddress, action: namedAction, args: namedParams });
+    if (recipientList.textContent != "") {
+      recipientList.textContent = recipientList.textContent + "\n";
+    }
+    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${namedParams}`;
+
+    document.querySelector("#namedActionsContainer").style.display = "none";
+    document.querySelector("#namedActions").innerHTML = "<option></option>";
+    document.querySelectorAll(".namedActionParams").forEach((elem) => elem.remove());
+  } else {
+    recipients.push({ address: recipientAddress });
+    if (recipientList.textContent != "") {
+      recipientList.textContent = recipientList.textContent + "\n";
+    }
+    recipientList.textContent += recipientAddress;
+  }
+
+  document.querySelector("#recipient").value = "";
 };
 
 window.sendTransaction = async () => {

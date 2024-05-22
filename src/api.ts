@@ -2,6 +2,7 @@ import fetch from "cross-fetch";
 import absinthe from "./api/absinthe.js";
 import { maybeUint8ArrayToHex } from "./utils.js";
 import { Balance, NearestEndpoint, OracleData, Ownership, Token } from "./types.js";
+import Transaction from "./transaction.js";
 
 /**
  * Send a custom query to the Archethic API
@@ -327,6 +328,36 @@ export async function getBalance(address: string | Uint8Array, endpoint: string)
         return { uco: 0, token: [] };
       } else {
         return res.data.balance;
+      }
+    });
+}
+
+export async function getContractCode(address: string | Uint8Array, endpoint: string): Promise<string> {
+  address = maybeUint8ArrayToHex(address);
+
+  const url = new URL("/api", endpoint);
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      query: `query {
+        lastTransaction(address: "${address}") {
+      		data {
+              code
+            }
+          }
+        }`
+    })
+  })
+    .then(handleResponse)
+    .then((res): string => {
+      if (res.errors || res.data == null) {
+        return "";
+      } else {
+        return res.data.lastTransaction.data.code;
       }
     });
 }
