@@ -131,10 +131,27 @@
           <div class="box">
             <label for="recipient">Add recipient</label>
             <br />
-            <input type="text" class="input" id="recipient" placeholder="Contract's address" style="width: 400px" />
+            <input
+              type="text"
+              class="input"
+              id="recipient"
+              placeholder="Contract's address"
+              style="width: 400px"
+              onchange="onChangeRecipient()"
+            />
             <br />
 
-            <label for="action">Named action (optional)</label>
+            <div style="margin-top: 10px; display: none" id="namedActionsContainer">
+              <p>
+                Named action:
+                <select id="namedActions" onchange="pickNamedAction()">
+                  <option></option>
+                </select>
+              </p>
+              <div id="namedActionsParameters"></div>
+            </div>
+
+            <!-- <label for="action">Named action (optional)</label>
             <br />
             <input type="text" class="input" id="action" placeholder="Named action" style="width: 400px" />
             <input
@@ -143,9 +160,9 @@
               id="args_json"
               placeholder="Name action's arguments as JSON"
               style="width: 400px"
-            />
+            /> -->
             <br />
-            <p id="args_json_error" style="color: red; margin: 1em 0 1em 0"></p>
+            <!-- <p id="args_json_error" style="color: red; margin: 1em 0 1em 0"></p> -->
             <button type="button" class="button" onclick="onClickAddRecipient()">Add</button>
             <br />
 

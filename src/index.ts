@@ -7,8 +7,9 @@ import { NodeRPCClient } from "./api/node_rpc.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
 import Account, { Keychain } from "./account.js";
+import * as Contract from "./contract.js";
 
-export { Utils, Crypto, Keychain };
+export { Utils, Crypto, Keychain, Contract };
 
 export default class Archethic {
   endpoint: DirectEndpoint | WalletRPCEndpoint;
