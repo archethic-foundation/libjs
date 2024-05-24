@@ -1,4 +1,14 @@
-import { deriveKeyPair, ecDecrypt, ecEncrypt, isValidAddress, encryptSecret, hash, sign, verify } from "../src/crypto";
+import {
+  deriveKeyPair,
+  ecDecrypt,
+  ecEncrypt,
+  isValidAddress,
+  encryptSecret,
+  hash,
+  sign,
+  verify,
+  decryptSecret
+} from "../src/crypto";
 import { uint8ArrayToHex } from "../src/utils";
 import { Curve, HashAlgorithm } from "../src/types";
 
