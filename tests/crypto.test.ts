@@ -173,22 +173,47 @@ describe("crypto", () => {
     });
   });
 
-  describe("encryptSecret", () => {
-    it("should encrypt a secret using a public key", () => {
+  describe("encryptSecret / decryptSecret", () => {
+    it("should encrypt a secret (string) using a public key and then decrypt it", () => {
       const keypair = deriveKeyPair("seed", 0);
       const secret = "mySecret";
-      const publicKey = uint8ArrayToHex(keypair.publicKey);
-      const result = encryptSecret(secret, publicKey);
+      const result = encryptSecret(secret, keypair.publicKey);
 
-      expect(result).toStrictEqual({
-        encryptedSecret: result.encryptedSecret,
-        authorizedKeys: [
-          {
-            publicKey: result.authorizedKeys[0].publicKey,
-            encryptedSecretKey: result.authorizedKeys[0].encryptedSecretKey
-          }
-        ]
-      });
+      const secretDecrypted = decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair);
+      expect(new TextDecoder().decode(secretDecrypted)).toStrictEqual(secret);
+    });
+
+    it("should encrypt a secret (uint8array) using a public key and then decrypt it", () => {
+      const keypair = deriveKeyPair("seed", 0);
+      const secret = new TextEncoder().encode("mySecret");
+      const result = encryptSecret(secret, keypair.publicKey);
+
+      const secretDecrypted = decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair);
+      expect(secretDecrypted).toStrictEqual(secret);
+    });
+
+    it("should be able to be decrypted by anyone authorized", () => {
+      const keypair1 = deriveKeyPair("seed", 0);
+      const keypair2 = deriveKeyPair("seed2", 0);
+      const secret = new TextEncoder().encode("mySecret");
+      const result = encryptSecret(secret, [keypair1.publicKey, keypair2.publicKey]);
+
+      const secretDecrypted1 = decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair1);
+      const secretDecrypted2 = decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair2);
+      expect(secretDecrypted1).toStrictEqual(secret);
+      expect(secretDecrypted2).toStrictEqual(secret);
+    });
+
+    it("should not be able to be decrypted by non-authorized keys", () => {
+      const keypair1 = deriveKeyPair("seed", 0);
+      const keypair2 = deriveKeyPair("seed2", 0);
+      const secret = "mySecret";
+      const publicKey = uint8ArrayToHex(keypair1.publicKey);
+      const result = encryptSecret(secret, [publicKey]);
+
+      expect(() => {
+        decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair2);
+      }).toThrow();
     });
 
     it("should return an object with encryptedSecret and authorizedKeys", () => {
