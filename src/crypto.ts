@@ -700,11 +700,11 @@ export function getServiceGenesisAddress(keychain: Keychain, service: string, su
 /**
  * Encrypts a secret using a given public key
  * @param {string | Uint8Array} secret The secret to encrypt
- * @param {string | Uint8Array} publicKey The public key to use for encryption
- * @returns {Object} {encryptedSecret: Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]}
+ * @param {string | string[] | Uint8Array | Uint8Array[]} publicKeys The public keys authorized to decrypt the secret
+ * @returns {{encryptedSecret: Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]}}
  * @example
  * const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
- * const { encryptedSecret, authorizedKeys } = encryptSecret(Crypto.randomSecretKey(), storageNoncePublicKey);
+ * const { encryptedSecret, authorizedKeys } = encryptSecret("something secret", storageNoncePublicKey);
  * const code = "" // The contract code
  * const tx = await archethic.transaction
  *  .new()
@@ -717,13 +717,44 @@ export function getServiceGenesisAddress(keychain: Keychain, service: string, su
  */
 export function encryptSecret(
   secret: string | Uint8Array,
-  publicKey: string | Uint8Array
+  publicKeys: string | string[] | Uint8Array | Uint8Array[]
 ): { encryptedSecret: Uint8Array; authorizedKeys: AuthorizedKeyUserInput[] } {
+  const publicKeysWrapped =
+    typeof publicKeys == "string" || publicKeys instanceof Uint8Array ? [publicKeys] : publicKeys;
+
   const aesKey = randomSecretKey();
   const encryptedSecret = aesEncrypt(secret, aesKey);
-  const encryptedAesKey = uint8ArrayToHex(ecEncrypt(aesKey, publicKey));
-  const authorizedKeys: AuthorizedKeyUserInput[] = [
-    { encryptedSecretKey: encryptedAesKey, publicKey: maybeUint8ArrayToHex(publicKey) }
-  ];
+
+  const authorizedKeys: AuthorizedKeyUserInput[] = publicKeysWrapped.map((publicKey) => {
+    const encryptedAesKey = uint8ArrayToHex(ecEncrypt(aesKey, publicKey));
+    return { encryptedSecretKey: encryptedAesKey, publicKey: maybeUint8ArrayToHex(publicKey) };
+  });
+
   return { encryptedSecret, authorizedKeys };
 }
+
+/**
+ * Decrypt a secret if authorized
+ * @param {Uint8Array} encryptedSecret The secret to decrypt
+ * @param {AuthorizedKeyUserInput[]} authorizedKeys The AES keys of authorized keys
+ * @param {Keypair} keyPair The keyPair to use for decrypting
+ * @returns {Uint8Array} The decrypted secret
+ * @example
+ * const keypair = deriveKeyPair("seed", 0);
+ * const { encryptedSecret, authorizedKeys } = encryptSecret("something secret", keypair.publicKey);
+ * const decryptedSecret = decryptSecret(encryptedSecret, authorizedKeys, keypair);
+ */
+export function decryptSecret(
+  encryptedSecret: Uint8Array,
+  authorizedKeys: AuthorizedKeyUserInput[],
+  keyPair: Keypair
+): Uint8Array {
+  const publicKeyInHex = uint8ArrayToHex(keyPair.publicKey);
+
+  const authorizedKey = authorizedKeys.find(({ publicKey: currentPubKey }) => currentPubKey == publicKeyInHex);
+  if (!authorizedKey) throw new Error("This keypair is not authorized to decrypt the secret");
+
+  const aesKey = ecDecrypt(authorizedKey.encryptedSecretKey, keyPair.privateKey);
+  return aesDecrypt(encryptedSecret, aesKey);
+}
+
