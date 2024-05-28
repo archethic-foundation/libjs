@@ -1,4 +1,4 @@
-import { AWCStreamChannel, AWCStreamChannelState, ArchethicWalletClient } from "./wallet_rpc.js";
+import { AWCStreamChannel, AWCStreamChannelState, ArchethicWalletClient } from "./wallet_rpc.js"
 
 
 declare global {
@@ -13,7 +13,7 @@ declare global {
 
 export class AWCWebBrowserExtension {
   static get awc(): ArchethicWalletClient | undefined {
-    return (typeof (archethic) === "undefined") ? undefined : archethic?.awc;
+    return (typeof (archethic) === "undefined") ? undefined : archethic?.awc
   }
 }
 
@@ -23,64 +23,68 @@ export class AWCWebBrowserExtensionStreamChannel implements AWCStreamChannel<str
   private _state: AWCStreamChannelState = AWCStreamChannelState.CLOSED
 
   constructor(extensionId: string | undefined) {
-    if (extensionId === undefined) throw new Error('Archethic Wallet Web extension not available');
+    if (extensionId === undefined) throw new Error('Archethic Wallet Web extension not available')
     this.extensionId = extensionId
   }
 
   async connect(): Promise<void> {
-    this._connectionReady()
+    if (this._port !== null) {
+      console.log(`[AWC] Popup extension already running`)
+      return
+    }
+
+    this._state = AWCStreamChannelState.CONNECTING
+
+    console.log(`[AWC] Wait for popup extension ...`)
+    await chrome.runtime.sendMessage(this.extensionId, 'ensureExtensionPopupOpened')
+    console.log(`[AWC] ... opened`)
+
+    console.log(`[AWC] Connecting to popup extension ...`)
+    this._port = chrome.runtime.connect(this.extensionId)
+    this._port.onDisconnect.addListener(() => {
+      this._port = null
+      this._connectionClosed()
+    })
+    this._port.onMessage.addListener((message: string, _) => {
+      if (message === 'connected') {
+        this._connectionReady()
+        return
+
+      }
+      console.log(`[AWC] Received message ${message}`)
+      if (this.onReceive !== null) this.onReceive(message)
+    })
   }
 
   _connectionClosed() {
-    this._state = AWCStreamChannelState.CLOSED;
+    console.log(`[AWC] Connection closed`)
+    this._state = AWCStreamChannelState.CLOSED
     if (this.onClose !== null) this.onClose('')
   }
 
   _connectionReady() {
-    this._state = AWCStreamChannelState.OPEN;
+    console.log(`[AWC] Connection ready`)
+    this._state = AWCStreamChannelState.OPEN
     if (this.onReady !== null) this.onReady()
   }
 
-  async port(): Promise<chrome.runtime.Port> {
-    if (this._port !== null) {
-      console.log(`Popup extension already running`)
-      return this._port
-    }
-
-    console.log(`Wait for popup extension ...`)
-    await chrome.runtime.sendMessage(this.extensionId, 'waitForExtensionPopup')
-    console.log(`... ready`)
-
-
-    console.log(`Connecting to popup extension ...`)
-    this._port = chrome.runtime.connect(this.extensionId)
-    this._port.onDisconnect.addListener(() => {
-      this._port = null
-    })
-    this._port.onMessage.addListener((message: string, _) => {
-      console.log(`Received message ${message}`)
-      if (this.onReceive !== null) this.onReceive(message);
-    })
-    console.log(`... ready`)
-    return this._port
-  }
-
   async close(): Promise<void> {
-    this._port?.disconnect();
-    this._port = null;
+    this._port?.disconnect()
     this._connectionClosed()
   }
 
   async send(data: string): Promise<void> {
-    const port = await this.port()
-    await port.postMessage(data)
+    if (this._port == null) {
+      throw "[AWC] Disconnected"
+    }
+    await this._port.postMessage(data)
   }
 
-  public onReceive: ((data: string) => Promise<void>) | null = null;
+  public onReceive: ((data: string) => Promise<void>) | null = null
 
-  public onReady: (() => Promise<void>) | null = null;
+  public onReady: (() => Promise<void>) | null = null
 
-  public onClose: ((reason: string) => Promise<void>) | null = null;
+  public onClose: ((reason: string) => Promise<void>) | null = null
 
   get state(): AWCStreamChannelState {
     return this._state
