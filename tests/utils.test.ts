@@ -1,3 +1,4 @@
+import fc from "fast-check";
 import {
   isHex,
   hexToUint8Array,
@@ -130,6 +131,23 @@ describe("Utils", () => {
 
     it("should return decimals number with decimals passed in param", () => {
       expect(fromBigInt(12_534_500, 6)).toStrictEqual(12.5345);
+    });
+  });
+
+  describe("toBigInt(fromBigInt())", () => {
+    it("return the same value", () => {
+      fc.assert(
+        fc.property(fc.float(), (v) => {
+          // truncate at 8 decimal
+          // no need to test negative values
+          v = parseFloat(Math.abs(v).toFixed(8));
+
+          const bv = toBigInt(v);
+          const r = fromBigInt(bv);
+
+          expect(r).toStrictEqual(v);
+        })
+      );
     });
   });
 
