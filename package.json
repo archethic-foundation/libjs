@@ -45,6 +45,7 @@
     "@absinthe/socket": "^0.2.1",
     "blakejs": "^1.2.1",
     "buffer": "^6.0.3",
+    "core-js-pure": "^3.37.1",
     "cross-fetch": "^4.0.0",
     "crypto-js": "^4.1.1",
     "curve25519-js": "^0.0.4",

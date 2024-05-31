@@ -94,14 +94,14 @@ describe("Transaction builder", () => {
     it("should add an uco transfer to the transaction data", () => {
       const tx = new TransactionBuilder("transfer").addUCOTransfer(
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-        toBigInt(10.03)
+        toBigInt("10.03")
       );
 
       expect(tx.data.ledger.uco.transfers.length).toBe(1);
       expect(tx.data.ledger.uco.transfers[0].to).toStrictEqual(
         hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
       );
-      expect(tx.data.ledger.uco.transfers[0].amount).toStrictEqual(toBigInt(10.03));
+      expect(tx.data.ledger.uco.transfers[0].amount).toStrictEqual(toBigInt("10.03"));
     });
   });
 
@@ -109,7 +109,7 @@ describe("Transaction builder", () => {
     it("should add an token transfer to the transaction data", () => {
       const tx = new TransactionBuilder("transfer").addTokenTransfer(
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-        toBigInt(10.03),
+        toBigInt("10.03"),
         "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"
       );
 
@@ -117,7 +117,7 @@ describe("Transaction builder", () => {
       expect(tx.data.ledger.token.transfers[0].to).toStrictEqual(
         hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
       );
-      expect(tx.data.ledger.token.transfers[0].amount).toStrictEqual(toBigInt(10.03));
+      expect(tx.data.ledger.token.transfers[0].amount).toStrictEqual(toBigInt("10.03"));
       expect(tx.data.ledger.token.transfers[0].tokenAddress).toStrictEqual(
         hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
       );
@@ -173,10 +173,10 @@ describe("Transaction builder", () => {
             encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
           }
         ])
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt(0.202))
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt("0.202"))
         .addTokenTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          toBigInt(100),
+          toBigInt("100"),
           "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         )
         .setCode(code)
@@ -223,7 +223,7 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         concatUint8Arrays(
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt(0.202))
+          bigIntToUint8Array(toBigInt("0.202"))
         ),
         // Nb of byte to encode nb of Token transfers
         Uint8Array.from([1]),
@@ -232,7 +232,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays(
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt(100)),
+          bigIntToUint8Array(toBigInt("100")),
           Uint8Array.from([1]),
           Uint8Array.from([0])
         ),
@@ -271,10 +271,10 @@ describe("Transaction builder", () => {
             encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
           }
         ])
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt(0.202))
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt("0.202"))
         .addTokenTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          toBigInt(100),
+          toBigInt("100"),
           "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         )
         .setCode(code)
@@ -323,7 +323,7 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         concatUint8Arrays(
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt(0.202))
+          bigIntToUint8Array(toBigInt("0.202"))
         ),
         // Nb of byte to encode nb of Token transfers
         Uint8Array.from([1]),
@@ -332,7 +332,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays(
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt(100)),
+          bigIntToUint8Array(toBigInt("100")),
           Uint8Array.from([1]),
           Uint8Array.from([0])
         ),
@@ -465,7 +465,7 @@ describe("Transaction builder", () => {
   describe("build", () => {
     it("should build the transaction and the related signature", () => {
       const tx = new TransactionBuilder("transfer")
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.0)
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt("10.0"))
         .build("seed", 0, "ed25519", "sha256");
 
       expect(tx.address).toEqual(
@@ -504,10 +504,10 @@ describe("Transaction builder", () => {
             encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
           }
         ])
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt(0.202))
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt("0.202"))
         .addTokenTransfer(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          toBigInt(100),
+          toBigInt("100"),
           "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         )
         .setCode(code)
@@ -554,7 +554,7 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         concatUint8Arrays(
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt(0.202))
+          bigIntToUint8Array(toBigInt("0.202"))
         ),
         // Nb of byte to encode nb of Token transfers
         Uint8Array.from([1]),
@@ -563,7 +563,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays(
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt(100)),
+          bigIntToUint8Array(toBigInt("100")),
           Uint8Array.from([1]),
           Uint8Array.from([0])
         ),
@@ -592,50 +592,10 @@ describe("Transaction builder", () => {
     });
   });
 
-  describe("toJSON", () => {
-    it("should return a JSON from the transaction", () => {
-      const originKeypair = deriveKeyPair("origin_seed", 0);
-      const transactionKeyPair = deriveKeyPair("seed", 0);
-
-      const tx = new TransactionBuilder("transfer")
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt(0.2193))
-        .addOwnership(Uint8Array.from([0, 1, 2, 3, 4]), [
-          {
-            publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-            encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
-          }
-        ])
-        .build("seed", 0)
-        .originSign(originKeypair.privateKey);
-
-      const parsedTx = JSON.parse(tx.toJSON());
-
-      const previousSig = sign(tx.previousSignaturePayload(), transactionKeyPair.privateKey);
-      const originSig = sign(tx.originSignaturePayload(), originKeypair.privateKey);
-
-      expect(parsedTx.address).toStrictEqual(uint8ArrayToHex(deriveAddress("seed", 1)));
-      expect(parsedTx.type).toStrictEqual("transfer");
-      expect(parsedTx.previousPublicKey).toStrictEqual(uint8ArrayToHex(transactionKeyPair.publicKey));
-      expect(parsedTx.previousSignature).toStrictEqual(uint8ArrayToHex(previousSig));
-      expect(parsedTx.originSignature).toStrictEqual(uint8ArrayToHex(originSig));
-      expect(parsedTx.data.ownerships[0].secret).toStrictEqual(uint8ArrayToHex(Uint8Array.from([0, 1, 2, 3, 4])));
-      expect(parsedTx.data.ledger.uco.transfers[0]).toStrictEqual({
-        to: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-        amount: toBigInt(0.2193)
-      });
-      expect(parsedTx.data.ownerships[0].authorizedKeys).toStrictEqual([
-        {
-          publicKey: "0001b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-          encryptedSecretKey: "00501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
-        }
-      ]);
-    });
-  });
-
   describe("toWalletRPC", () => {
     it("should return a transaction object for RPC", () => {
       const tx = new TransactionBuilder("transfer")
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt(0.2193))
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt("0.2193"))
         .setContent("Hello world");
 
       const txRPC = tx.toWalletRPC();
@@ -645,7 +605,7 @@ describe("Transaction builder", () => {
       // @ts-ignore
       expect(txRPC.data.ledger.uco.transfers[0]).toStrictEqual({
         to: "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
-        amount: toBigInt(0.2193)
+        amount: toBigInt("0.2193")
       });
       // @ts-ignore
       expect(txRPC.data.content).toStrictEqual("Hello world");

@@ -5,8 +5,8 @@ export default {
   deserialize
 };
 
-function serialize(int: number): Uint8Array {
-  const buff = toByteArray(int);
+function serialize(int: number | bigint): Uint8Array {
+  const buff = toByteArray(parseInt(int.toString()));
 
   return concatUint8Arrays(Uint8Array.from([buff.length]), buff);
 }

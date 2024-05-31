@@ -14,8 +14,8 @@ describe("TE", () => {
     expect(TE.deserialize(TE.serialize(2 ** 40))).toBe(2 ** 40);
   });
   it("should serialize/deserialize a float", () => {
-    expect(TE.deserialize(TE.serialize(1.00000001))).toBe(1.00000001);
-    expect(TE.deserialize(TE.serialize(1.99999999))).toBe(1.99999999);
+    expect(TE.deserialize(TE.serialize(1.00000001))).toBe("1.00000001");
+    expect(TE.deserialize(TE.serialize(1.99999999))).toBe("1.99999999");
   });
   it("should serialize/deserialize a str", () => {
     expect(TE.deserialize(TE.serialize("hello"))).toBe("hello");

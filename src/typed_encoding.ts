@@ -65,13 +65,13 @@ function do_serialize_v1(data: any): Uint8Array {
       return concatUint8Arrays(
         Uint8Array.from([TYPE_INT]),
         Uint8Array.from([sign ? 1 : 0]),
-        VarInt.serialize(Math.abs(data))
+        VarInt.serialize(BigInt(Math.abs(data)))
       );
     } else {
       return concatUint8Arrays(
         Uint8Array.from([TYPE_FLOAT]),
         Uint8Array.from([sign ? 1 : 0]),
-        VarInt.serialize(toBigInt(Math.abs(data)))
+        VarInt.serialize(toBigInt(Math.abs(data).toString()))
       );
     }
   } else if (typeof data === "string") {

@@ -157,12 +157,12 @@ export default class TransactionBuilder {
   /**
    * Add a UCO transfer to the transaction
    * @param {string | Uint8Array} to Address of the recipient (hexadecimal or binary buffer)
-   * @param {number} amount Amount of UCO to transfer (in bigint)
+   * @param {bigint} amount Amount of UCO to transfer
    */
-  addUCOTransfer(to: string | Uint8Array, amount: number) {
+  addUCOTransfer(to: string | Uint8Array, amount: bigint) {
     to = maybeHexToUint8Array(to);
 
-    if (isNaN(amount) || amount <= 0) {
+    if (amount <= 0) {
       throw new Error("UCO transfer amount must be a positive number");
     }
 
@@ -173,15 +173,15 @@ export default class TransactionBuilder {
   /**
    * Add a token transfer to the transaction
    * @param {string | Uint8Array} to Address of the recipient (hexadecimal or binary buffer)
-   * @param {number} amount Amount of UCO to transfer (in bigint)
+   * @param {BigInt} amount Amount of UCO to transfer
    * @param {string | Uint8Array} tokenAddress Address of token to spend (hexadecimal or binary buffer)
    * @param {number} tokenId ID of the token to use (default to 0)
    */
-  addTokenTransfer(to: string | Uint8Array, amount: number, tokenAddress: string | Uint8Array, tokenId: number = 0) {
+  addTokenTransfer(to: string | Uint8Array, amount: bigint, tokenAddress: string | Uint8Array, tokenId: number = 0) {
     to = maybeHexToUint8Array(to);
     tokenAddress = maybeHexToUint8Array(tokenAddress);
 
-    if (isNaN(amount) || amount <= 0) {
+    if (amount <= 0) {
       throw new Error("Token transfer amount must be a positive number");
     }
 
@@ -484,14 +484,6 @@ export default class TransactionBuilder {
       previousSignature: uint8ArrayToHex(this.previousSignature),
       originSignature: this.originSignature && uint8ArrayToHex(this.originSignature)
     };
-  }
-
-  /**
-   * REST API (deprecated, replaced by JSON RPC API)
-   * content is hexadecimal
-   */
-  toJSON(): string {
-    return JSON.stringify(this.toNodeRPC());
   }
 
   /**

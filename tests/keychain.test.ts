@@ -1,5 +1,5 @@
 import Keychain, { keyToJWK } from "../src/keychain";
-import { uint8ArrayToHex, concatUint8Arrays, wordArrayToUint8Array } from "../src/utils";
+import { uint8ArrayToHex, concatUint8Arrays, wordArrayToUint8Array, toBigInt } from "../src/utils";
 import { deriveAddress, deriveKeyPair, ecDecrypt, aesDecrypt, verify } from "../src/crypto";
 import TransactionBuilder from "../src/transaction_builder";
 // @ts-ignore
@@ -180,7 +180,7 @@ describe("Keychain", () => {
 
       const tx = new TransactionBuilder()
         .setType("transfer")
-        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", 10.0);
+        .addUCOTransfer("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", toBigInt("10.0"));
 
       keychain.buildTransaction(tx, "uco", 0);
 

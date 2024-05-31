@@ -2,6 +2,7 @@ import Keychain from "../src/keychain";
 import Account from "../src/account";
 import Archethic from "../src/index";
 import { deriveKeyPair, randomSecretKey } from "../src/crypto";
+import { uint8ArrayToHex } from "../src/utils";
 const nock = require("nock");
 
 describe("Account", () => {
@@ -72,14 +73,13 @@ describe("Account", () => {
       .addService("uco", "m/650'/0/0")
       .addAuthorizedPublicKey(publicKey);
 
-    const keychainTx = JSON.parse(account.newKeychainTransaction(expectedKeychain, 0).toJSON());
-
-    const accessTx = JSON.parse(account.newAccessTransaction("seed", keychainTx.address).toJSON());
+    const keychainTx = account.newKeychainTransaction(expectedKeychain, 0);
+    const accessTx = account.newAccessTransaction("seed", keychainTx.address);
 
     nock("http://localhost:4000")
       .post("/api", {
         query: `query {
-                    transaction(address: "${accessTx.address}") {
+                    transaction(address: "${uint8ArrayToHex(accessTx.address)}") {
                       data {
                         ownerships {
                           secret,
@@ -98,8 +98,15 @@ describe("Account", () => {
             data: {
               ownerships: [
                 {
-                  secret: accessTx.data.ownerships[0].secret,
-                  authorizedPublicKeys: accessTx.data.ownerships[0].authorizedKeys
+                  secret: uint8ArrayToHex(accessTx.data.ownerships[0].secret),
+                  authorizedPublicKeys: accessTx.data.ownerships[0].authorizedPublicKeys.map(
+                    ({ publicKey, encryptedSecretKey }) => {
+                      return {
+                        publicKey: uint8ArrayToHex(publicKey),
+                        encryptedSecretKey: uint8ArrayToHex(encryptedSecretKey)
+                      };
+                    }
+                  )
                 }
               ]
             }
@@ -110,7 +117,7 @@ describe("Account", () => {
     nock("http://localhost:4000")
       .post("/api", {
         query: `query {
-                    lastTransaction(address: "${keychainTx.address}") {
+                    lastTransaction(address: "${uint8ArrayToHex(keychainTx.address)}") {
                       data {
                         ownerships {
                           secret,
@@ -129,8 +136,15 @@ describe("Account", () => {
             data: {
               ownerships: [
                 {
-                  secret: keychainTx.data.ownerships[0].secret,
-                  authorizedPublicKeys: keychainTx.data.ownerships[0].authorizedKeys
+                  secret: uint8ArrayToHex(keychainTx.data.ownerships[0].secret),
+                  authorizedPublicKeys: keychainTx.data.ownerships[0].authorizedPublicKeys.map(
+                    ({ publicKey, encryptedSecretKey }) => {
+                      return {
+                        publicKey: uint8ArrayToHex(publicKey),
+                        encryptedSecretKey: uint8ArrayToHex(encryptedSecretKey)
+                      };
+                    }
+                  )
                 }
               ]
             }

@@ -110,6 +110,7 @@ describe("Network", () => {
         "content-type": "application/json"
       }
     })
+      // @ts-ignore
       .post("/api/rpc", {
         jsonrpc: "2.0",
         id: 1,
@@ -118,7 +119,7 @@ describe("Network", () => {
           transaction: tx.toNodeRPC()
         }
       })
-
+      // @ts-ignore
       .reply(200, {
         id: 1,
         jsonrpc: "2.0",
@@ -148,6 +149,7 @@ describe("Network", () => {
         "content-type": "application/json"
       }
     })
+      // @ts-ignore
       .post("/api/rpc", {
         jsonrpc: "2.0",
         id: 1,
@@ -156,7 +158,7 @@ describe("Network", () => {
           transaction: tx.toNodeRPC()
         }
       })
-
+      // @ts-ignore
       .reply(200, {
         id: 1,
         jsonrpc: "2.0",
@@ -183,6 +185,7 @@ describe("Network", () => {
         "content-type": "application/json"
       }
     })
+      // @ts-ignore
       .post("/api/rpc", {
         jsonrpc: "2.0",
         id: 1,
@@ -191,7 +194,7 @@ describe("Network", () => {
           transaction: tx.toNodeRPC()
         }
       })
-
+      // @ts-ignore
       .reply(200, {
         id: 1,
         jsonrpc: "2.0",

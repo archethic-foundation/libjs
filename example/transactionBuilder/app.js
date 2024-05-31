@@ -183,16 +183,11 @@ window.onClickAddTransfer = () => {
   const transfer_to = document.querySelector("#amount_address").value;
   const transferAmount = document.querySelector("#uco_amount").value;
 
-  const amount = parseFloat(transferAmount);
-  if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
-    return;
-  }
-
   if (transfer_to == "") {
     return;
   }
 
-  ucoTransfers.push({ to: transfer_to, amount: toBigInt(amount) });
+  ucoTransfers.push({ to: transfer_to, amount: toBigInt(transferAmount) });
 
   const option = document.createElement("option");
   option.text = transfer_to + ": " + transferAmount;
@@ -212,11 +207,6 @@ window.onClickAddTokenTransfer = async () => {
   const transferToken = document.querySelector("#token_address").value;
   const transferTokenId = document.querySelector("#token_id").value;
 
-  const amount = parseFloat(transferAmount);
-  if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
-    return;
-  }
-
   if (transfer_to == "") {
     return;
   }
@@ -231,7 +221,7 @@ window.onClickAddTokenTransfer = async () => {
 
   tokenTransfers.push({
     to: transfer_to,
-    amount: toBigInt(amount, decimals),
+    amount: toBigInt(transferAmount, decimals),
     token: transferToken,
     tokenId: parseInt(transferTokenId)
   });
