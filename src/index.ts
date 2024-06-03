@@ -2,8 +2,7 @@ import Account, { Keychain } from "./account.js";
 import * as Api from "./api.js";
 import { NodeRPCClient } from "./api/node_rpc.js";
 import { ConnectionState } from "./api/types.js";
-import { AWCWebBrowserExtensionStreamChannel } from "./api/wallet_rpc.browserextension.js";
-import { ArchethicWalletClient } from "./api/wallet_rpc.js";
+import { AWCStreamChannel, AWCStreamChannelState, ArchethicWalletClient } from "./api/wallet_rpc.js";
 import * as Crypto from "./crypto.js";
 import { AWCEndpoint, Endpoint } from "./endpoint.js";
 import Network from "./network.js";
@@ -11,7 +10,8 @@ import Transaction from "./transaction.js";
 import * as Utils from "./utils.js";
 
 export {
-  AWCWebBrowserExtensionStreamChannel,
+  AWCStreamChannel,
+  AWCStreamChannelState,
   ArchethicWalletClient,
   ConnectionState,
   Crypto,
