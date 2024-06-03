@@ -3,7 +3,7 @@ import absinthe from "./api/absinthe.js";
 import TransactionBuilder from "./transaction_builder.js";
 import { AbsintheSocket } from "@absinthe/socket";
 import Archethic from "./index.js";
-import { RpcError } from "./api/types.js";
+import { RpcError, ErrorReason } from "./api/types.js";
 
 const senderContext = "SENDER";
 
@@ -106,7 +106,7 @@ export default class TransactionSender {
       );
       this.errorNotifier = await waitError(txAddress, this.absintheSocket, handleError.bind(this));
     } catch (err: any) {
-      this.onError.forEach((func) => func(senderContext, err.message, this));
+      this.onError.forEach((func) => func(senderContext, { code: 500, message: err.message }, this));
       return this;
     }
 
@@ -115,7 +115,13 @@ export default class TransactionSender {
       .then(() => {
         handleSend.call(this, timeout);
       })
-      .catch((err: RpcError) => handleError.call(this, senderContext, err));
+      .catch((err: RpcError) =>
+        handleError.call(this, senderContext, {
+          code: err.code,
+          message: err.message,
+          data: err.data
+        })
+      );
     return this;
   }
 
@@ -189,20 +195,28 @@ async function waitConfirmations(
   });
 }
 
-async function waitError(address: string | Uint8Array, absintheSocket: any, handler: Function): Promise<unknown> {
+async function waitError(
+  address: string | Uint8Array,
+  absintheSocket: any,
+  handler: (context: string, errorReason: ErrorReason) => void
+): Promise<unknown> {
   const operation = `
     subscription {
       transactionError(address: "${maybeUint8ArrayToHex(address)}") {
         context,
-        reason
+        error {
+          code,
+          data,
+          message
+        }
       }
     }
     `;
   const notifier = absinthe.send(absintheSocket, operation);
   return absinthe.observe(absintheSocket, notifier, (result: any) => {
     if (result.data.transactionError) {
-      const { context, reason } = result.data.transactionError;
-      handler(context, reason);
+      const { context, error } = result.data.transactionError;
+      handler(context, error);
     }
   });
 }
@@ -236,14 +250,14 @@ function handleConfirmation(
   }
 }
 
-function handleError(this: TransactionSender, context: any, reason: any) {
+function handleError(this: TransactionSender, context: any, error: ErrorReason) {
   clearTimeout(this.timeout);
 
   // Unsubscribe to all subscriptions
   absinthe.cancel(this.absintheSocket as AbsintheSocket, this.confirmationNotifier);
   absinthe.cancel(this.absintheSocket as AbsintheSocket, this.errorNotifier);
 
-  this.onError.forEach((func) => func(context, reason, this));
+  this.onError.forEach((func) => func(context, error, this));
 }
 
 function handleSend(this: TransactionSender, timeout: number) {

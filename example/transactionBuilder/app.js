@@ -292,7 +292,7 @@ window.onChangeRecipient = async () => {
       paramInput.setAttribute("class", "input");
       paramInput.addEventListener("change", function (e) {
         const value = e.target.value;
-        namedParams[index] = value;
+        namedParams[index] = Contract.parseTypedArgument(value);
       });
 
       paramsContainer.appendChild(paramLabel);
@@ -358,10 +358,22 @@ window.sendTransaction = async () => {
       document.querySelector("#confirmations").innerText = nbConfirmations;
       document.querySelector("#maxConfirmations").innerText = maxConfirmations;
     })
-    .on("error", (context, reason) => {
+    .on("error", (context, error) => {
+      let errMsg = `<p>${context}</p><p style="padding-left: 10px">(${error.code}) ${error.message}</p>`;
+      if (error.data && error.data.message) {
+        if (error.data.recipient) {
+          errMsg += `<p style="padding-left: 20px">Calling ${error.data.recipient}</p>`;
+        }
+        if (error.data.data) {
+          errMsg += `<p style="padding-left: 20px">(${error.data.data.code}) ${error.data.data.message}</p>`;
+        } else {
+          errMsg += `<p style="padding-left: 20px">${error.data.message}</p>`;
+        }
+      }
+
       document.querySelector("#confirmed").style.display = "none";
       document.querySelector("#transaction_error").style.display = "block";
-      document.querySelector("#error_reason").innerText = reason;
+      document.querySelector("#error_reason").innerHTML = errMsg;
     })
     .on("sent", () => {
       document.querySelector("#success").style.display = "block";
