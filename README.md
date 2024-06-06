@@ -1017,7 +1017,7 @@ archethic.rpcWallet.getServices().then((services) => {
 });
 ```
 
-### onAccountChange(accountName, callback) : RpcSubscription
+### onAccountUpdate(accountName, callback) : RpcSubscription
 
 Listens to an account's changes.
 
@@ -1032,7 +1032,27 @@ await archethic.rpcWallet.setOrigin({
   url: "https://great_app.com"
 });
 
-const subscription = await archethic.rpcWallet.onAccountChange("account name", (account) => {
+const subscription = await archethic.rpcWallet.onAccountUpdate("account name", (account) => {
+  console.log(JSON.stringify(account));
+});
+```
+
+### onCurrentAccountChange(callback) : RpcSubscription
+
+Listens account selection in wallet.
+
+```js
+import Archethic from "@archethicjs/sdk";
+
+const archethic = new Archethic("ws://localhost:12345");
+await archethic.connect();
+
+await archethic.rpcWallet.setOrigin({
+  name: "My DApp",
+  url: "https://great_app.com"
+});
+
+const subscription = await archethic.rpcWallet.onCurrentAccountChange((account) => {
   console.log(JSON.stringify(account));
 });
 ```
@@ -1071,7 +1091,7 @@ await archethic.rpcWallet.setOrigin({
   url: "https://great_app.com"
 })
 
-const subscription // subscription from a previous call (onAccountChange for example)
+const subscription // subscription from a previous call (onAccountUpdate for example)
 
 await archethic.rpcWallet.unsubscribe(subscription)
 ```
