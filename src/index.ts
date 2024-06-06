@@ -4,7 +4,7 @@ import { NodeRPCClient } from "./api/node_rpc.js";
 import { ConnectionState } from "./api/types.js";
 import { AWCStreamChannel, AWCStreamChannelState, ArchethicWalletClient } from "./api/wallet_rpc.js";
 import * as Crypto from "./crypto.js";
-import { AWCEndpoint, Endpoint } from "./endpoint.js";
+import { AWCEndpoint, Endpoint, EndpointFactory } from "./endpoint.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
 import * as Utils from "./utils.js";
@@ -32,7 +32,7 @@ export default class Archethic {
    * @param endpoint if undefined, endpoint will be resolved using ArchethicWalletClient.
    */
   constructor(endpoint: string | undefined) {
-    this.endpoint = Endpoint.build(endpoint);
+    this.endpoint = new EndpointFactory().build(endpoint);
     if (this.endpoint instanceof AWCEndpoint) {
       this.rpcWallet = this.endpoint.rpcClient;
     }

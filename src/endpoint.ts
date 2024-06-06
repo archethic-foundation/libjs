@@ -3,16 +3,19 @@ import { AWCWebBrowserExtension } from "./api/wallet_rpc.browserextension.js";
 import { ArchethicWalletClient } from "./api/wallet_rpc.js";
 import { AWCWebsocketStreamChannel } from "./api/wallet_rpc.websocket.js";
 
-export abstract class Endpoint {
-  abstract get isRpcAvailable(): boolean;
-  abstract get origin(): string;
-  abstract get nodeEndpoint(): URL | null;
+export interface Endpoint {
+  get isRpcAvailable(): boolean;
+  get origin(): string;
+  get nodeEndpoint(): URL | null;
 
+}
+
+export class EndpointFactory {
   /**
    * @param {String | undefined} endpoint
    * @return {Endpoint}
    */
-  static build(endpoint: string | undefined): Endpoint {
+  build(endpoint: string | undefined): Endpoint {
     if (endpoint === undefined) {
       console.log('Using AWC client');
       return new AWCEndpoint(
@@ -54,7 +57,7 @@ export class DirectEndpoint implements Endpoint {
 }
 
 
-export class AWCEndpoint extends Endpoint {
+export class AWCEndpoint implements Endpoint {
   public readonly rpcClient: ArchethicWalletClient;
   public readonly origin: string;
   private _nodeEndpoint: URL | null;
@@ -67,8 +70,6 @@ export class AWCEndpoint extends Endpoint {
    * @param {String} endpoint
    */
   constructor(client: ArchethicWalletClient) {
-    super()
-
     /** @type {ArchethicWalletClient} */
     this.rpcClient = client;
 
