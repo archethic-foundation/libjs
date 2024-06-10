@@ -20,3 +20,15 @@ export function extractActionsFromContract(code: string): ContractAction[] {
 
   return actions;
 }
+
+export function parseTypedArgument(input: any): any {
+  // Check if input is an object
+  if (typeof input === "object") {
+    return input; // Return input as is
+  } else if (!isNaN(input)) {
+    // Check if input is a number
+    return parseFloat(input); // Parse input as a float
+  } else {
+    return input; // Return input as string
+  }
+}
