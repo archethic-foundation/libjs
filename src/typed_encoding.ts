@@ -105,10 +105,10 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
       return nextUint8(iter) == 1;
 
     case TYPE_INT:
-      return nextUint8(iter) == 1 ? VarInt.deserialize(iter) : VarInt.deserialize(iter) * -1;
+      return nextUint8(iter) == 1 ? VarInt.deserialize(iter) : VarInt.deserialize(iter) * -1n;
 
     case TYPE_FLOAT:
-      return nextUint8(iter) == 1 ? fromBigInt(VarInt.deserialize(iter)) : fromBigInt(VarInt.deserialize(iter) * -1);
+      return nextUint8(iter) == 1 ? fromBigInt(VarInt.deserialize(iter)) : fromBigInt(VarInt.deserialize(iter) * -1n);
 
     case TYPE_STR: {
       const strLen = VarInt.deserialize(iter);

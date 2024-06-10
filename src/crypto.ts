@@ -2,7 +2,7 @@ import { Curve, HashAlgorithm, Keypair } from "./types.js";
 import {
   concatUint8Arrays,
   hexToUint8Array,
-  intToUint8Array,
+  intToUint32Array,
   maybeHexToUint8Array,
   maybeStringToUint8Array,
   uint8ArrayToHex,
@@ -178,7 +178,7 @@ export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): 
   const masterEntropy = hash.subarray(32, 64);
 
   //Derive the final seed
-  const indexBuf = intToUint8Array(index);
+  const indexBuf = intToUint32Array(index);
   const extendedSeed = concatUint8Arrays(masterKey, indexBuf);
 
   const hmacWordArray = CryptoJS.HmacSHA512(

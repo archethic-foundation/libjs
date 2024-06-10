@@ -8,12 +8,12 @@ import {
   TransactionRPC
 } from "./types.js";
 import {
-  bigIntToUint8Array,
   concatUint8Arrays,
   intToUint8Array,
+  intToUint32Array,
+  intToUint64Array,
   maybeHexToUint8Array,
   maybeStringToUint8Array,
-  toByteArray,
   uint8ArrayToHex
 } from "./utils.js";
 import TE from "./typed_encoding.js";
@@ -338,14 +338,14 @@ export default class TransactionBuilder {
    * Generate the payload for the previous signature by encoding address,  type and data
    */
   previousSignaturePayload() {
-    const bufCodeSize = intToUint8Array(this.data.code.length);
+    const bufCodeSize = intToUint32Array(this.data.code.length);
 
     let contentSize = this.data.content.length;
 
-    const bufContentSize = intToUint8Array(contentSize);
+    const bufContentSize = intToUint32Array(contentSize);
 
     const ownershipsBuffer = this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
-      const bufAuthKeyLength = toByteArray(authorizedPublicKeys.length);
+      const bufAuthKeyLength = intToUint8Array(authorizedPublicKeys.length);
       const authorizedKeysBuffer = [Uint8Array.from([bufAuthKeyLength.length]), bufAuthKeyLength];
 
       // Sort authorized public key by alphabethic order
@@ -356,19 +356,19 @@ export default class TransactionBuilder {
         authorizedKeysBuffer.push(maybeHexToUint8Array(encryptedSecretKey));
       });
 
-      return concatUint8Arrays(intToUint8Array(secret.byteLength), secret, concatUint8Arrays(...authorizedKeysBuffer));
+      return concatUint8Arrays(intToUint32Array(secret.byteLength), secret, concatUint8Arrays(...authorizedKeysBuffer));
     });
 
     const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
-      return concatUint8Arrays(transfer.to, bigIntToUint8Array(transfer.amount));
+      return concatUint8Arrays(transfer.to, intToUint64Array(transfer.amount));
     });
 
     const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
-      const bufTokenId = toByteArray(transfer.tokenId);
+      const bufTokenId = intToUint8Array(transfer.tokenId);
       return concatUint8Arrays(
         transfer.tokenAddress,
         transfer.to,
-        bigIntToUint8Array(transfer.amount),
+        intToUint64Array(transfer.amount),
         Uint8Array.from([bufTokenId.length]),
         bufTokenId
       );
@@ -401,13 +401,13 @@ export default class TransactionBuilder {
       }
     });
 
-    const bufOwnershipLength = toByteArray(this.data.ownerships.length);
-    const bufUCOTransferLength = toByteArray(this.data.ledger.uco.transfers.length);
-    const bufTokenTransferLength = toByteArray(this.data.ledger.token.transfers.length);
-    const bufRecipientLength = toByteArray(this.data.recipients.length);
+    const bufOwnershipLength = intToUint8Array(this.data.ownerships.length);
+    const bufUCOTransferLength = intToUint8Array(this.data.ledger.uco.transfers.length);
+    const bufTokenTransferLength = intToUint8Array(this.data.ledger.token.transfers.length);
+    const bufRecipientLength = intToUint8Array(this.data.recipients.length);
 
     return concatUint8Arrays(
-      intToUint8Array(VERSION),
+      intToUint32Array(VERSION),
       this.address,
       Uint8Array.from([getTransactionTypeId(this.type)]),
       bufCodeSize,

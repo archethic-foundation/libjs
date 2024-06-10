@@ -1,13 +1,6 @@
 import TransactionBuilder from "../src/transaction_builder";
 import { deriveAddress, deriveKeyPair, sign, verify } from "../src/crypto";
-import {
-  bigIntToUint8Array,
-  concatUint8Arrays,
-  hexToUint8Array,
-  intToUint8Array,
-  toBigInt,
-  uint8ArrayToHex
-} from "../src/utils";
+import { concatUint8Arrays, hexToUint8Array, intToUint8Array, intToUint32Array, toBigInt } from "../src/utils";
 import { Curve } from "../src/types";
 import TE from "../src/typed_encoding";
 
@@ -192,21 +185,21 @@ describe("Transaction builder", () => {
 
       const expected_binary = concatUint8Arrays(
         //Version
-        intToUint8Array(VERSION),
+        intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
         //Code size
-        intToUint8Array(code.length),
+        intToUint32Array(code.length),
         new TextEncoder().encode(code),
         //Content size
-        intToUint8Array(content.length),
+        intToUint32Array(content.length),
         new TextEncoder().encode(content),
         // Nb of byte to encode nb of ownerships
         Uint8Array.from([1]),
         //Nb of ownerships
         Uint8Array.from([1]),
         //Secret size
-        intToUint8Array(secret.length),
+        intToUint32Array(secret.length),
         new TextEncoder().encode(secret),
         // Nb of byte to encode nb of authorized keys
         Uint8Array.from([1]),
@@ -223,7 +216,7 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         concatUint8Arrays(
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt("0.202"))
+          intToUint8Array(toBigInt("0.202"))
         ),
         // Nb of byte to encode nb of Token transfers
         Uint8Array.from([1]),
@@ -232,7 +225,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays(
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt("100")),
+          intToUint8Array(toBigInt("100")),
           Uint8Array.from([1]),
           Uint8Array.from([0])
         ),
@@ -292,21 +285,21 @@ describe("Transaction builder", () => {
 
       const expected_binary = concatUint8Arrays(
         //Version
-        intToUint8Array(VERSION),
+        intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
         //Code size
-        intToUint8Array(code.length),
+        intToUint32Array(code.length),
         new TextEncoder().encode(code),
         //Content size
-        intToUint8Array(content.length),
+        intToUint32Array(content.length),
         new TextEncoder().encode(content),
         // Nb of byte to encode nb of ownerships
         Uint8Array.from([1]),
         //Nb of ownerships
         Uint8Array.from([1]),
         //Secret size
-        intToUint8Array(secret.length),
+        intToUint32Array(secret.length),
         new TextEncoder().encode(secret),
         // Nb of byte to encode nb of authorized keys
         Uint8Array.from([1]),
@@ -323,7 +316,7 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         concatUint8Arrays(
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt("0.202"))
+          intToUint8Array(toBigInt("0.202"))
         ),
         // Nb of byte to encode nb of Token transfers
         Uint8Array.from([1]),
@@ -332,7 +325,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays(
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt("100")),
+          intToUint8Array(toBigInt("100")),
           Uint8Array.from([1]),
           Uint8Array.from([0])
         ),
@@ -372,13 +365,13 @@ describe("Transaction builder", () => {
 
       const expected_binary = concatUint8Arrays(
         //Version
-        intToUint8Array(VERSION),
+        intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
         //Code size
-        intToUint8Array(0),
+        intToUint32Array(0),
         //Content size
-        intToUint8Array(0),
+        intToUint32Array(0),
         // Nb of byte to encode nb of ownerships
         Uint8Array.from([1]),
         //Nb of ownerships
@@ -521,21 +514,21 @@ describe("Transaction builder", () => {
       const payload = tx.originSignaturePayload();
       const expected_binary = concatUint8Arrays(
         //Version
-        intToUint8Array(VERSION),
+        intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
         //Code size
-        intToUint8Array(code.length),
+        intToUint32Array(code.length),
         new TextEncoder().encode(code),
         //Content size
-        intToUint8Array(content.length),
+        intToUint32Array(content.length),
         new TextEncoder().encode(content),
         // Nb of byte to encode nb of ownerships
         Uint8Array.from([1]),
         //Nb ownerships
         Uint8Array.from([1]),
         //Secret size
-        intToUint8Array(secret.length),
+        intToUint32Array(secret.length),
         new TextEncoder().encode(secret),
         // Nb of byte to encode nb of authorized key
         Uint8Array.from([1]),
@@ -554,7 +547,7 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         concatUint8Arrays(
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt("0.202"))
+          intToUint8Array(toBigInt("0.202"))
         ),
         // Nb of byte to encode nb of Token transfers
         Uint8Array.from([1]),
@@ -563,7 +556,7 @@ describe("Transaction builder", () => {
         concatUint8Arrays(
           hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
           hexToUint8Array("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646"),
-          bigIntToUint8Array(toBigInt("100")),
+          intToUint8Array(toBigInt("100")),
           Uint8Array.from([1]),
           Uint8Array.from([0])
         ),

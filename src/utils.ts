@@ -97,25 +97,30 @@ export function maybeUint8ArrayToHex(bytes: Uint8Array | string): string {
 }
 
 /**
+ * Encode any integer into Uint8Array
+ * @param int Integer to encode
+ * @returns {Uint8Array} Encoded integer
+ */
+export function intToUint8Array(int: number | bigint): Uint8Array {
+  return toByteArray(int);
+}
+
+/**
  * Encode an integer into a Uint8Array (4 bytes)
  * @param int Integer to encode
  * @returns {Uint8Array} Encoded integer
  */
-export function intToUint8Array(int: number): Uint8Array {
+export function intToUint32Array(int: number): Uint8Array {
   const buffer = new ArrayBuffer(4);
   const view = new DataView(buffer);
   view.setUint32(0x0, int, true);
   return new Uint8Array(buffer).reverse();
 }
 
-/**
- * Encode a big integer into a Uint8Array (8 bytes)
- * @param {Number} number Number to encode
- */
-export function bigIntToUint8Array(number: bigint | number): Uint8Array {
+export function intToUint64Array(int: number | bigint): Uint8Array {
   const buffer = new ArrayBuffer(8);
   const view = new DataView(buffer);
-  view.setBigUint64(0x0, getBigNumber(number), true);
+  view.setBigUint64(0x0, getBigNumber(int), true);
   return new Uint8Array(buffer).reverse();
 }
 
@@ -123,12 +128,8 @@ export function bigIntToUint8Array(number: bigint | number): Uint8Array {
  * Decode byte array (4 bytes) into a integer
  * @param {Uint8Array} bytes Bytes array to decode
  */
-export function uint8ArrayToInt(bytes: Uint8Array): number {
-  let value = 0;
-  for (const element of bytes) {
-    value = value * 256 + element;
-  }
-  return value;
+export function uint8ArrayToInt(bytes: Uint8Array): bigint {
+  return fromByteArray(bytes);
 }
 
 /**
@@ -261,30 +262,51 @@ export function base64url(arraybuffer: ArrayBuffer): string {
 }
 
 /**
- * Convert any number into a byte array
+ * Convert any number into a byte uint8Array
  */
-export function toByteArray(number: number): Uint8Array {
-  if (number === 0) return Uint8Array.from([0]);
+function toByteArray(number: number | bigint): Uint8Array {
+  var hex = getBigNumber(number).toString(16);
 
-  const arr = [];
-  while (number >= 256) {
-    arr.push(number % 256);
-    number = Math.floor(number / 256);
+  //Fix padding issue for invalid hex string
+  if (hex.length % 2) {
+    hex = "0" + hex;
   }
 
-  arr.push(number % 256);
+  // The byteLength will be half of the hex string length
+  var len = hex.length / 2;
+  var u8 = new Uint8Array(len);
 
-  return new Uint8Array(arr).reverse();
+  // And then we can iterate each element by one
+  // and each hex segment by two
+  var i = 0;
+  var j = 0;
+  while (i < len) {
+    u8[i] = parseInt(hex.slice(j, j + 2), 16);
+    i += 1;
+    j += 2;
+  }
+
+  return u8;
 }
 
 /**
- * Alias of uint8ArrayToInt
+ * Convert any byte array into a number
  *
  * @param bytes
  * @returns the number
  */
-export function fromByteArray(bytes: Uint8Array): number {
-  return uint8ArrayToInt(bytes);
+function fromByteArray(bytes: Uint8Array): bigint {
+  let hex: string[] = [];
+
+  bytes.forEach(function (i) {
+    var h = i.toString(16);
+    if (h.length % 2) {
+      h = "0" + h;
+    }
+    hex.push(h);
+  });
+
+  return BigInt("0x" + hex.join(""));
 }
 
 /**
