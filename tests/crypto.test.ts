@@ -206,7 +206,7 @@ describe("crypto", () => {
       const keypair1 = deriveKeyPair("seed", 0);
       const keypair2 = deriveKeyPair("seed2", 0);
       const secret = new TextEncoder().encode("mySecret");
-      const result = encryptSecret(secret, [keypair1.publicKey, keypair2.publicKey]);
+      const result = encryptSecret(secret, keypair1.publicKey, keypair2.publicKey);
 
       const secretDecrypted1 = decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair1);
       const secretDecrypted2 = decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair2);
@@ -219,7 +219,7 @@ describe("crypto", () => {
       const keypair2 = deriveKeyPair("seed2", 0);
       const secret = "mySecret";
       const publicKey = uint8ArrayToHex(keypair1.publicKey);
-      const result = encryptSecret(secret, [publicKey]);
+      const result = encryptSecret(secret, ...[publicKey]);
 
       expect(() => {
         decryptSecret(result.encryptedSecret, result.authorizedKeys, keypair2);

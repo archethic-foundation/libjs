@@ -700,7 +700,7 @@ export function getServiceGenesisAddress(keychain: Keychain, service: string, su
 /**
  * Encrypts a secret using a given public key
  * @param {string | Uint8Array} secret The secret to encrypt
- * @param {string | string[] | Uint8Array | Uint8Array[]} publicKeys The public keys authorized to decrypt the secret
+ * @param {string[] | Uint8Array[]} publicKeys The public keys authorized to decrypt the secret
  * @returns {{encryptedSecret: Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]}}
  * @example
  * const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
@@ -717,15 +717,12 @@ export function getServiceGenesisAddress(keychain: Keychain, service: string, su
  */
 export function encryptSecret(
   secret: string | Uint8Array,
-  publicKeys: string | string[] | Uint8Array | Uint8Array[]
+  ...publicKeys: string[] | Uint8Array[]
 ): { encryptedSecret: Uint8Array; authorizedKeys: AuthorizedKeyUserInput[] } {
-  const publicKeysWrapped =
-    typeof publicKeys == "string" || publicKeys instanceof Uint8Array ? [publicKeys] : publicKeys;
-
   const aesKey = randomSecretKey();
   const encryptedSecret = aesEncrypt(secret, aesKey);
 
-  const authorizedKeys: AuthorizedKeyUserInput[] = publicKeysWrapped.map((publicKey) => {
+  const authorizedKeys: AuthorizedKeyUserInput[] = publicKeys.map((publicKey) => {
     const encryptedAesKey = uint8ArrayToHex(ecEncrypt(aesKey, publicKey));
     return { encryptedSecretKey: encryptedAesKey, publicKey: maybeUint8ArrayToHex(publicKey) };
   });
@@ -757,4 +754,3 @@ export function decryptSecret(
   const aesKey = ecDecrypt(authorizedKey.encryptedSecretKey, keyPair.privateKey);
   return aesDecrypt(encryptedSecret, aesKey);
 }
-
