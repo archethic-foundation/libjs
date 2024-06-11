@@ -24,7 +24,7 @@ export enum UserTypeTransaction {
   code_approval = "code_approval"
 }
 
-enum NetworkTypeTransaction {
+export enum NetworkTypeTransaction {
   node = "node",
   node_shared_secrets = "node_shared_secrets",
   origin_shared_secrets = "origin_shared_secrets",
@@ -72,7 +72,8 @@ export type Token = {
 
 type CrossValidationStamp = {
   nodePubliKey: string;
-  signature: string; // Hexadecimal
+  /** Hexadecimal */
+  signature: string;
 };
 
 export type TransactionData = {
@@ -116,16 +117,19 @@ export type Recipient = {
 
 export type Ownership = {
   authorizedPublicKeys: AuthorizedKey[];
-  secret: Uint8Array; // Hexadecimal
+  /** Hexadecimal */
+  secret: Uint8Array;
 };
 
 export type AuthorizedKey = {
-  encryptedSecretKey: Uint8Array; // hexadecimal
+  /** Hexadecimal */
+  encryptedSecretKey: Uint8Array;
   publicKey: Uint8Array;
 };
 
 export type AuthorizedKeyUserInput = {
-  encryptedSecretKey: string; // hexadecimal
+  /** Hexadecimal */
+  encryptedSecretKey: string;
   publicKey: string;
 };
 
@@ -246,6 +250,39 @@ export type TransactionFee = {
     eur: number;
     usd: number;
   };
+};
+
+export type DIDVerificationMethod = {
+  id: string;
+  type: string;
+  controller: string;
+  publicKeyJwk?: object;
+  publicKeyMultibase?: string;
+};
+
+export type DIDService = {
+  id: string;
+  type: string;
+  serviceEndpoint: string;
+};
+
+export type DIDDocument = {
+  "@context": string[];
+  id: string;
+  alsoKnownAs?: string[];
+  controller?: string;
+  verificationMethod?: DIDVerificationMethod[];
+  authentication?: string[];
+  assertionMethod?: string[];
+  keyAgreement?: string[];
+  capabilityInvocation?: string[];
+  capabilityDelegation?: string[];
+  service?: Service[];
+};
+
+export type ecEncryptServiceSeed = {
+  secret: Uint8Array;
+  authorizedPublicKeys: AuthorizedKey[];
 };
 
 export type ContractAction = {

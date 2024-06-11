@@ -8,6 +8,7 @@ import Transaction from "./transaction.js";
  * Send a custom query to the Archethic API
  * @param query
  * @param endpoint
+ * @returns {Promise<any>} The response of the query
  */
 export async function rawGraphQLQuery(query: string, endpoint: string): Promise<any> {
   const url = new URL("/api", endpoint);
@@ -67,6 +68,7 @@ export async function getNearestEndpoints(endpoint: string): Promise<NearestEndp
  * Get the transaction index of an address
  * @param address address to get the transaction index
  * @param endpoint The Archethic API endpoint
+ * @returns {Promise<number>} The transaction index
  */
 export async function getTransactionIndex(address: string | Uint8Array, endpoint: string): Promise<number> {
   address = maybeUint8ArrayToHex(address);
@@ -133,6 +135,7 @@ export async function getStorageNoncePublicKey(endpoint: string): Promise<string
  * @param address address to get the ownerships of
  * @param endpoint The Archethic API endpoint
  * @param last If true, get the ownerships of the last transaction of the chain
+ * @returns {Promise<Ownership[]>} The ownerships of the transaction
  */
 export async function getTransactionOwnerships(
   address: string | Uint8Array,
@@ -179,6 +182,7 @@ export async function getTransactionOwnerships(
  * Get token information
  * @param tokenAddress address of the token
  * @param endpoint The Archethic API endpoint
+ * @returns {Promise<Token>} The token information
  */
 export async function getToken(tokenAddress: string | Uint8Array, endpoint: string): Promise<{} | Token> {
   tokenAddress = maybeUint8ArrayToHex(tokenAddress);
@@ -213,6 +217,7 @@ export async function getToken(tokenAddress: string | Uint8Array, endpoint: stri
  * Get Oracle data
  * @param endpoint The Archethic API endpoint
  * @param timestamp The timestamp of the data to get
+ * @returns {Promise<OracleData>} The Oracle data
  */
 export async function getOracleData(endpoint: string, timestamp: undefined | number = undefined): Promise<OracleData> {
   let query;
@@ -267,10 +272,11 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
  * Subscribe to oracle updates
  * @param endpoint The Archethic API endpoint
  * @param handler The handler to call when a new update is received
+ * @returns {Promise<any>} The subscription
  */
 export async function subscribeToOracleUpdates(endpoint: string, handler: Function): Promise<any> {
   const { host, protocol } = new URL(endpoint);
-  const ws_protocol = protocol == "https:" ? "wss" : "ws";
+  const ws_protocol = protocol === "https:" ? "wss" : "ws";
 
   const absintheSocket = absinthe.create(`${ws_protocol}://${host}/socket`);
 
@@ -298,6 +304,7 @@ export async function subscribeToOracleUpdates(endpoint: string, handler: Functi
  * Get the balance of an address
  * @param endpoint The Archethic API endpoint
  * @param address The address to get the balance of
+ * @returns {Promise<Balance>} The balance of the address
  */
 export async function getBalance(address: string | Uint8Array, endpoint: string): Promise<Balance> {
   address = maybeUint8ArrayToHex(address);
@@ -365,6 +372,7 @@ export async function getContractCode(address: string | Uint8Array, endpoint: st
 /**
  * handle an api response
  * @param response
+ * @returns {Promise<any>} The response
  */
 async function handleResponse(response: Response): Promise<any> {
   return new Promise(function (resolve, reject) {

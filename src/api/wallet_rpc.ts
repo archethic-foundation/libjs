@@ -15,9 +15,9 @@ import {
 
 
 export class RpcRequest {
-  private origin: RpcRequestOrigin;
-  private version: number;
-  private payload: {};
+  private readonly origin: RpcRequestOrigin;
+  private readonly version: number;
+  private readonly payload: {};
   /**
    * @param {RpcRequestOrigin} origin Application emitting the request
    * @param {Object} payload Request payload
@@ -100,7 +100,7 @@ export class ArchethicWalletClient {
     return new Promise((resolve, reject) => {
       console.log('Connection attempt');
 
-      if (this.connectionState != ConnectionState.Closed) {
+      if (this.connectionState !== ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
       this._dispatchConnectionState();
@@ -157,7 +157,7 @@ export class ArchethicWalletClient {
   }
 
   _ensuresConnectionAlive(): void {
-    if (this.client == null || this.connectionState != ConnectionState.Open)
+    if (this.client === null || this.connectionState !== ConnectionState.Open)
       throw new Error("RPC connection must be alive.");
   }
 
@@ -364,7 +364,11 @@ export class ArchethicWalletClient {
    * @param {String} pathSuffix
    * @returns {Promise<{"publicKey": string}>}
    */
-  async keychainDeriveKeypair(serviceName: string, index = 0, pathSuffix = ""): Promise<{ publicKey: string }> {
+  async keychainDeriveKeypair(
+    serviceName: string,
+    index: number = 0,
+    pathSuffix: string = ""
+  ): Promise<{ publicKey: string }> {
     this._ensuresConnectionAlive();
 
     return this.client?.request(

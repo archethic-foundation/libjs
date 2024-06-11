@@ -22,16 +22,28 @@ export {
 };
 
 export default class Archethic {
+  /** @internal */
   endpoint: Endpoint;
+  /** @internal */
   rpcWallet: ArchethicWalletClient | undefined;
+  /** @internal */
   rpcNode: NodeRPCClient | undefined;
   transaction: Transaction;
-  nearestEndpoints: Set<string>;
   account: Account;
   network: Network;
+  /** @internal */
+  nearestEndpoints: Set<string>;
 
   /**
-   * @param endpoint if undefined, endpoint will be resolved using ArchethicWalletClient.
+   * Create a new Archethic instance
+   * @param {String} endpoint if undefined, endpoint will be resolved using ArchethicWalletClient.
+   * @return {Archethic}
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * ```
    */
   constructor(endpoint: string | undefined) {
     this.endpoint = new EndpointFactory().build(endpoint);
@@ -45,24 +57,42 @@ export default class Archethic {
     this.rpcNode = new NodeRPCClient(this);
   }
 
+  /**
+   * Connect to the Archethic network
+   * @return {Promise<Archethic>}
+   * @example
+   * ```ts
+   * import Archethic from "@archethicjs/sdk";
+   *
+   * const archethic = new Archethic("https://testnet.archethic.net");
+   * await archethic.connect();
+   * ```
+   */
   async connect() {
     if (this.endpoint instanceof AWCEndpoint) {
       await this.endpoint.resolve();
     }
-    const nodes = this.endpoint.nodeEndpoint === null ?
-      [] :
-      await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
+    const nodes =
+      this.endpoint.nodeEndpoint === null ? [] : await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
 
-    let nearestEndpoints = nodes.map(({ ip, port }) => {
+    const nearestEndpoints = nodes.map(({ ip, port }) => {
       return `http://${ip}:${port}`;
     });
 
-    nearestEndpoints.push(this.endpoint.origin.toString()); // Add the main endpoint as fallback
+    // Add the main endpoint as fallback
+    nearestEndpoints.push(this.endpoint.origin.toString());
 
     this.nearestEndpoints = new Set(nearestEndpoints);
     return this;
   }
 
+  /**
+   * Request a node from the nearest nodes
+   * @param {Function} call The function to call on the node
+   * @return {String} The nearest node
+   * @throws {Error} If no node is available
+   * @private
+   */
   async requestNode(call: (endpoint: string) => Promise<any>): Promise<any> {
     const node = this.nearestEndpoints.values().next().value;
 
@@ -70,7 +100,7 @@ export default class Archethic {
       return await call(node);
     } catch (err) {
       this.nearestEndpoints.delete(node);
-      if (this.nearestEndpoints.size == 0) {
+      if (this.nearestEndpoints.size === 0) {
         console.log(err);
         throw new Error("Cannot reach Archethic node");
       }
