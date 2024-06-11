@@ -24,17 +24,15 @@ export {
 export default class Archethic {
   /** @internal */
   endpoint: Endpoint;
+  /** @internal */
   rpcWallet: ArchethicWalletClient | undefined;
+  /** @internal */
   rpcNode: NodeRPCClient | undefined;
   transaction: Transaction;
   account: Account;
   network: Network;
   /** @internal */
   nearestEndpoints: Set<string>;
-  /** @internal */
-  rpcWallet: ArchethicRPCClient | undefined;
-  /** @internal */
-  rpcNode: NodeRPCClient | undefined;
 
   /**
    * Create a new Archethic instance
@@ -74,9 +72,8 @@ export default class Archethic {
     if (this.endpoint instanceof AWCEndpoint) {
       await this.endpoint.resolve();
     }
-    const nodes = this.endpoint.nodeEndpoint === null ?
-      [] :
-      await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
+    const nodes =
+      this.endpoint.nodeEndpoint === null ? [] : await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
 
     const nearestEndpoints = nodes.map(({ ip, port }) => {
       return `http://${ip}:${port}`;

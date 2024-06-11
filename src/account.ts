@@ -179,3 +179,5 @@ export default class Account {
     return keychain;
   }
 }
+
+export { Keychain };
