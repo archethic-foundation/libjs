@@ -293,6 +293,26 @@ export default class Keychain {
 
     return { secret, authorizedPublicKeys };
   }
+
+  /**
+   * Converts the Keychain object to a JSON representation.
+   * @returns The JSON representation of the Keychain object.
+   */
+  toJSON(): Object {
+    const decodedKeys: { [key: string]: string | string[] } = {};
+    for (const key in this) {
+      if (this.hasOwnProperty(key)) {
+        if (this[key] instanceof Uint8Array) {
+          decodedKeys[key] = new TextDecoder().decode(this[key] as Uint8Array);
+        } else if (Array.isArray(this[key])) {
+          decodedKeys[key] = (this[key] as Uint8Array[]).map((value) => uint8ArrayToHex(value));
+        } else {
+          decodedKeys[key] = this[key] as string;
+        }
+      }
+    }
+    return JSON.stringify(decodedKeys);
+  }
 }
 
 function deriveArchethicKeypair(
@@ -375,6 +395,7 @@ function readByte(binary: Uint8Array, pos: number, size: number): { byte: number
     pos: pos + size
   };
 }
+
 function readBytes(binary: Uint8Array, pos: number, size: number): { bytes: Uint8Array; pos: number } {
   return {
     bytes: binary.slice(pos, pos + size),

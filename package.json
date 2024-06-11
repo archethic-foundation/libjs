@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/archethic-foundation/libjs#readme",
   "devDependencies": {
+    "@types/chrome": "0.0.266",
     "@types/absinthe__socket": "^0.2.3",
     "@types/ed2curve": "^0.2.4",
     "@types/elliptic": "^6.4.14",

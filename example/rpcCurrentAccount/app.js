@@ -1,22 +1,12 @@
 import Archethic from "@archethicjs/sdk";
-import { ArchethicRPCClient } from "../../dist/api/wallet_rpc";
 
 let accountChangesSubscription;
-
-ArchethicRPCClient.instance.setOrigin({ name: "Wallet RPC example application" });
 
 /** @type {Archethic | undefined} */
 let archethic = undefined;
 
-window.onload = function () {
-  const endpoint = document.querySelector("#endpoint").value;
-  console.log(`Endpoint : ${endpoint}`);
-  const localArchethic = new Archethic(endpoint);
-  localArchethic.rpcWallet.onconnectionstatechange((state) => {
-    document.querySelector("#rpcConnectionStatus").textContent = state;
-  });
-  localArchethic.connect();
-  archethic = localArchethic;
+window.onload = async () => {
+  await _connect()
 };
 
 window.get_current_account = async () => {
@@ -50,6 +40,27 @@ window.unsubscribe_current_account = async () => {
 
   _updateSubscribeAccount(false);
 };
+
+async function _connect() {
+  const endpoint = document.querySelector("#endpoint").value;
+  console.log(`Endpoint : ${endpoint}`);
+  const localArchethic = new Archethic(endpoint == '' ? undefined : endpoint);
+  localArchethic.rpcWallet.onconnectionstatechange((state) => {
+    document.querySelector("#rpcConnectionStatus").textContent = state;
+
+    switch (state) {
+      case "WalletRPCConnection_open":
+        archethic = localArchethic;
+        break;
+      case "WalletRPCConnection_closed":
+        archethic = undefined;
+        break;
+    }
+  });
+  localArchethic.rpcWallet.setOrigin({ name: "Wallet RPC example application" });
+
+  await localArchethic.connect();
+}
 
 function _updateSubscribeAccount(listening) {
   const button = document.querySelector("#current_account_sub_button");

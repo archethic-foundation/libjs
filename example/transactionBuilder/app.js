@@ -1,4 +1,5 @@
-import Archethic, { Utils, Crypto } from "@archethicjs/sdk";
+import Archethic, { Utils, Crypto, Contract } from "@archethicjs/sdk";
+import { ExtendedTransactionBuilder } from "../../dist/transaction";
 
 const { toBigInt } = Utils;
 
@@ -10,25 +11,76 @@ let tokenTransfers = [];
 let recipients = [];
 let ownerships = [];
 
-let endpoint = document.querySelector("#endpoint").value;
+/** @type {Archethic | undefined} */
+let archethic = undefined;
 
-let archethic = new Archethic(endpoint);
-archethic.connect();
+/** @type { AccountIdentity | undefined} */
+let walletAccount = undefined;
+
+async function connectEndpoint() {
+  const endpoint = document.querySelector("#endpoint").value;
+  const localArchethic = new Archethic(endpoint);
+  document.querySelector("#connectionStatus").textContent = "";
+
+  if (localArchethic.endpoint.isRpcAvailable) {
+    document.querySelector("#seedConfig").style.display = "none";
+    document.querySelector("#txIndexForm").style.display = "none";
+    localArchethic.rpcWallet.onconnectionstatechange(async (state) => {
+      let status = "";
+      switch (state) {
+        case "WalletRPCConnection_connecting":
+          status = "Connecting";
+          break;
+        case "WalletRPCConnection_closed":
+          status = "Connection closed";
+          break;
+        case "WalletRPCConnection_open":
+          const { endpointUrl } = await localArchethic.rpcWallet.getEndpoint();
+          walletAccount = await localArchethic.rpcWallet.getCurrentAccount();
+          let networkName;
+          switch (endpointUrl) {
+            case "https://mainnet.archethic.net":
+              networkName = `<a href="${endpointUrl}" target="_blank">mainnet</a>`;
+              break;
+            case "https://testnet.archethic.net":
+              networkName = `<a href="${endpointUrl}" target="_blank">devnet</a>`;
+              break;
+            default:
+              networkName = `<a href="${endpointUrl}" target="_blank">devnet</a>`;
+              break;
+          }
+
+          status = `Connected as <strong>${walletAccount.shortName}</strong> to ${networkName}`;
+          break;
+      }
+      document.querySelector("#connectionStatus").innerHTML = status;
+    });
+  }
+  await localArchethic.connect();
+  if (!localArchethic.endpoint.isRpcAvailable) {
+    document.querySelector("#seedConfig").style.display = "block";
+    document.querySelector("#txIndexForm").style.display = "block";
+    document.querySelector("#connectionStatus").textContent = "Connected";
+  }
+
+  archethic = localArchethic;
+}
+
+window.onload = async function () {
+  await connectEndpoint();
+};
 
 document.querySelector("#endpoint").addEventListener("change", async function () {
-  archethic = new Archethic(this.value);
-  archethic.connect();
+  await connectEndpoint();
 });
+
+let txBuilder = undefined;
 
 window.generate_transaction = async () => {
   transaction = null;
   document.querySelector("#transactionOutput").style.visibility = "hidden";
 
   const seed = document.querySelector("#seed").value;
-  const index = document.querySelector("#index").value;
-  const curve = document.querySelector("#curve").value;
-  const endpoint = document.querySelector("#endpoint").value;
-  const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
 
   const code = document.querySelector("#code").value;
   if (code != "") {
@@ -60,7 +112,7 @@ window.generate_transaction = async () => {
     content = file_content;
   }
 
-  let txBuilder = archethic.transaction
+  txBuilder = archethic.transaction
     .new()
     .setType(document.querySelector("#type").value)
     .setCode(document.querySelector("#code").value)
@@ -93,15 +145,30 @@ window.generate_transaction = async () => {
     txBuilder.addRecipient(address, action, args);
   });
 
-  transaction = txBuilder.build(seed, parseInt(index), curve).originSign(originPrivateKey);
-
-  document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(transaction.address);
+  await signTransaction();
+  document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(signedTx.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
-  const result = await archethic.transaction.getTransactionFee(transaction);
+  const result = await archethic.transaction.getTransactionFee(signedTx);
   const amount = Utils.fromBigInt(result.fee);
   const usdValue = (result.rates.usd * amount).toFixed(4);
   document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
 };
+
+/** @type {ExtendedTransactionBuilder | undefined} */
+let signedTx = undefined;
+
+async function signTransaction() {
+  if (archethic.rpcWallet && archethic.rpcWallet.connectionState == "WalletRPCConnection_open") {
+    const signedTxs = await archethic.rpcWallet.signTransactions(walletAccount.serviceName, "", [txBuilder]);
+    signedTx = signedTxs[0];
+  } else {
+    const seed = document.querySelector("#seed").value;
+    const index = document.querySelector("#index").value;
+    const curve = document.querySelector("#curve").value;
+    const originPrivateKey = "01019280BDB84B8F8AEDBA205FE3552689964A5626EE2C60AA10E3BF22A91A036009";
+    signedTx = txBuilder.build(seed, parseInt(index), curve).originSign(originPrivateKey);
+  }
+}
 
 window.onClickAddStorageNoncePublicKey = async () => {
   const storageNonce = await archethic.network.getStorageNoncePublicKey();
@@ -190,76 +257,128 @@ window.onClickAddTokenTransfer = async () => {
   document.querySelector("#token_id").value = "0";
 };
 
-window.onClickAddRecipient = () => {
-  const $address = document.querySelector("#recipient");
-  const $action = document.querySelector("#action");
-  const $argsJson = document.querySelector("#args_json");
-  const $argsJsonErr = document.querySelector("#args_json_error");
-  const $list = document.querySelector("#recipients");
+let namedParams = [];
 
-  const address = $address.value;
-  const action = $action.value;
-  const argsJson = $argsJson.value;
-
-  if (address == "") return;
-
-  $argsJsonErr.textContent = "";
-
-  if (action == "" && argsJson == "") {
-    // update state
-    recipients.push({ address });
-
-    // update list
-    if ($list.textContent != "") $list.textContent = $list.textContent + "\n";
-    $list.textContent = $list.textContent + address;
-
-    // reset form
-    $address.value = "";
-    $action.value = "";
-    $argsJson.value = "";
-  } else {
-    try {
-      const args = JSON.parse(argsJson);
-      // update state
-      recipients.push({ address, action, args });
-
-      // update list
-      if ($list.textContent != "") $list.textContent = $list.textContent + "\n";
-      $list.textContent = $list.textContent + `${address} - ${action} - ${argsJson}`;
-
-      // reset form
-      $address.value = "";
-      $action.value = "";
-      $argsJson.value = "";
-    } catch (e) {
-      $argsJsonErr.textContent = "Invalid JSON:" + e.message;
-    }
+window.onChangeRecipient = async () => {
+  const address = document.querySelector("#recipient").value;
+  const contractCode = await archethic.network.getContractCode(address);
+  if (contractCode == "") {
+    return;
   }
+
+  document.querySelector("#namedActionsContainer").style.display = "block";
+
+  Contract.extractActionsFromContract(contractCode).forEach((action) => {
+    const option = document.createElement("option");
+    option.text = action.name;
+    option.value = action.name;
+    const select = document.querySelector("#namedActions");
+    select.appendChild(option);
+
+    const paramsContainerId = "action_" + action.name;
+    const paramsContainer = document.createElement("div");
+    paramsContainer.setAttribute("id", paramsContainerId);
+    paramsContainer.setAttribute("style", "display: none");
+    paramsContainer.setAttribute("class", "namedActionParams");
+
+    action.parameters.forEach((parameter, index) => {
+      const inputId = paramsContainerId + "_param_" + parameter;
+      const paramLabel = document.createElement("label");
+      paramLabel.innerText = parameter;
+      paramLabel.setAttribute("for", inputId);
+
+      const paramInput = document.createElement("input");
+      paramInput.setAttribute("id", inputId);
+      paramInput.setAttribute("class", "input");
+      paramInput.addEventListener("change", function (e) {
+        const value = e.target.value;
+        namedParams[index] = Contract.parseTypedArgument(value);
+      });
+
+      paramsContainer.appendChild(paramLabel);
+      paramsContainer.appendChild(paramInput);
+    });
+
+    document.querySelector("#namedActionsParameters").appendChild(paramsContainer);
+  });
+};
+
+window.pickNamedAction = function () {
+  document.querySelectorAll(".namedActionParams").forEach((elem) => {
+    elem.style.display = "none";
+  });
+  const select = document.querySelector("#namedActions");
+  document.querySelector("#action_" + select.value).style.display = "block";
+};
+
+window.onClickAddRecipient = () => {
+  const recipientAddress = document.querySelector("#recipient").value;
+  const namedAction = document.querySelector("#namedActions").value;
+  const recipientList = document.querySelector("#recipients");
+
+  if (namedAction != "") {
+    recipients.push({ address: recipientAddress, action: namedAction, args: namedParams });
+    if (recipientList.textContent != "") {
+      recipientList.textContent = recipientList.textContent + "\n";
+    }
+    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${namedParams}`;
+
+    document.querySelector("#namedActionsContainer").style.display = "none";
+    document.querySelector("#namedActions").innerHTML = "<option></option>";
+    document.querySelectorAll(".namedActionParams").forEach((elem) => elem.remove());
+  } else {
+    recipients.push({ address: recipientAddress });
+    if (recipientList.textContent != "") {
+      recipientList.textContent = recipientList.textContent + "\n";
+    }
+    recipientList.textContent += recipientAddress;
+  }
+
+  document.querySelector("#recipient").value = "";
 };
 
 window.sendTransaction = async () => {
-  const endpoint = document.querySelector("#endpoint").value;
   document.querySelector("#confirmations").innerText = 0;
 
-  transaction
+  let explorerLink;
+  const transactionAddress = Utils.uint8ArrayToHex(signedTx.address);
+
+  if (archethic.rpcWallet && archethic.rpcWallet.connectionState == "WalletRPCConnection_open") {
+    const { endpointUrl } = await archethic.rpcWallet.getEndpoint();
+    explorerLink = endpointUrl + "/explorer/transaction/" + transactionAddress;
+  } else {
+    const endpoint = document.querySelector("#endpoint").value;
+    explorerLink = endpoint + "/explorer/transaction/" + transactionAddress;
+  }
+
+  signedTx
     .on("confirmation", (nbConfirmations, maxConfirmations) => {
       document.querySelector("#transaction_error").style.display = "none";
       document.querySelector("#confirmed").style.display = "block";
       document.querySelector("#confirmations").innerText = nbConfirmations;
       document.querySelector("#maxConfirmations").innerText = maxConfirmations;
     })
-    .on("error", (context, reason) => {
+    .on("error", (context, error) => {
+      let errMsg = `<p>${context}</p><p style="padding-left: 10px">(${error.code}) ${error.message}</p>`;
+      if (error.data && error.data.message) {
+        if (error.data.recipient) {
+          errMsg += `<p style="padding-left: 20px">Calling ${error.data.recipient}</p>`;
+        }
+        if (error.data.data) {
+          errMsg += `<p style="padding-left: 20px">(${error.data.data.code}) ${error.data.data.message}</p>`;
+        } else {
+          errMsg += `<p style="padding-left: 20px">${error.data.message}</p>`;
+        }
+      }
+
       document.querySelector("#confirmed").style.display = "none";
       document.querySelector("#transaction_error").style.display = "block";
-      document.querySelector("#error_reason").innerText = reason;
+      document.querySelector("#error_reason").innerHTML = errMsg;
     })
     .on("sent", () => {
       document.querySelector("#success").style.display = "block";
-      document.querySelector("#tx_address_link").innerText =
-        endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address);
-      document
-        .querySelector("#tx_address_link")
-        .setAttribute("href", endpoint + "/explorer/transaction/" + Utils.uint8ArrayToHex(transaction.address));
+      document.querySelector("#tx_address_link").innerText = explorerLink;
+      document.querySelector("#tx_address_link").setAttribute("href", explorerLink);
     })
     .send();
 };

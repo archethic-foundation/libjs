@@ -111,3 +111,9 @@ export type SignedTransaction = {
   previousSignature: string;
   originSignature: string;
 };
+
+export type ErrorReason = {
+  code: number;
+  data: any;
+  message: string;
+};

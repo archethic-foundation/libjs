@@ -1,6 +1,6 @@
-import Archethic from "../src/index";
 import * as API from "../src/api";
-import { Endpoint } from "../src/endpoint";
+import { EndpointFactory } from "../src/endpoint";
+import Archethic from "../src/index";
 const nock = require("nock");
 
 describe("Archethic", () => {
@@ -8,7 +8,7 @@ describe("Archethic", () => {
     const archethic = new Archethic("http://localhost:4000");
 
     // converts asserts to jest
-    expect(archethic.endpoint).toStrictEqual(Endpoint.build("http://localhost:4000"));
+    expect(archethic.endpoint).toStrictEqual(new EndpointFactory().build("http://localhost:4000"));
     expect(archethic.network).not.toBeUndefined();
     expect(archethic.account).not.toBeUndefined();
     expect(archethic.transaction).not.toBeUndefined();

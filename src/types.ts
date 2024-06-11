@@ -247,3 +247,8 @@ export type TransactionFee = {
     usd: number;
   };
 };
+
+export type ContractAction = {
+  name: string;
+  parameters: string[];
+};

@@ -193,4 +193,27 @@ describe("Keychain", () => {
       expect(verify(tx.previousSignature, tx.previousSignaturePayload(), tx.previousPublicKey)).toStrictEqual(true);
     });
   });
+
+  describe("toJSON", () => {
+    it("should return the JSON representation of the keychain", () => {
+      const seed = "abcdef";
+      const { publicKey } = deriveKeyPair(seed, 0);
+      const keychain = new Keychain(seed, 2).addService("uco", "m/650'/0/0").addAuthorizedPublicKey(publicKey);
+
+      const expectedJSON = JSON.stringify({
+        seed: seed,
+        version: 2,
+        services: {
+          uco: {
+            derivationPath: "m/650'/0/0",
+            curve: "ed25519",
+            hashAlgo: "sha256"
+          }
+        },
+        authorizedPublicKeys: [uint8ArrayToHex(publicKey)]
+      });
+
+      expect(keychain.toJSON()).toEqual(expectedJSON);
+    });
+  });
 });

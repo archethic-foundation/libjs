@@ -1,28 +1,42 @@
-import * as Crypto from "./crypto.js";
-import * as Utils from "./utils.js";
+import Account, { Keychain } from "./account.js";
 import * as Api from "./api.js";
-import { DirectEndpoint, Endpoint, WalletRPCEndpoint } from "./endpoint.js";
-import { ArchethicRPCClient } from "./api/wallet_rpc.js";
 import { NodeRPCClient } from "./api/node_rpc.js";
+import { ConnectionState } from "./api/types.js";
+import { AWCStreamChannel, AWCStreamChannelState, ArchethicWalletClient } from "./api/wallet_rpc.js";
+import * as Crypto from "./crypto.js";
+import { AWCEndpoint, Endpoint, EndpointFactory } from "./endpoint.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
-import Account, { Keychain } from "./account.js";
+import * as Contract from "./contract.js";
+import * as Utils from "./utils.js";
 
-export { Utils, Crypto, Keychain };
+export {
+  AWCStreamChannel,
+  AWCStreamChannelState,
+  ArchethicWalletClient,
+  ConnectionState,
+  Crypto,
+  Keychain,
+  Utils,
+  Contract
+};
 
 export default class Archethic {
-  endpoint: DirectEndpoint | WalletRPCEndpoint;
-  rpcWallet: ArchethicRPCClient | undefined;
+  endpoint: Endpoint;
+  rpcWallet: ArchethicWalletClient | undefined;
   rpcNode: NodeRPCClient | undefined;
   transaction: Transaction;
   nearestEndpoints: Set<string>;
   account: Account;
   network: Network;
 
-  constructor(endpoint: string) {
-    this.endpoint = Endpoint.build(endpoint);
-    if (this.endpoint instanceof WalletRPCEndpoint) {
-      this.rpcWallet = ArchethicRPCClient.instance;
+  /**
+   * @param endpoint if undefined, endpoint will be resolved using ArchethicWalletClient.
+   */
+  constructor(endpoint: string | undefined) {
+    this.endpoint = new EndpointFactory().build(endpoint);
+    if (this.endpoint instanceof AWCEndpoint) {
+      this.rpcWallet = this.endpoint.rpcClient;
     }
     this.account = new Account(this);
     this.network = new Network(this);
@@ -32,10 +46,12 @@ export default class Archethic {
   }
 
   async connect() {
-    if (this.endpoint instanceof WalletRPCEndpoint) {
+    if (this.endpoint instanceof AWCEndpoint) {
       await this.endpoint.resolve();
     }
-    const nodes = await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
+    const nodes = this.endpoint.nodeEndpoint === null ?
+      [] :
+      await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
 
     let nearestEndpoints = nodes.map(({ ip, port }) => {
       return `http://${ip}:${port}`;
