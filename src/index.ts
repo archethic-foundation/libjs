@@ -7,6 +7,7 @@ import * as Crypto from "./crypto.js";
 import { AWCEndpoint, Endpoint, EndpointFactory } from "./endpoint.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
+import * as Contract from "./contract.js";
 import * as Utils from "./utils.js";
 
 export {
@@ -16,7 +17,8 @@ export {
   ConnectionState,
   Crypto,
   Keychain,
-  Utils
+  Utils,
+  Contract
 };
 
 export default class Archethic {
