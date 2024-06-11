@@ -284,3 +284,8 @@ export type ecEncryptServiceSeed = {
   secret: Uint8Array;
   authorizedPublicKeys: AuthorizedKey[];
 };
+
+export type ContractAction = {
+  name: string;
+  parameters: string[];
+};

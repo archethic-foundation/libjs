@@ -164,4 +164,8 @@ export default class Network {
   async rawGraphQLQuery(query: string): Promise<any> {
     return this.core.requestNode((endpoint) => API.rawGraphQLQuery(query, endpoint));
   }
+
+  async getContractCode(address: string): Promise<string> {
+    return this.core.requestNode((endpoint) => API.getContractCode(address, endpoint));
+  }
 }

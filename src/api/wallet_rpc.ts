@@ -1,4 +1,7 @@
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
+import { ExtendedTransactionBuilder } from "../transaction.js";
+import TransactionBuilder from "../transaction_builder.js";
+import { Service } from "../types.js";
 import {
   AccountIdentity,
   ConnectionState,
@@ -6,13 +9,10 @@ import {
   RpcNotification,
   RpcRequestOrigin,
   RpcSubscription,
-  TransactionSuccess,
-  SignedTransaction
+  SignedTransaction,
+  TransactionSuccess
 } from "./types.js";
-import { Service } from "../types";
-import TransactionBuilder from "../transaction_builder";
-import { ExtendedTransactionBuilder } from "../transaction";
-import TransportWebSocket from "isomorphic-ws";
+
 
 export class RpcRequest {
   private readonly origin: RpcRequestOrigin;
@@ -30,25 +30,50 @@ export class RpcRequest {
   }
 }
 
-export class ArchethicRPCClient {
+export enum AWCStreamChannelState {
+  CONNECTING,
+  OPEN,
+  CLOSING,
+  CLOSED,
+}
+
+
+export interface AWCStreamChannel<T> {
+  get state(): AWCStreamChannelState;
+
+  connect(): Promise<void>;
+  close(): Promise<void>;
+  send(data: T): Promise<void>;
+  onReceive: ((data: T) => Promise<void>) | null;
+  onReady: (() => Promise<void>) | null;
+  onClose: ((reason: string) => Promise<void>) | null;
+}
+
+
+export class ArchethicWalletClient {
   private origin: RpcRequestOrigin;
   private client: JSONRPCServerAndClient | undefined;
-  private websocket: TransportWebSocket | undefined;
-  private readonly _connectionStateEventTarget: EventTarget;
-  private readonly _rpcNotificationEventTarget: EventTarget;
-  private static _instance: ArchethicRPCClient | undefined;
-  constructor() {
+  private _channel: AWCStreamChannel<string>;
+  private _connectionStateEventTarget: EventTarget;
+  private _rpcNotificationEventTarget: EventTarget;
+  private static _instance: ArchethicWalletClient | undefined;
+  constructor(channel: AWCStreamChannel<string>) {
     this.origin = { name: "" };
     this._connectionStateEventTarget = new EventTarget();
     this._rpcNotificationEventTarget = new EventTarget();
+    this._channel = channel;
+  }
+
+  static init(channel: AWCStreamChannel<string>) {
+    this._instance = new this(channel)
   }
 
   /**
    * @return {ArchethicRPCClient}
    */
-  static get instance(): ArchethicRPCClient {
+  static get instance(): ArchethicWalletClient {
     if (!this._instance) {
-      this._instance = new this();
+      throw 'ArchethicWalletClient must be init before using it'
     }
     return this._instance;
   }
@@ -65,25 +90,26 @@ export class ArchethicRPCClient {
     this._connectionStateEventTarget.dispatchEvent(new Event(this.connectionState));
   }
 
+
   /**
    *
-   * @param {string} host
-   * @param {number} port
+   * @param {AWCStreamChannel} streamChannel
    * @returns {Promise<void>}
    */
-  async connect(host: string, port: number): Promise<void> {
+  async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
+      console.log('Connection attempt');
+
       if (this.connectionState !== ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
-      this.websocket = new TransportWebSocket(`ws://${host}:${port}`);
       this._dispatchConnectionState();
 
       this.client = new JSONRPCServerAndClient(
         new JSONRPCServer(),
         new JSONRPCClient((request) => {
           try {
-            this.websocket?.send(JSON.stringify(request));
+            this._channel?.send(JSON.stringify(request));
             return Promise.resolve();
           } catch (error) {
             return Promise.reject(error);
@@ -102,20 +128,22 @@ export class ArchethicRPCClient {
         );
       });
 
-      this.websocket.onmessage = (event: any) => {
-        this.client?.receiveAndSend(JSON.parse(event.data.toString()));
+      this._channel.onReceive = async (data) => {
+        this.client?.receiveAndSend(JSON.parse(data));
       };
 
       // On close, make sure to reject all the pending requests to prevent hanging.
-      this.websocket.onclose = (event: any) => {
-        this.client?.rejectAllPendingRequests(`Connection is closed (${event.reason}).`);
+      this._channel.onClose = async (reason) => {
+        this.client?.rejectAllPendingRequests(`Connection is closed (${reason}).`);
         this.close();
       };
 
-      this.websocket.onopen = (_: any) => {
+      this._channel.onReady = async () => {
         resolve();
         this._dispatchConnectionState();
       };
+
+      this._channel.connect();
     });
   }
 
@@ -123,9 +151,8 @@ export class ArchethicRPCClient {
    * @return {Promise<void>}
    */
   async close(): Promise<void> {
-    this.websocket?.close();
+    this._channel?.close();
     this.client = undefined;
-    this.websocket = undefined;
     this._dispatchConnectionState();
   }
 
@@ -186,13 +213,12 @@ export class ArchethicRPCClient {
    * @return {ConnectionState}
    */
   get connectionState(): ConnectionState {
-    const state = this.websocket?.readyState;
-    switch (state) {
-      case TransportWebSocket.CLOSING:
+    switch (this._channel?.state) {
+      case AWCStreamChannelState.CLOSING:
         return ConnectionState.Closing;
-      case TransportWebSocket.CONNECTING:
+      case AWCStreamChannelState.CONNECTING:
         return ConnectionState.Connecting;
-      case TransportWebSocket.OPEN:
+      case AWCStreamChannelState.OPEN:
         return ConnectionState.Open;
       default:
         return ConnectionState.Closed;
@@ -201,7 +227,7 @@ export class ArchethicRPCClient {
 
   /**
    * @param {function(String)} listener
-   * @return {ArchethicRPCClient}
+   * @return {ArchethicWalletClient}
    */
   onconnectionstatechange(listener: Function): this {
     this._connectionStateEventTarget.addEventListener(ConnectionState.Connecting, () => {
@@ -217,7 +243,7 @@ export class ArchethicRPCClient {
   }
 
   /**
-   * @return {ArchethicRPCClient}
+   * @return {ArchethicWalletClient}
    */
   unsubscribeconnectionstatechange(): this {
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Connecting, null);
