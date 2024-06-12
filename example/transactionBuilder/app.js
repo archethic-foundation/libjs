@@ -1,7 +1,7 @@
 import Archethic, { Utils, Crypto, Contract } from "@archethicjs/sdk";
 import { ExtendedTransactionBuilder } from "../../dist/transaction";
 
-const { toBigInt } = Utils;
+const { parseBigInt, formatBigInt } = Utils;
 
 let file_content = "";
 
@@ -148,8 +148,8 @@ window.generate_transaction = async () => {
   await signTransaction();
   document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(signedTx.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
-  const result = await archethic.transaction.getTransactionFee(signedTx);
-  const amount = Utils.fromBigInt(result.fee);
+  const result = await archethic.transaction.getTransactionFee(transaction);
+  const amount = parseFloat(formatBigInt(BigInt(result.fee)));
   const usdValue = (result.rates.usd * amount).toFixed(4);
   document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
 };
@@ -187,7 +187,7 @@ window.onClickAddTransfer = () => {
     return;
   }
 
-  ucoTransfers.push({ to: transfer_to, amount: toBigInt(transferAmount) });
+  ucoTransfers.push({ to: transfer_to, amount: parseBigInt(transferAmount) });
 
   const option = document.createElement("option");
   option.text = transfer_to + ": " + transferAmount;
@@ -221,7 +221,7 @@ window.onClickAddTokenTransfer = async () => {
 
   tokenTransfers.push({
     to: transfer_to,
-    amount: toBigInt(transferAmount, decimals),
+    amount: parseBigInt(transferAmount, decimals),
     token: transferToken,
     tokenId: parseInt(transferTokenId)
   });

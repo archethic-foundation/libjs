@@ -1,4 +1,4 @@
-import { intToUint8Array, concatUint8Arrays, nextUint8, uint8ArrayToInt, getBigNumber } from "./utils.js";
+import { intToUint8Array, concatUint8Arrays, nextUint8, uint8ArrayToBigInt, getBigNumber } from "./utils.js";
 
 export default {
   serialize,
@@ -18,5 +18,5 @@ function deserialize(iter: IterableIterator<[number, number]>): bigint {
     bytes.push(nextUint8(iter));
   }
 
-  return uint8ArrayToInt(Uint8Array.from(bytes));
+  return uint8ArrayToBigInt(Uint8Array.from(bytes));
 }

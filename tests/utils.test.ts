@@ -5,11 +5,10 @@ import {
   uint8ArrayToHex,
   concatUint8Arrays,
   intToUint8Array,
-  bigIntToUint8Array,
-  toBigInt,
-  fromBigInt,
+  parseBigInt,
+  formatBigInt,
   sortObjectKeysASC,
-  uint8ArrayToInt
+  uint8ArrayToBigInt
 } from "../src/utils.js";
 
 describe("Utils", () => {
@@ -73,21 +72,21 @@ describe("Utils", () => {
     });
   });
 
-  describe("uint8ArrayToInt", () => {
+  describe("uint8ArrayToBigInt", () => {
     it("should decode an integer from a Uint8Array", () => {
-      expect(uint8ArrayToInt(new Uint8Array([0]))).toStrictEqual(BigInt(0));
-      expect(uint8ArrayToInt(new Uint8Array([255]))).toStrictEqual(BigInt(2 ** 8 - 1));
-      expect(uint8ArrayToInt(new Uint8Array([1, 0]))).toStrictEqual(BigInt(2 ** 8));
-      expect(uint8ArrayToInt(new Uint8Array([255, 255]))).toStrictEqual(BigInt(2 ** 16 - 1));
-      expect(uint8ArrayToInt(new Uint8Array([1, 0, 0]))).toStrictEqual(BigInt(2 ** 16));
-      expect(uint8ArrayToInt(new Uint8Array([255, 255, 255]))).toStrictEqual(BigInt(2 ** 24 - 1));
-      expect(uint8ArrayToInt(new Uint8Array([1, 0, 0, 0]))).toStrictEqual(BigInt(2 ** 24));
-      expect(uint8ArrayToInt(new Uint8Array([255, 255, 255, 255]))).toStrictEqual(BigInt(2 ** 32 - 1));
-      expect(uint8ArrayToInt(new Uint8Array([1, 0, 0, 0, 0]))).toStrictEqual(BigInt(2 ** 32));
-      expect(uint8ArrayToInt(new Uint8Array([255, 255, 255, 255, 255]))).toStrictEqual(BigInt(2 ** 40 - 1));
-      expect(uint8ArrayToInt(new Uint8Array([1, 0, 0, 0, 0, 0]))).toStrictEqual(BigInt(2 ** 40));
+      expect(uint8ArrayToBigInt(new Uint8Array([0]))).toStrictEqual(BigInt(0));
+      expect(uint8ArrayToBigInt(new Uint8Array([255]))).toStrictEqual(BigInt(2 ** 8 - 1));
+      expect(uint8ArrayToBigInt(new Uint8Array([1, 0]))).toStrictEqual(BigInt(2 ** 8));
+      expect(uint8ArrayToBigInt(new Uint8Array([255, 255]))).toStrictEqual(BigInt(2 ** 16 - 1));
+      expect(uint8ArrayToBigInt(new Uint8Array([1, 0, 0]))).toStrictEqual(BigInt(2 ** 16));
+      expect(uint8ArrayToBigInt(new Uint8Array([255, 255, 255]))).toStrictEqual(BigInt(2 ** 24 - 1));
+      expect(uint8ArrayToBigInt(new Uint8Array([1, 0, 0, 0]))).toStrictEqual(BigInt(2 ** 24));
+      expect(uint8ArrayToBigInt(new Uint8Array([255, 255, 255, 255]))).toStrictEqual(BigInt(2 ** 32 - 1));
+      expect(uint8ArrayToBigInt(new Uint8Array([1, 0, 0, 0, 0]))).toStrictEqual(BigInt(2 ** 32));
+      expect(uint8ArrayToBigInt(new Uint8Array([255, 255, 255, 255, 255]))).toStrictEqual(BigInt(2 ** 40 - 1));
+      expect(uint8ArrayToBigInt(new Uint8Array([1, 0, 0, 0, 0, 0]))).toStrictEqual(BigInt(2 ** 40));
       expect(
-        uint8ArrayToInt(
+        uint8ArrayToBigInt(
           new Uint8Array([
             128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
           ])
@@ -96,47 +95,47 @@ describe("Utils", () => {
     });
   });
 
-  describe("toBigInt", () => {
+  describe("parseBigInt", () => {
     it("should return Big Int of an 4 decimal digit with 8 decimals by default", () => {
-      expect(toBigInt("12.5345")).toStrictEqual(BigInt(1_253_450_000));
+      expect(parseBigInt("12.5345")).toStrictEqual(BigInt(1_253_450_000));
     });
 
     it("should return Big Int of an 4 decimal digit with 6 decimals passed in param", () => {
-      expect(toBigInt("12.5345", 6)).toStrictEqual(BigInt(12_534_500));
+      expect(parseBigInt("12.5345", 6)).toStrictEqual(BigInt(12_534_500));
     });
 
     it("should return a Big Int of an 8 decimal digit with 7 decimal in param without rounding", () => {
-      expect(toBigInt("120139.69456927", 7)).toStrictEqual(BigInt(1_201_396_945_692));
+      expect(parseBigInt("120139.69456927", 7)).toStrictEqual(BigInt(1_201_396_945_692));
     });
 
     it("should return a Big Int of an 14 decimal digit with 8 decimal in param without rounding", () => {
-      expect(toBigInt("94.03999999999999", 8)).toStrictEqual(BigInt(9_403_999_999));
+      expect(parseBigInt("94.03999999999999", 8)).toStrictEqual(BigInt(9_403_999_999));
     });
 
     it("should return Big Int of an interger with 8 decimals passed in param", () => {
-      expect(toBigInt("125345", 8)).toStrictEqual(BigInt(12_534_500_000_000));
+      expect(parseBigInt("125345", 8)).toStrictEqual(BigInt(12_534_500_000_000));
     });
     //
   });
 
   describe("fromBigInt", () => {
     it("should return 8 decimals number by default", () => {
-      expect(fromBigInt(BigInt(1_253_450_000))).toStrictEqual("12.5345");
+      expect(formatBigInt(BigInt(1_253_450_000))).toStrictEqual("12.5345");
     });
 
     it("should return decimals number with decimals passed in param", () => {
-      expect(fromBigInt(BigInt(12_534_500), 6)).toStrictEqual("12.5345");
+      expect(formatBigInt(BigInt(12_534_500), 6)).toStrictEqual("12.5345");
     });
   });
 
-  describe("toBigInt(fromBigInt())", () => {
+  describe("parseBigInt(formatBigInt())", () => {
     it("return the same value", () => {
       fc.assert(
         fc.property(fc.tuple(fc.integer({ min: 0 }), fc.integer({ min: 0, max: 99999999 })), (v) => {
           const strV = removeTrailingZerosExceptOne(`${v[0]}.${v[1]}`);
 
-          const bv = toBigInt(strV);
-          const r = fromBigInt(bv);
+          const bv = parseBigInt(strV);
+          const r = formatBigInt(bv);
           expect(r).toStrictEqual(strV);
         })
       );

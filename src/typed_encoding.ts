@@ -1,7 +1,7 @@
 import {
   concatUint8Arrays,
-  toBigInt,
-  fromBigInt,
+  parseBigInt,
+  formatBigInt,
   sortObjectKeysASC,
   deserializeString,
   serializeString,
@@ -71,7 +71,7 @@ function do_serialize_v1(data: any): Uint8Array {
       return concatUint8Arrays(
         Uint8Array.from([TYPE_FLOAT]),
         Uint8Array.from([sign ? 1 : 0]),
-        VarInt.serialize(toBigInt(Math.abs(data).toString()))
+        VarInt.serialize(parseBigInt(Math.abs(data).toString()))
       );
     }
   } else if (typeof data === "string") {
@@ -108,7 +108,9 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
       return nextUint8(iter) == 1 ? VarInt.deserialize(iter) : VarInt.deserialize(iter) * -1n;
 
     case TYPE_FLOAT:
-      return nextUint8(iter) == 1 ? fromBigInt(VarInt.deserialize(iter)) : fromBigInt(VarInt.deserialize(iter) * -1n);
+      return nextUint8(iter) == 1
+        ? formatBigInt(VarInt.deserialize(iter))
+        : formatBigInt(VarInt.deserialize(iter) * -1n);
 
     case TYPE_STR: {
       const strLen = VarInt.deserialize(iter);

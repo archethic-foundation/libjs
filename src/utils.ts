@@ -128,17 +128,17 @@ export function intToUint64Array(int: number | bigint): Uint8Array {
  * Decode byte array (4 bytes) into a integer
  * @param {Uint8Array} bytes Bytes array to decode
  */
-export function uint8ArrayToInt(bytes: Uint8Array): bigint {
+export function uint8ArrayToBigInt(bytes: Uint8Array): bigint {
   return fromByteArray(bytes);
 }
 
 /**
- * Convert any number into a big int for 10^8 decimals
+ * Convert a string into a big int for 10^8 decimals
  * @param {number} number Number to convert
  * @param {number} formatDecimals Number of decimals
  * @returns {number} Converted number
  */
-export function toBigInt(number: string, formatDecimals: number = 8): bigint {
+export function parseBigInt(number: string, formatDecimals: number = 8): bigint {
   const match = number.match(/^([0-9]*)\.?([0-9]*)$/);
   if (!match || match[1].length + match[2].length == 0) {
     throw new Error("Invalid number");
@@ -176,7 +176,7 @@ export function getBigNumber(number: bigint | number) {
  * @param number Number to convert
  * @param formatDecimals Number of decimals
  */
-export function fromBigInt(number: bigint | number, formatDecimals: number = 8): string {
+export function formatBigInt(number: bigint, formatDecimals: number = 8): string {
   let strNumber = getBigNumber(number).toString();
   // No decimal point for whole values
   if (formatDecimals === 0) {

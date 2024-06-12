@@ -1,7 +1,7 @@
 import Archethic, { Crypto, Utils } from "@archethicjs/sdk";
 import Keychain from "../../src/keychain";
 
-const { toBigInt } = Utils;
+const { parseBigInt } = Utils;
 
 let endpoint = document.querySelector("#endpoint").value;
 
@@ -83,10 +83,7 @@ window.sendTransaction = async () => {
   const recipientAddress = document.querySelector("#tx_address").value;
   const ucoAmount = document.querySelector("#tx_amount").value;
 
-  const tx = archethic.transaction
-    .new()
-    .setType("transfer")
-    .addUCOTransfer(recipientAddress, toBigInt(parseFloat(ucoAmount)));
+  const tx = archethic.transaction.new().setType("transfer").addUCOTransfer(recipientAddress, parseBigInt(ucoAmount));
 
   const originPrivateKey = Utils.originPrivateKey;
 
