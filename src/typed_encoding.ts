@@ -5,7 +5,8 @@ import {
   sortObjectKeysASC,
   deserializeString,
   serializeString,
-  nextUint8
+  nextUint8,
+  getBigNumber
 } from "./utils.js";
 
 import VarInt from "./varint.js";
@@ -58,6 +59,15 @@ function do_serialize_v1(data: any): Uint8Array {
     return Uint8Array.from([TYPE_BOOL, 1]);
   } else if (data === false) {
     return Uint8Array.from([TYPE_BOOL, 0]);
+  } else if (typeof data == "bigint") {
+    const sign = data >= 0;
+    const absBigInt = (x: bigint) => (x < 0 ? -x : x);
+
+    return concatUint8Arrays(
+      Uint8Array.from([TYPE_INT]),
+      Uint8Array.from([sign ? 1 : 0]),
+      VarInt.serialize(absBigInt(data))
+    );
   } else if (Number(data) === data) {
     const sign = data >= 0;
 
