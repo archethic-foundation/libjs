@@ -148,7 +148,7 @@ window.generate_transaction = async () => {
   await signTransaction();
   document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(signedTx.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
-  const result = await archethic.transaction.getTransactionFee(transaction);
+  const result = await archethic.transaction.getTransactionFee(signedTx);
   const amount = parseFloat(formatBigInt(BigInt(result.fee)));
   const usdValue = (result.rates.usd * amount).toFixed(4);
   document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
