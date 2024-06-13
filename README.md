@@ -1370,6 +1370,31 @@ tx.originSign(originPrivateKey)
 ```
 
   </details>
+  <details>
+  <summary>Contract</summary>
+
+  <br />
+
+  ### newContractTransaction
+
+  Create a new contract transaction injecting the code and the authorized public key encryption to allow node to emit transaction on your behalf
+
+  ```js
+  import Archethic, { Utils, Contract } from "@archethicjs/sdk"
+  const archethic = new Archethic("https://testnet.archethic.net")
+
+  const tx = await Contract.newContractTransaction(archethic, contractCode, contractSeed)
+
+  tx
+    .originSign(Utils.originPrivateKey)
+    .on("requiredConfirmation", () => console.log("ok deployed"))
+    .on("error", (context, reason) => console.error(reason))
+    .send();
+  ```
+
+
+
+  </details>
 
 ## Running the tests
 

@@ -1,0 +1,88 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Archethic - Contract Deployer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" />
+    <style>
+      body {
+        background: linear-gradient(-30deg, #00a4db 30%, #006cd2 70%);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container margin-top-6">
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-2 has-text-white">Archethic</h1>
+        </div>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <h1 class="is-size-5 has-text-white">Contract deployer</h1>
+        </div>
+      </div>
+
+      <div>
+        <form>
+          <div class="box">
+            <label for="endpoint">Node endpoint</label> <br /><br />
+            <div class="column"><input type="text" class="input" value="http://localhost:4000" id="endpoint" /></div>
+            <div class="column"><span id="connectionStatus"></span></div>
+          </div>
+          <div class="box" id="seedConfig">
+            <label for="seed">Enter your seed/passphrase</label>
+            <input
+              type="password"
+              class="input"
+              id="seed"
+              placeholder="TransactionChain seed"
+              style="width: 500px"
+              onchange="getTransactionIndex()"
+            />
+            <label for="curve">Cryptographic curve</label>
+            <select id="curve" class="select">
+              <option value="ed25519">Ed25519</option>
+              <option value="P256">P256</option>
+              <option value="secp256k1">secp256k1</option>
+            </select>
+          </div>
+          <div class="box" id="txIndexForm">
+            <label for="index">Transaction index</label>
+            <input type="number" class="input" min="0" id="index" value="0" />
+          </div>
+          <div class="box">
+            <label for="code">Enter your smart contract code</label>
+            <br />
+            <textarea id="code" cols="40" rows="5" class="textarea" placeholder="Smart contract code"></textarea>
+          </div>
+        </form>
+        <div class="column">
+          <button type="button" class="button is-warning" onclick="generate_transaction()">Generate</button>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="box" style="visibility: hidden" id="transactionOutput">
+              <p>Transaction address: <span id="address"></span></p>
+              <p>Transaction fee: <span id="tx_fee"></span></p>
+              <button type="button" class="button" onclick="sendTransaction()">Send</button>
+              <p id="success" style="display: none">
+                Your transaction has been sent to the network. <br />
+                You can verify it at <a id="tx_address_link" target="_blank"></a>
+              </p>
+              <p id="confirmed" style="display: none">
+                Transaction confirmed with <span id="confirmations"></span> replications out of
+                <span id="maxConfirmations"></span>
+              </p>
+              <p id="transaction_error" style="display: none; color: red">
+                Error during transaction validation : <span id="error_reason"></span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="dist/app.js"></script>
+  </body>
+</html>
