@@ -30,8 +30,8 @@
   },
   "homepage": "https://github.com/archethic-foundation/libjs#readme",
   "devDependencies": {
-    "@types/chrome": "0.0.266",
     "@types/absinthe__socket": "^0.2.3",
+    "@types/chrome": "0.0.266",
     "@types/elliptic": "^6.4.14",
     "@types/jest": "^29.5.0",
     "esbuild": "^0.19.0",
@@ -45,7 +45,6 @@
     "@absinthe/socket": "^0.2.1",
     "blakejs": "^1.2.1",
     "buffer": "^6.0.3",
-    "core-js-pure": "^3.37.1",
     "cross-fetch": "^4.0.0",
     "crypto-js": "^4.1.1",
     "curve25519-js": "^0.0.4",

@@ -1,6 +1,3 @@
-// @ts-ignore
-import CoreJSON from "core-js-pure/actual/json";
-
 /**
  *
  * Return the Initial Origin Private Key
@@ -339,5 +336,8 @@ export function deserializeString(encoded_str: Uint8Array): string {
 
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
-  return CoreJSON.rawJSON(this.toString());
+  // Because we cannot convert safely between browsers using rawJSON
+  // we convert into integer with loss of precision until browser compatiblity supports
+  // or blockchain's API support of string/hex amounts
+  return parseInt(this.toString());
 };

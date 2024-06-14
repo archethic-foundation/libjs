@@ -118,7 +118,7 @@ describe("Utils", () => {
     //
   });
 
-  describe("fromBigInt", () => {
+  describe("formatBigInt", () => {
     it("should return 8 decimals number by default", () => {
       expect(formatBigInt(BigInt(1_253_450_000))).toStrictEqual("12.5345");
     });
