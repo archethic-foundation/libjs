@@ -1,17 +1,16 @@
-import { toByteArray, concatUint8Arrays, nextUint8, fromByteArray } from "./utils.js";
+import { intToUint8Array, concatUint8Arrays, nextUint8, uint8ArrayToBigInt, getBigNumber } from "./utils.js";
 
 export default {
   serialize,
   deserialize
 };
 
-function serialize(int: number): Uint8Array {
-  const buff = toByteArray(int);
-
+function serialize(int: number | bigint): Uint8Array {
+  const buff = intToUint8Array(getBigNumber(int));
   return concatUint8Arrays(Uint8Array.from([buff.length]), buff);
 }
 
-function deserialize(iter: IterableIterator<[number, number]>): number {
+function deserialize(iter: IterableIterator<[number, number]>): bigint {
   const length = nextUint8(iter);
 
   let bytes = [];
@@ -19,5 +18,5 @@ function deserialize(iter: IterableIterator<[number, number]>): number {
     bytes.push(nextUint8(iter));
   }
 
-  return fromByteArray(Uint8Array.from(bytes));
+  return uint8ArrayToBigInt(Uint8Array.from(bytes));
 }

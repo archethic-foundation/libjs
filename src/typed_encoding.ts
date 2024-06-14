@@ -1,11 +1,12 @@
 import {
   concatUint8Arrays,
-  toBigInt,
-  fromBigInt,
+  parseBigInt,
+  formatBigInt,
   sortObjectKeysASC,
   deserializeString,
   serializeString,
-  nextUint8
+  nextUint8,
+  getBigNumber
 } from "./utils.js";
 
 import VarInt from "./varint.js";
@@ -58,6 +59,15 @@ function do_serialize_v1(data: any): Uint8Array {
     return Uint8Array.from([TYPE_BOOL, 1]);
   } else if (data === false) {
     return Uint8Array.from([TYPE_BOOL, 0]);
+  } else if (typeof data == "bigint") {
+    const sign = data >= 0;
+    const absBigInt = (x: bigint) => (x < 0 ? -x : x);
+
+    return concatUint8Arrays(
+      Uint8Array.from([TYPE_INT]),
+      Uint8Array.from([sign ? 1 : 0]),
+      VarInt.serialize(absBigInt(data))
+    );
   } else if (Number(data) === data) {
     const sign = data >= 0;
 
@@ -65,13 +75,13 @@ function do_serialize_v1(data: any): Uint8Array {
       return concatUint8Arrays(
         Uint8Array.from([TYPE_INT]),
         Uint8Array.from([sign ? 1 : 0]),
-        VarInt.serialize(Math.abs(data))
+        VarInt.serialize(BigInt(Math.abs(data)))
       );
     } else {
       return concatUint8Arrays(
         Uint8Array.from([TYPE_FLOAT]),
         Uint8Array.from([sign ? 1 : 0]),
-        VarInt.serialize(toBigInt(Math.abs(data)))
+        VarInt.serialize(parseBigInt(Math.abs(data).toString()))
       );
     }
   } else if (typeof data === "string") {
@@ -105,10 +115,12 @@ function do_deserialize_v1(iter: IterableIterator<[number, number]>): any {
       return nextUint8(iter) == 1;
 
     case TYPE_INT:
-      return nextUint8(iter) == 1 ? VarInt.deserialize(iter) : VarInt.deserialize(iter) * -1;
+      return nextUint8(iter) == 1 ? VarInt.deserialize(iter) : VarInt.deserialize(iter) * -1n;
 
     case TYPE_FLOAT:
-      return nextUint8(iter) == 1 ? fromBigInt(VarInt.deserialize(iter)) : fromBigInt(VarInt.deserialize(iter) * -1);
+      return nextUint8(iter) == 1
+        ? formatBigInt(VarInt.deserialize(iter))
+        : formatBigInt(VarInt.deserialize(iter) * -1n);
 
     case TYPE_STR: {
       const strLen = VarInt.deserialize(iter);

@@ -93,7 +93,7 @@ type TokenLedger = {
 };
 
 type TokenTransfer = {
-  amount: number;
+  amount: bigint;
   to: Uint8Array;
   tokenAddress: Uint8Array;
   tokenId: number;
@@ -104,7 +104,7 @@ type UcoLedger = {
 };
 
 type UcoTransfer = {
-  amount: number;
+  amount: bigint;
   to: Uint8Array;
 };
 
@@ -192,12 +192,12 @@ export type Keypair = {
 
 type Transfer = {
   to: string;
-  amount: number;
+  amount: bigint;
 };
 
 type TokenTransferRPC = {
   to: string;
-  amount: number;
+  amount: bigint;
   tokenAddress: string;
   tokenId: number;
 };

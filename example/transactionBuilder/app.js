@@ -1,7 +1,7 @@
 import Archethic, { Utils, Crypto, Contract } from "@archethicjs/sdk";
 import { ExtendedTransactionBuilder } from "../../dist/transaction";
 
-const { toBigInt } = Utils;
+const { parseBigInt, formatBigInt } = Utils;
 
 let file_content = "";
 
@@ -147,7 +147,7 @@ window.generate_transaction = async () => {
   document.querySelector("#transactionOutput #address").innerText = Utils.uint8ArrayToHex(signedTx.address);
   document.querySelector("#transactionOutput").style.visibility = "visible";
   const result = await archethic.transaction.getTransactionFee(signedTx);
-  const amount = Utils.fromBigInt(result.fee);
+  const amount = parseFloat(formatBigInt(BigInt(result.fee)));
   const usdValue = (result.rates.usd * amount).toFixed(4);
   document.querySelector("#tx_fee").innerText = `${amount} UCO ($${usdValue})`;
 };
@@ -181,16 +181,11 @@ window.onClickAddTransfer = () => {
   const transfer_to = document.querySelector("#amount_address").value;
   const transferAmount = document.querySelector("#uco_amount").value;
 
-  const amount = parseFloat(transferAmount);
-  if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
-    return;
-  }
-
   if (transfer_to == "") {
     return;
   }
 
-  ucoTransfers.push({ to: transfer_to, amount: toBigInt(amount) });
+  ucoTransfers.push({ to: transfer_to, amount: parseBigInt(transferAmount) });
 
   const option = document.createElement("option");
   option.text = transfer_to + ": " + transferAmount;
@@ -210,11 +205,6 @@ window.onClickAddTokenTransfer = async () => {
   const transferToken = document.querySelector("#token_address").value;
   const transferTokenId = document.querySelector("#token_id").value;
 
-  const amount = parseFloat(transferAmount);
-  if (transferAmount == "" || Number.isNaN(amount) || amount < 0.0) {
-    return;
-  }
-
   if (transfer_to == "") {
     return;
   }
@@ -229,7 +219,7 @@ window.onClickAddTokenTransfer = async () => {
 
   tokenTransfers.push({
     to: transfer_to,
-    amount: toBigInt(amount, decimals),
+    amount: parseBigInt(transferAmount, decimals),
     token: transferToken,
     tokenId: parseInt(transferTokenId)
   });

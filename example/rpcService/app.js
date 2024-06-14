@@ -1,15 +1,6 @@
 import Archethic, { Utils } from "@archethicjs/sdk";
 import { ArchethicRPCClient } from "../../dist/api/wallet_rpc";
 
-const { toBigInt } = Utils;
-
-let file_content = "";
-
-let ucoTransfers = [];
-let tokenTransfers = [];
-let recipients = [];
-let ownerships = [];
-
 ArchethicRPCClient.instance.setOrigin({ name: "Wallet RPC example application" });
 
 /** @type {Archethic | undefined} */

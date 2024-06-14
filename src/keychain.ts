@@ -1,10 +1,10 @@
 import {
   base64url,
   concatUint8Arrays,
-  intToUint8Array,
+  intToUint32Array,
   maybeHexToUint8Array,
   uint8ArrayToHex,
-  uint8ArrayToInt,
+  uint8ArrayToBigInt,
   wordArrayToUint8Array
 } from "./utils.js";
 import { Curve, HashAlgorithm, Keypair, Services } from "./types.js";
@@ -150,7 +150,7 @@ export default class Keychain {
     }
 
     return concatUint8Arrays(
-      intToUint8Array(this.version),
+      intToUint32Array(this.version),
       Uint8Array.from([this.seed.length]),
       this.seed,
       Uint8Array.from([Object.keys(this.services).length]),
@@ -168,7 +168,7 @@ export default class Keychain {
     let { bytes: seed, pos: seedPos } = readBytes(binary, seedSizePos, seedSize);
     let { byte: nbServices, pos: nbServicesPos } = readByte(binary, seedPos, 1);
 
-    let keychain = new Keychain(seed, uint8ArrayToInt(version));
+    let keychain = new Keychain(seed, Number(uint8ArrayToBigInt(version)));
 
     for (let i = 0; i < nbServices; i++) {
       let { byte: serviceNameLength, pos: serviceNameLengthPos } = readByte(binary, nbServicesPos, 1);

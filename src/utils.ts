@@ -94,25 +94,30 @@ export function maybeUint8ArrayToHex(bytes: Uint8Array | string): string {
 }
 
 /**
+ * Encode any integer into Uint8Array
+ * @param int Integer to encode
+ * @returns {Uint8Array} Encoded integer
+ */
+export function intToUint8Array(int: number | bigint): Uint8Array {
+  return toByteArray(int);
+}
+
+/**
  * Encode an integer into a Uint8Array (4 bytes)
  * @param int Integer to encode
  * @returns {Uint8Array} Encoded integer
  */
-export function intToUint8Array(int: number): Uint8Array {
+export function intToUint32Array(int: number): Uint8Array {
   const buffer = new ArrayBuffer(4);
   const view = new DataView(buffer);
   view.setUint32(0x0, int, true);
   return new Uint8Array(buffer).reverse();
 }
 
-/**
- * Encode a big integer into a Uint8Array (8 bytes)
- * @param {Number} number Number to encode
- */
-export function bigIntToUint8Array(number: number): Uint8Array {
+export function intToUint64Array(int: number | bigint): Uint8Array {
   const buffer = new ArrayBuffer(8);
   const view = new DataView(buffer);
-  view.setBigUint64(0x0, BigInt(number), true);
+  view.setBigUint64(0x0, getBigNumber(int), true);
   return new Uint8Array(buffer).reverse();
 }
 
@@ -120,37 +125,81 @@ export function bigIntToUint8Array(number: number): Uint8Array {
  * Decode byte array (4 bytes) into a integer
  * @param {Uint8Array} bytes Bytes array to decode
  */
-export function uint8ArrayToInt(bytes: Uint8Array): number {
-  let value = 0;
-  for (const element of bytes) {
-    value = value * 256 + element;
-  }
-  return value;
+export function uint8ArrayToBigInt(bytes: Uint8Array): bigint {
+  return fromByteArray(bytes);
 }
 
 /**
- * Convert any number into a big int for 10^8 decimals
- * @param number Number to convert
- * @param decimal Number of decimals
+ * Convert a string into a big int for 10^8 decimals
+ * @param {number} number Number to convert
+ * @param {number} formatDecimals Number of decimals
+ * @returns {number} Converted number
  */
-export function toBigInt(number: number, decimal: number = 8): number {
-  // This is a workaroud of float weird behavior
-  // 94.03999999999999 * 100_000_000 = 9404000000
-  // 94.03999999999999 * 10*10*10*10*10*10*10*10 = 9403999999
-  let nb = number;
-  for (let i = 0; i < decimal; i++) {
-    nb = nb * 10;
+export function parseBigInt(number: string, formatDecimals: number = 8): bigint {
+  const match = number.match(/^([0-9]*)\.?([0-9]*)$/);
+  if (!match || match[1].length + match[2].length == 0) {
+    throw new Error("Invalid number");
   }
-  return Math.trunc(nb);
+
+  let whole = match[1] || "0",
+    decimal = match[2] || "";
+
+  // Pad out the decimals
+  while (decimal.length < formatDecimals) {
+    decimal += "0000";
+  }
+
+  // Remove extra padding
+  decimal = decimal.substring(0, formatDecimals);
+  return BigInt(whole + decimal);
+}
+
+export function getBigNumber(number: bigint | number) {
+  switch (typeof number) {
+    case "bigint":
+      return number;
+    case "number":
+      if (!Number.isInteger(number)) {
+        throw new Error(`${number} is not an integer`);
+      }
+      return BigInt(number);
+    default:
+      throw new Error(`${number} is not an valid number`);
+  }
 }
 
 /**
  * Convert a big int number of 10^8 decimals into a decimal number
  * @param number Number to convert
- * @param decimal Number of decimals
+ * @param formatDecimals Number of decimals
  */
-export function fromBigInt(number: number, decimal: number = 8): number {
-  return number / Math.pow(10, decimal);
+export function formatBigInt(number: bigint, formatDecimals: number = 8): string {
+  let strNumber = getBigNumber(number).toString();
+  // No decimal point for whole values
+  if (formatDecimals === 0) {
+    return strNumber;
+  }
+
+  // Pad out to the whole component (including a whole digit)
+  while (strNumber.length <= formatDecimals) {
+    strNumber = "0000" + strNumber;
+  }
+
+  // Insert the decimal point
+  const index = strNumber.length - formatDecimals;
+  strNumber = strNumber.substring(0, index) + "." + strNumber.substring(index);
+
+  // Trim the whole component (leaving at least one 0)
+  while (strNumber[0] === "0" && strNumber[1] !== ".") {
+    strNumber = strNumber.substring(1);
+  }
+
+  // Trim the decimal component (leaving at least one 0)
+  while (strNumber[strNumber.length - 1] === "0" && strNumber[strNumber.length - 2] !== ".") {
+    strNumber = strNumber.substring(0, strNumber.length - 1);
+  }
+
+  return strNumber;
 }
 
 /**
@@ -210,30 +259,51 @@ export function base64url(arraybuffer: ArrayBuffer): string {
 }
 
 /**
- * Convert any number into a byte array
+ * Convert any number into a byte uint8Array
  */
-export function toByteArray(number: number): Uint8Array {
-  if (number === 0) return Uint8Array.from([0]);
+function toByteArray(number: number | bigint): Uint8Array {
+  var hex = getBigNumber(number).toString(16);
 
-  const arr = [];
-  while (number >= 256) {
-    arr.push(number % 256);
-    number = Math.floor(number / 256);
+  //Fix padding issue for invalid hex string
+  if (hex.length % 2) {
+    hex = "0" + hex;
   }
 
-  arr.push(number % 256);
+  // The byteLength will be half of the hex string length
+  var len = hex.length / 2;
+  var u8 = new Uint8Array(len);
 
-  return new Uint8Array(arr).reverse();
+  // And then we can iterate each element by one
+  // and each hex segment by two
+  var i = 0;
+  var j = 0;
+  while (i < len) {
+    u8[i] = parseInt(hex.slice(j, j + 2), 16);
+    i += 1;
+    j += 2;
+  }
+
+  return u8;
 }
 
 /**
- * Alias of uint8ArrayToInt
+ * Convert any byte array into a number
  *
  * @param bytes
  * @returns the number
  */
-export function fromByteArray(bytes: Uint8Array): number {
-  return uint8ArrayToInt(bytes);
+function fromByteArray(bytes: Uint8Array): bigint {
+  let hex: string[] = [];
+
+  bytes.forEach(function (i) {
+    var h = i.toString(16);
+    if (h.length % 2) {
+      h = "0" + h;
+    }
+    hex.push(h);
+  });
+
+  return BigInt("0x" + hex.join(""));
 }
 
 /**
@@ -263,3 +333,11 @@ export function serializeString(str: string): Uint8Array {
 export function deserializeString(encoded_str: Uint8Array): string {
   return new TextDecoder().decode(encoded_str);
 }
+
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  // Because we cannot convert safely between browsers using rawJSON
+  // we convert into integer with loss of precision until browser compatiblity supports
+  // or blockchain's API support of string/hex amounts
+  return parseInt(this.toString());
+};
