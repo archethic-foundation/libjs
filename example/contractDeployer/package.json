@@ -1,0 +1,16 @@
+{
+  "name": "@archethic/contractdeployer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run build && http-server",
+    "build": "node ./build.js"
+  },
+  "dependencies": {
+    "@archethicjs/sdk": "file:../.."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

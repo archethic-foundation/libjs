@@ -5,7 +5,6 @@ const { toBigInt } = Utils;
 
 let file_content = "";
 
-let transaction;
 let ucoTransfers = [];
 let tokenTransfers = [];
 let recipients = [];
@@ -19,7 +18,7 @@ let walletAccount = undefined;
 
 async function connectEndpoint() {
   const endpoint = document.querySelector("#endpoint").value;
-  const localArchethic = new Archethic(endpoint);
+  const localArchethic = new Archethic(endpoint == "ws://localhost:12345" ? undefined : endpoint);
   document.querySelector("#connectionStatus").textContent = "";
 
   if (localArchethic.endpoint.isRpcAvailable) {
@@ -77,7 +76,6 @@ document.querySelector("#endpoint").addEventListener("change", async function ()
 let txBuilder = undefined;
 
 window.generate_transaction = async () => {
-  transaction = null;
   document.querySelector("#transactionOutput").style.visibility = "hidden";
 
   const seed = document.querySelector("#seed").value;
