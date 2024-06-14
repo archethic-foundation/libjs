@@ -1,10 +1,11 @@
-import { Curve, HashAlgorithm, Keypair } from "./types.js";
+import { AuthorizedKeyUserInput, Curve, HashAlgorithm, Keypair } from "./types.js";
 import {
   concatUint8Arrays,
   hexToUint8Array,
   intToUint32Array,
   maybeHexToUint8Array,
   maybeStringToUint8Array,
+  maybeUint8ArrayToHex,
   uint8ArrayToHex,
   wordArrayToUint8Array
 } from "./utils.js";
@@ -15,20 +16,21 @@ import * as curve25519 from "curve25519-js";
 import CryptoJS from "crypto-js";
 import blake from "blakejs";
 import nacl from "tweetnacl";
-import pkg from "elliptic";
-const { ec } = pkg;
+import { ec } from "elliptic";
 import sha3 from "js-sha3";
-// @ts-ignore
 import ed2curve from "ed2curve";
-// @ts-ignore
 import sjcl from "sjcl";
+import Keychain from "./keychain.js";
 
 const { sha3_512, sha3_256 } = sha3;
-const EC = ec;
-const ec_P256 = new EC("p256");
-const ec_secp256k1 = new EC("secp256k1");
+const ec_P256 = new ec("p256");
+const ec_secp256k1 = new ec("secp256k1");
 const SOFTWARE_ID = 1;
 
+/**
+ * Generate a random secret key of 32 bytes
+ * @returns {Uint8Array} Random secret key
+ */
 export function randomSecretKey(): Uint8Array {
   return wordArrayToUint8Array(CryptoJS.lib.WordArray.random(32));
 }
@@ -44,6 +46,7 @@ const hashAlgoMap = {
 /**
  * Get the hash algo name from the hash algorithm ID
  * @param {number} ID Hash algorithm's ID
+ * @returns {HashAlgorithm} Hash algorithm's name
  */
 export function IDToHashAlgo(ID: number): HashAlgorithm {
   const hashAlgo = findHashAlgoById(ID);
@@ -59,7 +62,8 @@ function findHashAlgoById(ID: number) {
 
 /**
  * Get the ID of a given hash algorithm
- * @params {String} hashAlgo Hash algorithm
+ * @param {String} hashAlgo Hash algorithm
+ * @returns {number} Hash algorithm's ID
  */
 export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
   const ID = hashAlgoMap[hashAlgo];
@@ -73,6 +77,7 @@ export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
  * Get the hash digest of a given content for a given hash algorithm
  * @param {string | Uint8Array} content Content to hash
  * @param {HashAlgorithm} algo Hash algorithm
+ * @returns {Uint8Array} Hash digest
  */
 export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm): Uint8Array {
   switch (algo) {
@@ -110,7 +115,7 @@ export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm)
  * @param {HashAlgorithm} algo Hash algorithm to use
  * @returns {Uint8Array} Hash digest
  */
-export function hash(content: string | Uint8Array, algo: HashAlgorithm = HashAlgorithm.sha256) {
+export function hash(content: string | Uint8Array, algo: HashAlgorithm = HashAlgorithm.sha256): Uint8Array {
   content = maybeStringToUint8Array(content);
 
   const algoID = hashAlgoToID(algo);
@@ -121,7 +126,8 @@ export function hash(content: string | Uint8Array, algo: HashAlgorithm = HashAlg
 
 /**
  * Get the ID of a given Elliptic curve
- * @params {String} curve Elliptic curve
+ * @param {String} curve Elliptic curve
+ * @returns {number} Curve's ID
  */
 export function curveToID(curve: Curve): number {
   switch (curve) {
@@ -142,6 +148,7 @@ export function curveToID(curve: Curve): number {
 /**
  * Get the curve name from the curve ID
  * @param {number} ID Curve's ID
+ * @returns {Curve} Curve's name
  */
 export function IDToCurve(ID: number): Curve {
   switch (ID) {
@@ -156,12 +163,18 @@ export function IDToCurve(ID: number): Curve {
   }
 }
 
+/**
+ * Derive a private key from a seed and an index
+ * @param {string | Uint8Array} seed Seed to derive the private key
+ * @param {number} index Index to derive the private key
+ * @returns {Uint8Array} Derived private key
+ */
 export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): Uint8Array {
-  if (seed == undefined || seed == null) {
+  if (seed === undefined || seed === null) {
     throw new Error("Seed must be defined");
   }
 
-  if (index == undefined || index == null) {
+  if (index === undefined || index === null) {
     throw new Error("Index must be defined");
   }
 
@@ -191,23 +204,24 @@ export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): 
 }
 
 /**
- * Generate a keypair using a derivation function with a seed and an index. Each keys is prepending with a curve identification.
+ * Generate a keypair using a derivation function with a seed and an index. Each keys is prepending with a curve identification
  * @param {String} seed Keypair derivation seed
  * @param {number} index Number to identify the order of keys to generate
- * @param {String} curve Elliptic curve to use ("ed25519", "P256", "secp256k1")
+ * @param {Curve} curve Elliptic curve to use ("ed25519", "P256", "secp256k1")
  * @param {number} origin_id Origin id of the public key (0, 1, 2) = ("on chain wallet", "software", "tpm")
+ * @returns {Object} {publicKey: Uint8Array, privateKey: Uint8Array}
  */
 export function deriveKeyPair(
   seed: string | Uint8Array,
   index: number = 0,
-  curve = Curve.ed25519,
+  curve: Curve = Curve.ed25519,
   origin_id: number = SOFTWARE_ID
 ): Keypair {
-  if (seed == undefined || seed == null) {
+  if (seed === undefined || seed === null) {
     throw new Error("Seed must be defined");
   }
 
-  if (index == undefined || index == null) {
+  if (index === undefined || index === null) {
     throw new Error("Index must be defined");
   }
 
@@ -220,13 +234,14 @@ export function deriveKeyPair(
 }
 
 /**
- * Create an address from a seed, an index, an elliptic curve and an hash algorithm.
- * The address is prepended by the curve identification, the hash algorithm and the digest of the address
+ * Create an address from a seed, an index, an elliptic curve and an hash algorithm
  *
+ * The address is prepended by the curve identification, the hash algorithm and the digest of the address
  * @param {string | Uint8Array} seed Keypair derivation seed
  * @param {number} index Number to identify the order of keys to generate
  * @param {Curve} curve Elliptic Curve to use
  * @param {HashAlgorithm} hashAlgo Hash algorithm to use
+ * @returns {Uint8Array} Address
  */
 export function deriveAddress(
   seed: string | Uint8Array,
@@ -245,9 +260,10 @@ export function deriveAddress(
 
 /**
  * Generate a new keypair deterministically with a given private key, curve and origin id
- * @params {Uint8Array} privateKey Private key
- * @params {String} curve Elliptic curve
- * @params {Integer} originID Origin identification
+ * @param {Uint8Array} pvKey Private key
+ * @param {String} curve Elliptic curve
+ * @param {Integer} originID Origin identification
+ * @returns {Object} {publicKey: Uint8Array, privateKey: Uint8Array}
  */
 export function generateDeterministicKeyPair(pvKey: string | Uint8Array, curve: Curve, originID: number): Keypair {
   if (typeof pvKey === "string") {
@@ -317,6 +333,7 @@ function getKeypair(pvKey: string | Uint8Array, curve: Curve): { publicKey: Uint
  * Sign data with a private key
  * @param { string | Uint8Array } data Data to sign
  * @param { string | Uint8Array } privateKey Private key used to sign the data
+ * @returns { Uint8Array } Signature
  */
 export function sign(data: string | Uint8Array, privateKey: string | Uint8Array): Uint8Array {
   privateKey = maybeStringToUint8Array(privateKey);
@@ -354,6 +371,7 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
  * @param {string | Uint8Array} sig Signature to verify
  * @param {string | Uint8Array} data Data to verify
  * @param {string | Uint8Array} publicKey Public key used to verify the signature
+ * @returns {boolean} True if the signature is valid, false otherwise
  */
 export function verify(sig: string | Uint8Array, data: string | Uint8Array, publicKey: string | Uint8Array): boolean {
   sig = maybeStringToUint8Array(sig);
@@ -389,6 +407,7 @@ export function verify(sig: string | Uint8Array, data: string | Uint8Array, publ
  * Encrypt a data for a given public key using ECIES algorithm
  * @param {string | Uint8Array} data Data to encrypt
  * @param {string | Uint8Array} publicKey Public key for the shared secret encryption
+ * @returns {Uint8Array} Encrypted data
  */
 export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Array): Uint8Array {
   publicKey = maybeStringToUint8Array(publicKey);
@@ -439,6 +458,12 @@ export function ecEncrypt(data: string | Uint8Array, publicKey: string | Uint8Ar
   }
 }
 
+/**
+ * Decrypt a data for a given private key using ECIES algorithm
+ * @param {string | Uint8Array} ciphertext Data to decrypt
+ * @param {string | Uint8Array} privateKey Private key for the shared secret decryption
+ * @returns {Uint8Array} Decrypted data
+ */
 export function ecDecrypt(ciphertext: string | Uint8Array, privateKey: string | Uint8Array): Uint8Array {
   ciphertext = maybeStringToUint8Array(ciphertext);
   privateKey = maybeStringToUint8Array(privateKey);
@@ -492,40 +517,42 @@ export function ecDecrypt(ciphertext: string | Uint8Array, privateKey: string | 
 }
 
 /**
- * Encrypt a data for a given public key using AES algorithm
+ * Encrypt a data for a given AES key using AES algorithm
  * @param {string | Uint8Array} data Data to encrypt
- * @param {string | Uint8Array} key Symmetric key
+ * @param {string | Uint8Array} aesKey AES key (Symmetric key)
+ * @returns {Uint8Array} Encrypted data
  */
-export function aesEncrypt(data: string | Uint8Array, key: string | Uint8Array): Uint8Array {
-  key = maybeHexToUint8Array(key);
+export function aesEncrypt(data: string | Uint8Array, aesKey: string | Uint8Array): Uint8Array {
+  aesKey = maybeHexToUint8Array(aesKey);
   data = maybeStringToUint8Array(data);
 
   const iv = wordArrayToUint8Array(CryptoJS.lib.WordArray.random(12));
-
-  const { tag, encrypted } = aesAuthEncrypt(data, key, iv);
+  const { tag, encrypted } = aesAuthEncrypt(data, aesKey, iv);
 
   return concatUint8Arrays(new Uint8Array(iv), tag, encrypted);
 }
 
 /**
- * Decrypt cipherText for a given key using AES algorithm
- * @param cipherText Ciphertext to decrypt
- * @param key Symmetric key
+ * Decrypt a data for a given AES key using AES algorithm
+ * @param {string | Uint8Array} cipherText Data to decrypt
+ * @param {string | Uint8Array} aesKey AES key (Symmetric key)
+ * @returns {Uint8Array} Decrypted data
  */
-export function aesDecrypt(cipherText: string | Uint8Array, key: string | Uint8Array): Uint8Array {
+export function aesDecrypt(cipherText: string | Uint8Array, aesKey: string | Uint8Array): Uint8Array {
   cipherText = maybeHexToUint8Array(cipherText);
-  key = maybeHexToUint8Array(key);
+  aesKey = maybeHexToUint8Array(aesKey);
 
   const iv = cipherText.slice(0, 12);
   const tag = cipherText.slice(12, 12 + 16);
   const encrypted = cipherText.slice(28, cipherText.length);
 
-  return aesAuthDecrypt(encrypted, key, iv, tag);
+  return aesAuthDecrypt(encrypted, aesKey, iv, tag);
 }
 
 /**
  * Derive a secret from a shared key
- * @param sharedKey
+ * @param {Uint8Array} sharedKey
+ * @returns {Object} {aesKey: Uint8Array, iv: Uint8Array}
  */
 function deriveSecret(sharedKey: Uint8Array): { aesKey: Uint8Array; iv: Uint8Array } {
   sharedKey = CryptoJS.lib.WordArray.create(sharedKey);
@@ -539,9 +566,10 @@ function deriveSecret(sharedKey: Uint8Array): { aesKey: Uint8Array; iv: Uint8Arr
 
 /**
  * Encrypt data with AES
- * @param data Data to encrypt
- * @param aesKey AES key
- * @param iv Initialization vector
+ * @param {Uint8Array} data Data to encrypt
+ * @param {Uint8Array} aesKey AES key
+ * @param {Uint8Array} iv Initialization vector
+ * @returns {Object} {tag: Uint8Array, encrypted: Uint8Array}
  */
 function aesAuthEncrypt(
   data: Uint8Array,
@@ -553,6 +581,7 @@ function aesAuthEncrypt(
   const dataBits = sjcl.codec.hex.toBits(uint8ArrayToHex(data));
   const ivBits = sjcl.codec.hex.toBits(uint8ArrayToHex(iv));
 
+  // @ts-expect-error sjcl.mode.gcm.C is not in types
   const { tag, data: encrypted } = sjcl.mode.gcm.C(true, new sjcl.cipher.aes(keyBits), dataBits, [], ivBits, 128);
 
   return {
@@ -563,18 +592,20 @@ function aesAuthEncrypt(
 
 /**
  * Decrypt data with AES
- * @param encrypted Encrypted data
- * @param aesKey AES key
- * @param iv Initialization vector
- * @param tag Tag
+ * @param {Uint8Array} encrypted Encrypted data
+ * @param {Uint8Array} aesKey AES key
+ * @param {Uint8Array} iv Initialization vector
+ * @param {Uint8Array} tag Tag
+ * @returns {Uint8Array} Decrypted data
  */
-function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Array, tag: Uint8Array) {
+function aesAuthDecrypt(encrypted: Uint8Array, aesKey: Uint8Array, iv: Uint8Array, tag: Uint8Array): Uint8Array {
   // Format for SJCL
   const encryptedBits = sjcl.codec.hex.toBits(uint8ArrayToHex(encrypted));
   const aesKeyBits = sjcl.codec.hex.toBits(uint8ArrayToHex(aesKey));
   const ivBits = sjcl.codec.hex.toBits(uint8ArrayToHex(iv));
   const tagBits = sjcl.codec.hex.toBits(uint8ArrayToHex(tag));
 
+  // @ts-expect-error sjcl.mode.gcm.C is not in types
   const { tag: actualTag, data: decrypted } = sjcl.mode.gcm.C(
     false,
     new sjcl.cipher.aes(aesKeyBits),
@@ -644,4 +675,82 @@ function validHash(hashAlgo: HashAlgorithm, digest: Uint8Array) {
     case HashAlgorithm.blake2b:
       return digest.length == 64;
   }
+}
+
+/**
+ * Generates the genesis address (the first address) from a given seed
+ * @param {string | Uint8Array} seed The seed used to generate the address
+ * @returns {string} The genesis address in hexadecimal format
+ */
+export function getGenesisAddress(seed: string | Uint8Array): string {
+  return uint8ArrayToHex(deriveAddress(seed, 0));
+}
+
+/**
+ * Derives the genesis address for a given service from a keychain
+ * @param {Keychain} keychain The keychain used to derive the address
+ * @param {string} service The service for which to derive the address
+ * @param {string} [suffix=""] An optional suffix to append to the service before deriving the address
+ * @returns {string} The genesis address for the service in hexadecimal format
+ */
+export function getServiceGenesisAddress(keychain: Keychain, service: string, suffix: string = ""): string {
+  return uint8ArrayToHex(keychain.deriveAddress(service, 0, suffix));
+}
+
+/**
+ * Encrypts a secret using a given public key
+ * @param {string | Uint8Array} secret The secret to encrypt
+ * @param {string[] | Uint8Array[]} publicKeys The public keys authorized to decrypt the secret
+ * @returns {{encryptedSecret: Uint8Array, authorizedKeys: AuthorizedKeyUserInput[]}}
+ * @example
+ * const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
+ * const { encryptedSecret, authorizedKeys } = encryptSecret("something secret", storageNoncePublicKey);
+ * const code = "" // The contract code
+ * const tx = await archethic.transaction
+ *  .new()
+ *  .setType("contract")
+ *  .setCode(code)
+ *  .addOwnership(encryptedSecret, authorizedKeys)
+ *  .build(seed, 0)
+ *  .originSign(originPrivateKey)
+ *  .send();
+ */
+export function encryptSecret(
+  secret: string | Uint8Array,
+  ...publicKeys: string[] | Uint8Array[]
+): { encryptedSecret: Uint8Array; authorizedKeys: AuthorizedKeyUserInput[] } {
+  const aesKey = randomSecretKey();
+  const encryptedSecret = aesEncrypt(secret, aesKey);
+
+  const authorizedKeys: AuthorizedKeyUserInput[] = publicKeys.map((publicKey) => {
+    const encryptedAesKey = uint8ArrayToHex(ecEncrypt(aesKey, publicKey));
+    return { encryptedSecretKey: encryptedAesKey, publicKey: maybeUint8ArrayToHex(publicKey) };
+  });
+
+  return { encryptedSecret, authorizedKeys };
+}
+
+/**
+ * Decrypt a secret if authorized
+ * @param {Uint8Array} encryptedSecret The secret to decrypt
+ * @param {AuthorizedKeyUserInput[]} authorizedKeys The AES keys of authorized keys
+ * @param {Keypair} keyPair The keyPair to use for decrypting
+ * @returns {Uint8Array} The decrypted secret
+ * @example
+ * const keypair = deriveKeyPair("seed", 0);
+ * const { encryptedSecret, authorizedKeys } = encryptSecret("something secret", keypair.publicKey);
+ * const decryptedSecret = decryptSecret(encryptedSecret, authorizedKeys, keypair);
+ */
+export function decryptSecret(
+  encryptedSecret: Uint8Array,
+  authorizedKeys: AuthorizedKeyUserInput[],
+  keyPair: Keypair
+): Uint8Array {
+  const publicKeyInHex = uint8ArrayToHex(keyPair.publicKey);
+
+  const authorizedKey = authorizedKeys.find(({ publicKey: currentPubKey }) => currentPubKey == publicKeyInHex);
+  if (!authorizedKey) throw new Error("This keypair is not authorized to decrypt the secret");
+
+  const aesKey = ecDecrypt(authorizedKey.encryptedSecretKey, keyPair.privateKey);
+  return aesDecrypt(encryptedSecret, aesKey);
 }
