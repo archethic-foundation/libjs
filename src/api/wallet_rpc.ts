@@ -135,7 +135,8 @@ export class ArchethicWalletClient {
       // On close, make sure to reject all the pending requests to prevent hanging.
       this._channel.onClose = async (reason) => {
         this.client?.rejectAllPendingRequests(`Connection is closed (${reason}).`);
-        this.close();
+        this.client = undefined;
+        this._dispatchConnectionState();
       };
 
       this._channel.onReady = async () => {
@@ -152,8 +153,6 @@ export class ArchethicWalletClient {
    */
   async close(): Promise<void> {
     this._channel?.close();
-    this.client = undefined;
-    this._dispatchConnectionState();
   }
 
   _ensuresConnectionAlive(): void {
