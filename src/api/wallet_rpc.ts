@@ -87,7 +87,9 @@ export class ArchethicWalletClient {
   }
 
   _dispatchConnectionState() {
-    this._connectionStateEventTarget.dispatchEvent(new Event(this.connectionState));
+    const connectionState = this.connectionState
+    console.log(`Connection state updated : ${connectionState}`);
+    this._connectionStateEventTarget.dispatchEvent(new Event(connectionState));
   }
 
 
@@ -97,13 +99,12 @@ export class ArchethicWalletClient {
    * @returns {Promise<void>}
    */
   async connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       console.log('Connection attempt');
 
       if (this.connectionState != ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
-      this._dispatchConnectionState();
 
       this.client = new JSONRPCServerAndClient(
         new JSONRPCServer(),
@@ -144,7 +145,8 @@ export class ArchethicWalletClient {
         this._dispatchConnectionState();
       };
 
-      this._channel.connect();
+      await this._channel.connect();
+      this._dispatchConnectionState();
     });
   }
 
