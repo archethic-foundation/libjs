@@ -86,8 +86,8 @@ export class ArchethicWalletClient {
     return this;
   }
 
-  _dispatchConnectionState() {
-    const connectionState = this.connectionState
+  _dispatchConnectionState(state?: ConnectionState) {
+    const connectionState = state ?? this.connectionState
     console.log(`Connection state updated : ${connectionState}`);
     this._connectionStateEventTarget.dispatchEvent(new Event(connectionState));
   }
@@ -145,7 +145,7 @@ export class ArchethicWalletClient {
         this._dispatchConnectionState();
       };
 
-      await this._channel.connect();
+      this._channel.connect();
       this._dispatchConnectionState();
     });
   }
@@ -154,7 +154,8 @@ export class ArchethicWalletClient {
    * @return {Promise<void>}
    */
   async close(): Promise<void> {
-    this._channel?.close();
+    this._dispatchConnectionState(ConnectionState.Closing);
+    await this._channel?.close();
   }
 
   _ensuresConnectionAlive(): void {
@@ -230,12 +231,15 @@ export class ArchethicWalletClient {
    * @param {function(String)} listener
    * @return {ArchethicWalletClient}
    */
-  onconnectionstatechange(listener: Function): this {
+  onconnectionstatechange(listener: (state: ConnectionState) => void): this {
     this._connectionStateEventTarget.addEventListener(ConnectionState.Connecting, () => {
       listener(ConnectionState.Connecting);
     });
     this._connectionStateEventTarget.addEventListener(ConnectionState.Open, () => {
       listener(ConnectionState.Open);
+    });
+    this._connectionStateEventTarget.addEventListener(ConnectionState.Closing, () => {
+      listener(ConnectionState.Closing);
     });
     this._connectionStateEventTarget.addEventListener(ConnectionState.Closed, () => {
       listener(ConnectionState.Closed);
@@ -249,6 +253,7 @@ export class ArchethicWalletClient {
   unsubscribeconnectionstatechange(): this {
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Connecting, null);
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Open, null);
+    this._connectionStateEventTarget.removeEventListener(ConnectionState.Closing, null);
     this._connectionStateEventTarget.removeEventListener(ConnectionState.Closed, null);
     return this;
   }
