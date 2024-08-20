@@ -16,7 +16,9 @@ import * as curve25519 from "curve25519-js";
 import CryptoJS from "crypto-js";
 import blake from "blakejs";
 import nacl from "tweetnacl";
-import { ec } from "elliptic";
+// Keep the elliptic import like this to avoid conflict with commonjs import
+import pkg from "elliptic";
+const { ec } = pkg;
 import sha3 from "js-sha3";
 import ed2curve from "ed2curve";
 import sjcl from "sjcl";
