@@ -39,7 +39,7 @@ export class NodeRPCClient {
    * @returns {Promise<TransactionFee>} The transaction fee
    */
   async getTransactionFee(tx: TransactionBuilder): Promise<TransactionFee> {
-    return this.client.request("estimate_transaction_fee", { transaction: tx.toNodeRPC() });
+    return this.client.request("estimate_transaction_fee", { transaction: await tx.toNodeRPC() });
   }
 
   /**
@@ -48,7 +48,7 @@ export class NodeRPCClient {
    * @returns {Promise<SendTransactionResponse>} The transaction response
    */
   async sendTransaction(tx: TransactionBuilder): Promise<SendTransactionResponse> {
-    return this.client.request("send_transaction", { transaction: tx.toNodeRPC() });
+    return this.client.request("send_transaction", { transaction: await tx.toNodeRPC() });
   }
 
   /**
@@ -66,7 +66,7 @@ export class NodeRPCClient {
    * @returns {Promise<SimulateContractExecutionResponse[]>} The simulation response per recipient
    */
   async simulateContractExecution(tx: TransactionBuilder): Promise<SimulateContractExecutionResponse[]> {
-    return this.client.request("simulate_contract_execution", { transaction: tx.toNodeRPC() });
+    return this.client.request("simulate_contract_execution", { transaction: await tx.toNodeRPC() });
   }
 
   async handleRequest(jsonRPCRequest: any): Promise<any> {
