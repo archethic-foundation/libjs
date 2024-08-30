@@ -116,7 +116,7 @@ describe("Network", () => {
         id: 1,
         method: "estimate_transaction_fee",
         params: {
-          transaction: tx.toNodeRPC()
+          transaction: await tx.toNodeRPC()
         }
       })
       // @ts-ignore
@@ -155,7 +155,7 @@ describe("Network", () => {
         id: 1,
         method: "send_transaction",
         params: {
-          transaction: tx.toNodeRPC()
+          transaction: await tx.toNodeRPC()
         }
       })
       // @ts-ignore
@@ -191,7 +191,7 @@ describe("Network", () => {
         id: 1,
         method: "simulate_contract_execution",
         params: {
-          transaction: tx.toNodeRPC()
+          transaction: await tx.toNodeRPC()
         }
       })
       // @ts-ignore
