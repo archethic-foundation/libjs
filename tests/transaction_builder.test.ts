@@ -445,10 +445,10 @@ describe("Transaction builder", () => {
 
       expect(txRPC).toHaveProperty("generateEncryptedSeedSC", true);
     });
-    it("should not affect the NodeTransactionRPC", () => {
+    it("should not affect the NodeTransactionRPC", async () => {
       const generateEncryptedSeedSC = true;
       const tx = new TransactionBuilder("transfer").setGenerateEncryptedSeedSC(generateEncryptedSeedSC);
-      const txRPC = tx.toNodeRPC();
+      const txRPC = await tx.toNodeRPC();
 
       expect(txRPC).not.toHaveProperty("generateEncryptedSeedSC", true);
     });
@@ -601,6 +601,13 @@ describe("Transaction builder", () => {
       });
       // @ts-ignore
       expect(txRPC.data.content).toStrictEqual("Hello world");
+    });
+  });
+
+  describe("toNodeRPC", () => {
+    it("should compress using zlib contract's code", async () => {
+      const tx = new TransactionBuilder("code").setCode("0061736d01000000015e1160017f017f60067f7f7f7f7f7f0060037f7f7f");
+      console.log(await tx.toNodeRPC());
     });
   });
 });
