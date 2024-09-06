@@ -12,11 +12,15 @@ export async function extractActionsFromContract(code: string): Promise<Contract
       "archethic/env": {
         log: (offset: bigint, length: bigint) => {},
         store_u8: (offset: bigint, data: bigint) => {},
-        input_load_u8: (offset: bigint): number => 0,
+        load_u8: (offset: bigint): number => 0,
         input_size: (): bigint => 0n,
         alloc: (length: bigint): bigint => 0n,
         set_output: (offset: bigint, length: bigint) => {},
         set_error: (offset: bigint, length: bigint) => {}
+      },
+      // FIXME with JSON RPC like request
+      "archethic/IO": {
+        get_balance: (offset: bigint, length: bigint) => 0
       }
     });
 
