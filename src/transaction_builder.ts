@@ -433,36 +433,13 @@ export default class TransactionBuilder {
    * JSON RPC API SEND_TRANSACTION
    */
   async toNodeRPC(): Promise<TransactionRPC> {
-    async function asyncConcatUint8Arrays(uint8arrays: Uint8Array[]) {
-      const blob = new Blob(uint8arrays);
-      const buffer = await blob.arrayBuffer();
-      return new Uint8Array(buffer);
-    }
-
-    async function compress(str: Uint8Array): Promise<Uint8Array> {
-      // Convert the string to a byte stream.
-      const stream = new Blob([str]).stream();
-
-      // Create a compressed stream.
-      const compressedStream = stream.pipeThrough(new CompressionStream("deflate-raw"));
-
-      // Read all the bytes from this stream.
-      const chunks: Uint8Array[] = [];
-      //@ts-ignore
-      for await (const chunk of compressedStream) {
-        chunks.push(chunk);
-      }
-
-      return await asyncConcatUint8Arrays(chunks);
-    }
-
     return {
       version: this.version,
       address: uint8ArrayToHex(this.address),
       type: this.type,
       data: {
         content: new TextDecoder().decode(this.data.content),
-        code: uint8ArrayToHex(await compress(this.data.code)),
+        code: new TextDecoder().decode(this.data.code),
         ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
           return {
             secret: uint8ArrayToHex(secret),
