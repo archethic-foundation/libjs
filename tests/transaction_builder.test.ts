@@ -603,11 +603,4 @@ describe("Transaction builder", () => {
       expect(txRPC.data.content).toStrictEqual("Hello world");
     });
   });
-
-  describe("toNodeRPC", () => {
-    it("should compress using zlib contract's code", async () => {
-      const tx = new TransactionBuilder("code").setCode("0061736d01000000015e1160017f017f60067f7f7f7f7f7f0060037f7f7f");
-      console.log(await tx.toNodeRPC());
-    });
-  });
 });

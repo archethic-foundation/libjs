@@ -2,59 +2,65 @@ import { ContractAction } from "./types.js";
 import { encryptSecret, deriveAddress } from "./crypto.js";
 import { ExtendedTransactionBuilder } from "./transaction.js";
 import Archethic from "./index.js";
-import { hexToUint8Array, isHex } from "./utils.js";
+import { isHex } from "./utils.js";
+
+type CodeWithManifest = {
+  bytecode: string;
+  manifest: WasmManifest
+}
+
+type WasmManifest = {
+  abi: WasmABI
+}
+
+type WasmABI = {
+  functions: Record<string, WASMFunctionABI>
+}
+
+type WASMFunctionABI = {
+  type: string;
+  triggerType?: string;
+  name: string;
+  input: Record<string, any>
+}
 
 export async function extractActionsFromContract(code: string): Promise<ContractAction[]> {
-  let actions = [];
-
-  if (isHex(code)) {
-    const wasmModule = await WebAssembly.instantiate(hexToUint8Array(code), {
-      "archethic/env": {
-        log: (offset: bigint, length: bigint) => {},
-        store_u8: (offset: bigint, data: bigint) => {},
-        load_u8: (offset: bigint): number => 0,
-        input_size: (): bigint => 0n,
-        alloc: (length: bigint): bigint => 0n,
-        set_output: (offset: bigint, length: bigint) => {},
-        set_error: (offset: bigint, length: bigint) => {}
-      },
-      // FIXME with JSON RPC like request
-      "archethic/IO": {
-        get_balance: (offset: bigint, length: bigint) => 0
-      }
-    });
-
-    const reservedFunctions = ["spec", "init", "onUpgrade"];
-    for (let key in wasmModule.instance.exports) {
-      if (wasmModule.instance.exports[key] instanceof Function) {
-        if (!reservedFunctions.includes(key)) {
-          actions.push({ name: key, parameters: ["WASM JSON Input"] });
-        }
+  try {
+    const codeWithManifest: CodeWithManifest = JSON.parse(code)
+    const manifest = codeWithManifest.manifest
+    let actions: ContractAction[] = []
+    for (let name of Object.keys(manifest.abi.functions)) {
+      const functionABI = manifest.abi.functions[name]
+      if (functionABI.type == "action" && functionABI.triggerType == "transaction") {
+        actions.push({
+          name: name,
+          parameters: functionABI.input ? Object.keys(functionABI.input) : []
+       })
       }
     }
+    return actions
+  }
+  catch(e) {
+    let actions = [];
 
-    actions.push({ name: "upgrade", parameters: ['WASM JSON Input ( {"code": "wasm code as hex"})'] });
+    const regex = /actions\s+triggered_by:\s+transaction,\s+on:\s+([\w\s.,()]+?)\s+do/g;
+
+    for (const match of code.matchAll(regex)) {
+      const fullAction = match[1];
+
+      const regexActionName = /(\w+)\((.*?)\)/g;
+      for (const actionMatch of fullAction.matchAll(regexActionName)) {
+        const name = actionMatch[1];
+        const parameters = actionMatch[2] != "" ? actionMatch[2].split(",") : [];
+        actions.push({
+          name: name,
+          parameters: parameters
+        });
+      }
+    }
 
     return actions;
   }
-
-  const regex = /actions\s+triggered_by:\s+transaction,\s+on:\s+([\w\s.,()]+?)\s+do/g;
-
-  for (const match of code.matchAll(regex)) {
-    const fullAction = match[1];
-
-    const regexActionName = /(\w+)\((.*?)\)/g;
-    for (const actionMatch of fullAction.matchAll(regexActionName)) {
-      const name = actionMatch[1];
-      const parameters = actionMatch[2] != "" ? actionMatch[2].split(",") : [];
-      actions.push({
-        name: name,
-        parameters: parameters
-      });
-    }
-  }
-
-  return actions;
 }
 
 export function parseTypedArgument(input: any): any {
