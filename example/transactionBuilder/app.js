@@ -249,14 +249,11 @@ let namedParams = [];
 
 window.onChangeRecipient = async () => {
   const address = document.querySelector("#recipient").value;
-  const contractCode = await archethic.network.getContractCode(address);
-  if (contractCode == "") {
-    return;
-  }
+  const contractContext = await archethic.network.getContractCode(address);
 
   document.querySelector("#namedActionsContainer").style.display = "block";
 
-  const actions = await Contract.extractActionsFromContract(contractCode);
+  const actions = await Contract.extractActionsFromContract(contractContext);
   actions.forEach((action) => {
     const option = document.createElement("option");
     option.text = action.name;
