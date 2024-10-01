@@ -267,6 +267,8 @@ window.onChangeRecipient = async () => {
     paramsContainer.setAttribute("style", "display: none");
     paramsContainer.setAttribute("class", "namedActionParams");
 
+    namedParams = new Array(action.parameters.length).fill(null)
+
     action.parameters.forEach((parameter, index) => {
       const inputId = paramsContainerId + "_param_" + parameter;
       const paramLabel = document.createElement("label");
