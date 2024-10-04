@@ -19,7 +19,7 @@ import {
 import TE from "./typed_encoding.js";
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
 
-const VERSION = 3;
+export const VERSION = 4;
 
 function getTransactionTypeId(type: UserTypeTransaction): number {
   switch (type) {
@@ -202,17 +202,17 @@ export default class TransactionBuilder {
    * Add recipient to the transaction
    * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
    * @param {string} action The named action
-   * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
+   * @param {any[] | object} args The arguments for the named action
    */
-  addRecipient(to: string | Uint8Array, action?: string, args?: any[]) {
+  addRecipient(to: string | Uint8Array, action?: string, args?: any[] | object) {
     const address = maybeHexToUint8Array(to);
 
     if (action && typeof action != "string") {
       throw new Error("`action` must be a string");
     }
 
-    if (args && !Array.isArray(args)) {
-      throw new Error("`args` must be an array");
+    if (args && typeof(args) !== "object") {
+      throw new Error("`args` must be an object or an array");
     }
 
     if (action && !args) {
@@ -383,7 +383,7 @@ export default class TransactionBuilder {
           address
         );
       } else {
-        const serializedArgs = args.map((arg) => TE.serialize(arg));
+        const serializedArgs = args instanceof Array ? args.map((arg) => TE.serialize(arg)) : [TE.serialize(args)];
 
         return concatUint8Arrays(
           // 1 = named action
