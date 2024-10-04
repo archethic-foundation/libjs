@@ -1,4 +1,4 @@
-import { ContractAction } from "./types.js";
+import { Contract, ContractAction, TransactionData } from "./types.js";
 import { encryptSecret, deriveAddress } from "./crypto.js";
 import { ExtendedTransactionBuilder } from "./transaction.js";
 import Archethic from "./index.js";
@@ -82,17 +82,26 @@ This function abstract the wrapping of encrypted keys towards the node's shared 
 */
 export async function newContractTransaction(
   archethic: Archethic,
-  code: string,
-  seed: string | Uint8Array
+  contract: Contract,
+  seed: string | Uint8Array,
+  txData?: TransactionData
 ): Promise<ExtendedTransactionBuilder> {
   const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
   const index = await archethic.transaction.getTransactionIndex(deriveAddress(seed, 0));
 
   const { encryptedSecret, authorizedKeys } = encryptSecret(seed, storageNoncePublicKey);
-  return archethic.transaction
+  const tx = archethic.transaction
     .new()
     .setType("contract")
-    .setCode(code)
+    .setContract(contract)
     .addOwnership(encryptedSecret, authorizedKeys)
-    .build(seed, index);
+
+  if (txData) {
+    txData.ledger.uco.transfers.forEach(t => tx.addUCOTransfer(t.to, t.amount))
+    txData.ledger.token.transfers.forEach(t => tx.addTokenTransfer(t.to, t.amount, t.tokenAddress, t.tokenId))
+    txData.recipients.forEach(r => tx.addRecipient(r.address, r.action, r.args))
+    tx.setContent(txData.content)
+  }
+
+  return tx.build(seed, index);
 }
