@@ -38,17 +38,20 @@ describe("Transaction builder", () => {
     });
   });
 
-  describe("setCode", () => {
+  describe("setContract", () => {
     it("should insert the code into the transaction data", () => {
-      const tx = new TransactionBuilder("transfer").setCode("my smart contract code");
-      expect(new TextDecoder().decode(tx.data.code)).toBe("my smart contract code");
+      const tx = new TransactionBuilder("transfer").setContract({
+        bytecode: new Uint8Array(),
+        manifest: { abi: { state: {}, functions: {}}}
+      });
+      expect(tx.data.contract?.bytecode).toStrictEqual(new Uint8Array());
     });
   });
 
   describe("setContent", () => {
     it("should insert the content into the transaction data", () => {
       const tx = new TransactionBuilder("transfer").setContent("my super content");
-      expect(tx.data.content).toStrictEqual(new TextEncoder().encode("my super content"));
+      expect(tx.data.content).toBe("my super content");
     });
   });
 
@@ -147,16 +150,16 @@ describe("Transaction builder", () => {
 
   describe("previousSignaturePayload", () => {
     it("should generate binary encoding of the transaction before signing", () => {
-      const code = `
-              condition inherit: [
-                uco_transferred: 0.020
-              ]
-
-              actions triggered by: transaction do
-                  set_type transfer
-                  add_uco_ledger to: "000056E763190B28B4CF9AAF3324CF379F27DE9EF7850209FB59AA002D71BA09788A", amount: 0.020
-              end
-            `;
+      const contract = {
+        bytecode: new Uint8Array(5),
+        manifest: {
+          abi: {
+            state: { "value": "u32"},
+            functions: {
+            }
+          }
+        }
+      };
 
       const content =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet leo egestas, lobortis lectus a, dignissim orci.";
@@ -176,7 +179,7 @@ describe("Transaction builder", () => {
           parseBigInt("100"),
           "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"
         )
-        .setCode(code)
+        .setContract(contract)
         .setContent(content)
         .addRecipient("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
         .addRecipient("0000ae12908c889ba2728614abc6ae472ed9f1df0b3afefd1faa290473a47ceb42bd", "addHero", { name: "John Doe"});
@@ -193,9 +196,11 @@ describe("Transaction builder", () => {
         intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
-        //Code size
-        intToUint32Array(code.length),
-        new TextEncoder().encode(code),
+        //Contract bytecode size
+        intToUint32Array(contract.bytecode.length),
+        contract.bytecode,
+        intToUint32Array(JSON.stringify(contract.manifest).length),
+        new TextEncoder().encode(JSON.stringify(contract.manifest)),
         //Content size
         intToUint32Array(content.length),
         new TextEncoder().encode(content),
@@ -272,7 +277,7 @@ describe("Transaction builder", () => {
         intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
-        //Code size
+        //Contract size
         intToUint32Array(0),
         //Content size
         intToUint32Array(0),

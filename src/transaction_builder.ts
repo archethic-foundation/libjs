@@ -5,7 +5,8 @@ import {
   HashAlgorithm,
   TransactionData,
   UserTypeTransaction,
-  TransactionRPC
+  TransactionRPC,
+  Contract
 } from "./types.js";
 import {
   concatUint8Arrays,
@@ -62,9 +63,8 @@ export default class TransactionBuilder {
     this.type = type as UserTypeTransaction;
     this.address = new Uint8Array();
     this.data = {
-      content: new Uint8Array(),
-      code: new Uint8Array(),
       ownerships: [],
+      content: "",
       ledger: {
         uco: {
           transfers: []
@@ -99,22 +99,19 @@ export default class TransactionBuilder {
   }
 
   /**
-   * Add smart contract code to the transcation
-   * @param {string} code Smart contract code
+   * Add smart contract's definition to the transcation
+   * @param {Contract} code Smart contract code
    */
-  setCode(code: string) {
-    this.data.code = maybeStringToUint8Array(code);
+  setContract(contract: Contract) {
+    this.data.contract = contract;
     return this;
   }
 
   /**
    * Add a content to the transaction
-   * @param {String | Uint8Array} content Hosted content
+   * @param {String} content Hosted content
    */
-  setContent(content: string | Uint8Array) {
-    if (typeof content == "string") {
-      content = new TextEncoder().encode(content);
-    }
+  setContent(content: string) {
     this.data.content = content;
     return this;
   }
@@ -338,7 +335,17 @@ export default class TransactionBuilder {
    * Generate the payload for the previous signature by encoding address,  type and data
    */
   previousSignaturePayload() {
-    const bufCodeSize = intToUint32Array(this.data.code.length);
+    let bufContract: Uint8Array = intToUint32Array(0)
+    if (this.data.contract != undefined) {
+      const contract = this.data.contract
+      const manifestJSON = JSON.stringify(contract.manifest)
+      bufContract = concatUint8Arrays(
+        intToUint32Array(contract.bytecode.byteLength),
+        contract.bytecode,
+        intToUint32Array(manifestJSON.length),
+        new TextEncoder().encode(manifestJSON)
+      )
+    }
 
     let contentSize = this.data.content.length;
 
@@ -410,10 +417,9 @@ export default class TransactionBuilder {
       intToUint32Array(VERSION),
       this.address,
       Uint8Array.from([getTransactionTypeId(this.type)]),
-      bufCodeSize,
-      this.data.code,
+      bufContract,
       bufContentSize,
-      this.data.content,
+      new TextEncoder().encode(this.data.content),
       Uint8Array.from([bufOwnershipLength.length]),
       bufOwnershipLength,
       ...ownershipsBuffer,
@@ -438,8 +444,11 @@ export default class TransactionBuilder {
       address: uint8ArrayToHex(this.address),
       type: this.type,
       data: {
-        content: new TextDecoder().decode(this.data.content),
-        code: new TextDecoder().decode(this.data.code),
+        content: this.data.content,
+        contract: this.data.contract ? {
+          bytecode: uint8ArrayToHex(this.data.contract?.bytecode),
+          manifest: this.data.contract?.manifest
+        } : undefined, 
         ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
           return {
             secret: uint8ArrayToHex(secret),
@@ -496,8 +505,8 @@ export default class TransactionBuilder {
       version: this.version,
       type: this.type,
       data: {
-        content: new TextDecoder().decode(this.data.content),
-        code: new TextDecoder().decode(this.data.code),
+        content: this.data.content,
+        contract: this.data.contract,
         ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
           return {
             secret: uint8ArrayToHex(secret),
