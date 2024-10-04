@@ -111,7 +111,7 @@ type UcoTransfer = {
 export type Recipient = {
   address: Uint8Array;
   action?: string;
-  args?: any[];
+  args?: any[] | object;
 };
 
 export type Ownership = {
@@ -213,7 +213,7 @@ type OwnershipRPC = {
 type RecipientRPC = {
   address: string;
   action?: string;
-  args?: any[];
+  args?: any[] | object;
 };
 
 export type TransactionRPC = {
