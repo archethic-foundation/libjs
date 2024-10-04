@@ -76,12 +76,35 @@ type CrossValidationStamp = {
 };
 
 export type TransactionData = {
-  code: Uint8Array;
-  content: Uint8Array;
+  contract?: Contract;
+  content: string;
   ledger: Ledger;
   ownerships: Ownership[];
   recipients: Recipient[];
 };
+
+interface actionABI extends functionABI {
+  triggerType: string,
+  triggerArgument?: string
+}
+
+type functionABI = {
+  type: string;
+  input?: Record<string, any> | string | (Record<string, any> | string)[],
+  output?: any
+}
+
+export type ContractManifest = {
+  abi: {
+    functions: Record<string, functionABI | actionABI>,
+    state: Record<string, any>
+  }
+}
+
+export type Contract = {
+  bytecode: Uint8Array;
+  manifest: ContractManifest;
+}
 
 type Ledger = {
   token: TokenLedger;
@@ -216,13 +239,18 @@ type RecipientRPC = {
   args?: any[] | object;
 };
 
+type ContractRPC = {
+  bytecode: string;
+  manifest: ContractManifest;
+}
+
 export type TransactionRPC = {
   version: number;
   address: string;
   type: UserTypeTransaction;
   data: {
     content: string;
-    code: string;
+    contract?: ContractRPC;
     ownerships: OwnershipRPC[];
     ledger: {
       uco: {
