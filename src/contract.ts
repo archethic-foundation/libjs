@@ -2,26 +2,65 @@ import { ContractAction } from "./types.js";
 import { encryptSecret, deriveAddress } from "./crypto.js";
 import { ExtendedTransactionBuilder } from "./transaction.js";
 import Archethic from "./index.js";
+import { isHex } from "./utils.js";
 
-export function extractActionsFromContract(code: string): ContractAction[] {
-  const regex = /actions\s+triggered_by:\s+transaction,\s+on:\s+([\w\s.,()]+?)\s+do/g;
+type CodeWithManifest = {
+  bytecode: string;
+  manifest: WasmManifest
+}
 
-  let actions = [];
-  for (const match of code.matchAll(regex)) {
-    const fullAction = match[1];
+type WasmManifest = {
+  abi: WasmABI
+}
 
-    const regexActionName = /(\w+)\((.*?)\)/g;
-    for (const actionMatch of fullAction.matchAll(regexActionName)) {
-      const name = actionMatch[1];
-      const parameters = actionMatch[2] != "" ? actionMatch[2].split(",") : [];
-      actions.push({
-        name: name,
-        parameters: parameters
-      });
+type WasmABI = {
+  functions: Record<string, WASMFunctionABI>
+}
+
+type WASMFunctionABI = {
+  type: string;
+  triggerType?: string;
+  name: string;
+  input: Record<string, any>
+}
+
+export async function extractActionsFromContract(code: string): Promise<ContractAction[]> {
+  try {
+    const codeWithManifest: CodeWithManifest = JSON.parse(code)
+    const manifest = codeWithManifest.manifest
+    let actions: ContractAction[] = []
+    for (let name of Object.keys(manifest.abi.functions)) {
+      const functionABI = manifest.abi.functions[name]
+      if (functionABI.type == "action" && functionABI.triggerType == "transaction") {
+        actions.push({
+          name: name,
+          parameters: functionABI.input ? Object.keys(functionABI.input) : []
+       })
+      }
     }
+    return actions
   }
+  catch(e) {
+    let actions = [];
 
-  return actions;
+    const regex = /actions\s+triggered_by:\s+transaction,\s+on:\s+([\w\s.,()]+?)\s+do/g;
+
+    for (const match of code.matchAll(regex)) {
+      const fullAction = match[1];
+
+      const regexActionName = /(\w+)\((.*?)\)/g;
+      for (const actionMatch of fullAction.matchAll(regexActionName)) {
+        const name = actionMatch[1];
+        const parameters = actionMatch[2] != "" ? actionMatch[2].split(",") : [];
+        actions.push({
+          name: name,
+          parameters: parameters
+        });
+      }
+    }
+
+    return actions;
+  }
 }
 
 export function parseTypedArgument(input: any): any {

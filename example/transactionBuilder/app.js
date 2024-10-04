@@ -249,14 +249,12 @@ let namedParams = [];
 
 window.onChangeRecipient = async () => {
   const address = document.querySelector("#recipient").value;
-  const contractCode = await archethic.network.getContractCode(address);
-  if (contractCode == "") {
-    return;
-  }
+  const contractContext = await archethic.network.getContractCode(address);
 
   document.querySelector("#namedActionsContainer").style.display = "block";
 
-  Contract.extractActionsFromContract(contractCode).forEach((action) => {
+  const actions = await Contract.extractActionsFromContract(contractContext);
+  actions.forEach((action) => {
     const option = document.createElement("option");
     option.text = action.name;
     option.value = action.name;
@@ -269,6 +267,8 @@ window.onChangeRecipient = async () => {
     paramsContainer.setAttribute("style", "display: none");
     paramsContainer.setAttribute("class", "namedActionParams");
 
+    namedParams = new Array(action.parameters.length).fill(null)
+
     action.parameters.forEach((parameter, index) => {
       const inputId = paramsContainerId + "_param_" + parameter;
       const paramLabel = document.createElement("label");
@@ -280,7 +280,16 @@ window.onChangeRecipient = async () => {
       paramInput.setAttribute("class", "input");
       paramInput.addEventListener("change", function (e) {
         const value = e.target.value;
-        namedParams[index] = Contract.parseTypedArgument(value);
+        try {
+          const json = JSON.parse(value);
+          if (typeof json === "object") {
+            namedParams[index] = Contract.parseTypedArgument(json);
+          } else {
+            namedParams[index] = Contract.parseTypedArgument(value);
+          }
+        } catch (e) {
+          namedParams[index] = Contract.parseTypedArgument(value);
+        }
       });
 
       paramsContainer.appendChild(paramLabel);
@@ -309,7 +318,7 @@ window.onClickAddRecipient = () => {
     if (recipientList.textContent != "") {
       recipientList.textContent = recipientList.textContent + "\n";
     }
-    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${namedParams}`;
+    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${JSON.stringify(namedParams)}`;
 
     document.querySelector("#namedActionsContainer").style.display = "none";
     document.querySelector("#namedActions").innerHTML = "<option></option>";

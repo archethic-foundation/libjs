@@ -355,9 +355,9 @@ export async function getContractCode(address: string | Uint8Array, endpoint: st
     .then(handleResponse)
     .then((res): string => {
       if (res.errors || res.data == null) {
-        return "";
+        throw new Error("No contract at this address")
       } else {
-        return res.data.lastTransaction.data.code;
+        return res.data.lastTransaction.data.code
       }
     });
 }
