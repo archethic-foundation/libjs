@@ -2,7 +2,7 @@ import { Contract, ContractAction, TransactionData } from "./types.js";
 import { encryptSecret, deriveAddress } from "./crypto.js";
 import { ExtendedTransactionBuilder } from "./transaction.js";
 import Archethic from "./index.js";
-import { isHex } from "./utils.js";
+import { deflateRaw } from "pako"
 
 type CodeWithManifest = {
   bytecode: string;
@@ -90,6 +90,9 @@ export async function newContractTransaction(
   const index = await archethic.transaction.getTransactionIndex(deriveAddress(seed, 0));
 
   const { encryptedSecret, authorizedKeys } = encryptSecret(seed, storageNoncePublicKey);
+  const compressBytes = deflateRaw(contract.bytecode)
+  contract.bytecode = compressBytes
+
   const tx = archethic.transaction
     .new()
     .setType("contract")
