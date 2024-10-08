@@ -338,12 +338,10 @@ export default class TransactionBuilder {
     let bufContract: Uint8Array = intToUint32Array(0)
     if (this.data.contract != undefined) {
       const contract = this.data.contract
-      const manifestJSON = JSON.stringify(contract.manifest)
       bufContract = concatUint8Arrays(
         intToUint32Array(contract.bytecode.byteLength),
         contract.bytecode,
-        intToUint32Array(manifestJSON.length),
-        new TextEncoder().encode(manifestJSON)
+        TE.serialize(this.data.contract.manifest)
       )
     }
 
