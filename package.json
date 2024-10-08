@@ -32,6 +32,7 @@
   "devDependencies": {
     "@types/absinthe__socket": "^0.2.3",
     "@types/chrome": "0.0.266",
+    "@types/crypto-js": "^4.2.2",
     "@types/ed2curve": "^0.2.4",
     "@types/elliptic": "^6.4.14",
     "@types/jest": "^29.5.0",
