@@ -92,12 +92,15 @@ export async function newContractTransaction(
   return tx.build(seed, index);
 }
 
-export async function updateContractTransaction(
+export function updateContractTransaction(
   archethic: Archethic,
   contractAddress: string,
   contract: Contract
-): Promise<TransactionBuilder> {
-  return archethic.transaction.new().setType("transfer").addRecipient(contractAddress, "upgrade", contract);
+): ExtendedTransactionBuilder {
+  return archethic.transaction
+    .new()
+    .setType("transfer")
+    .addRecipient(contractAddress, "upgrade", contract);
 }
 
 export class Contract {
