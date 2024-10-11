@@ -2,6 +2,8 @@ import TransactionBuilder, { VERSION } from "../src/transaction_builder";
 import { deriveAddress, deriveKeyPair, sign, verify } from "../src/crypto";
 import { concatUint8Arrays, hexToUint8Array, intToUint32Array, intToUint64Array, parseBigInt } from "../src/utils";
 import TE from "../src/typed_encoding";
+import { Contract } from "../src/contract";
+import typed_encoding from "../src/typed_encoding";
 
 // all assert should be transformed to jest expect
 describe("Transaction builder", () => {
@@ -40,11 +42,9 @@ describe("Transaction builder", () => {
 
   describe("setContract", () => {
     it("should insert the code into the transaction data", () => {
-      const tx = new TransactionBuilder("transfer").setContract({
-        bytecode: new Uint8Array(),
-        manifest: { abi: { state: {}, functions: {}}}
-      });
-      expect(tx.data.contract?.bytecode).toStrictEqual(new Uint8Array());
+      const contract = new Contract(new Uint8Array(), { abi: {state: {}, functions: {}}})
+      const tx = new TransactionBuilder("transfer").setContract(contract)
+      expect(tx.data.contract?.bytecode).toStrictEqual(contract);
     });
   });
 
@@ -150,16 +150,12 @@ describe("Transaction builder", () => {
 
   describe("previousSignaturePayload", () => {
     it("should generate binary encoding of the transaction before signing", () => {
-      const contract = {
-        bytecode: new Uint8Array(5),
-        manifest: {
-          abi: {
-            state: { "value": "u32"},
-            functions: {
-            }
-          }
+      const contract = new Contract(new Uint8Array(5), {
+        abi: {
+          state: { "value": "u32"},
+          functions: {}
         }
-      };
+      })
 
       const content =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet leo egestas, lobortis lectus a, dignissim orci.";
@@ -199,8 +195,7 @@ describe("Transaction builder", () => {
         //Contract bytecode size
         intToUint32Array(contract.bytecode.length),
         contract.bytecode,
-        intToUint32Array(JSON.stringify(contract.manifest).length),
-        new TextEncoder().encode(JSON.stringify(contract.manifest)),
+        typed_encoding.serialize(contract.manifest),
         //Content size
         intToUint32Array(content.length),
         new TextEncoder().encode(content),
