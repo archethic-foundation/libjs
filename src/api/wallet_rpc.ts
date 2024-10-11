@@ -88,7 +88,6 @@ export class ArchethicWalletClient {
 
   _dispatchConnectionState(state?: ConnectionState) {
     const connectionState = state ?? this.connectionState
-    console.log(`Connection state updated : ${connectionState}`);
     this._connectionStateEventTarget.dispatchEvent(new Event(connectionState));
   }
 
@@ -100,8 +99,6 @@ export class ArchethicWalletClient {
    */
   async connect(): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      console.log('Connection attempt');
-
       if (this.connectionState != ConnectionState.Closed) {
         return reject(new Error("Connection already established. Cancelling new connection request"));
       }
