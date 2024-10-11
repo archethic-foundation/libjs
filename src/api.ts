@@ -1,8 +1,9 @@
 import fetch from "cross-fetch";
 import absinthe from "./api/absinthe.js";
-import { maybeUint8ArrayToHex } from "./utils.js";
+import { hexToUint8Array, maybeUint8ArrayToHex } from "./utils.js";
 import { Balance, NearestEndpoint, OracleData, Ownership, Token } from "./types.js";
 import Transaction from "./transaction.js";
+import { Contract } from "./contract.js";
 
 /**
  * Send a custom query to the Archethic API
@@ -332,7 +333,12 @@ export async function getBalance(address: string | Uint8Array, endpoint: string 
     });
 }
 
-export async function getContractCode(address: string | Uint8Array, endpoint: string | URL): Promise<string> {
+export type ContractCode = {
+  code: string;
+  contract?: Contract;
+};
+
+export async function getContractCode(address: string | Uint8Array, endpoint: string | URL): Promise<ContractCode> {
   address = maybeUint8ArrayToHex(address);
 
   const url = new URL("/api", endpoint);
@@ -346,18 +352,36 @@ export async function getContractCode(address: string | Uint8Array, endpoint: st
       query: `query {
         lastTransaction(address: "${address}") {
       		data {
-              code
+              code,
+              contract {
+                bytecode,
+                manifest {
+                  abi {
+                    functions,
+                    state
+                  }
+                }
+              }
             }
           }
         }`
     })
   })
     .then(handleResponse)
-    .then((res): string => {
+    .then((res): ContractCode => {
       if (res.errors || res.data == null) {
-        throw new Error("No contract at this address")
+        throw new Error("No contract at this address");
       } else {
-        return res.data.lastTransaction.data.code
+        return {
+          code: res.data.lastTransaction.data.code,
+          contract: res.data.lastTransaction.data.contract
+            ? new Contract(
+                hexToUint8Array(res.data.lastTransaction.data.contract.bytecode),
+                res.data.lastTransaction.data.contract.manifest,
+                false
+              )
+            : undefined
+        };
       }
     });
 }

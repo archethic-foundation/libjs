@@ -6,7 +6,6 @@ import {
   TransactionData,
   UserTypeTransaction,
   TransactionRPC,
-  Contract
 } from "./types.js";
 import {
   concatUint8Arrays,
@@ -19,6 +18,7 @@ import {
 } from "./utils.js";
 import TE from "./typed_encoding.js";
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
+import { Contract } from "./contract.js";
 
 export const VERSION = 4;
 
