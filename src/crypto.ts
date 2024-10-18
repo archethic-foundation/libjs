@@ -82,6 +82,7 @@ export function hashAlgoToID(hashAlgo: HashAlgorithm): number {
  * @returns {Uint8Array} Hash digest
  */
 export function getHashDigest(content: string | Uint8Array, algo: HashAlgorithm): Uint8Array {
+  content = maybeStringToUint8Array(content)
   switch (algo) {
     case HashAlgorithm.sha256: {
       const input = CryptoJS.lib.WordArray.create(content);
@@ -184,11 +185,8 @@ export function derivePrivateKey(seed: string | Uint8Array, index: number = 0): 
     throw new Error("Index must be a positive number");
   }
 
-  //Convert seed to Uint8Array
-  seed = CryptoJS.lib.WordArray.create(maybeStringToUint8Array(seed));
-
   //Derive master keys
-  const hash = wordArrayToUint8Array(CryptoJS.SHA512(seed));
+  const hash = wordArrayToUint8Array(CryptoJS.SHA512(CryptoJS.lib.WordArray.create(maybeStringToUint8Array(seed))));
   const masterKey = hash.subarray(0, 32);
   const masterEntropy = hash.subarray(32, 64);
 
@@ -292,8 +290,7 @@ function getKeypair(pvKey: string | Uint8Array, curve: Curve): { publicKey: Uint
   }
   // Uniform key's seed
   if (pvKey.length < 32) {
-    pvKey = CryptoJS.lib.WordArray.create(pvKey);
-    pvKey = wordArrayToUint8Array(CryptoJS.SHA256(pvKey));
+    pvKey = wordArrayToUint8Array(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(pvKey)));
   }
 
   if (pvKey.length > 32) {
@@ -352,14 +349,12 @@ export function sign(data: string | Uint8Array, privateKey: string | Uint8Array)
       return nacl.sign.detached(data, secretKey);
     }
     case 1: {
-      data = CryptoJS.lib.WordArray.create(data);
-      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(data));
+      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(data)));
       const key = ec_P256.keyFromPrivate(pvBuf);
       return Uint8Array.from(key.sign(msgHash).toDER());
     }
     case 2: {
-      data = CryptoJS.lib.WordArray.create(data);
-      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(data));
+      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(data)));
       const key = ec_secp256k1.keyFromPrivate(pvBuf);
       return Uint8Array.from(key.sign(msgHash).toDER());
     }
@@ -389,14 +384,12 @@ export function verify(sig: string | Uint8Array, data: string | Uint8Array, publ
       return nacl.sign.detached.verify(data, sig, pubBuf);
     }
     case 1: {
-      data = CryptoJS.lib.WordArray.create(data);
-      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(data));
+      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(data)));
       const key = ec_P256.keyFromPublic(pubBuf);
       return key.verify(msgHash, sig);
     }
     case 2: {
-      data = CryptoJS.lib.WordArray.create(data);
-      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(data));
+      const msgHash = wordArrayToUint8Array(CryptoJS.SHA256(CryptoJS.lib.WordArray.create(data)));
       const key = ec_secp256k1.keyFromPublic(pubBuf);
       return key.verify(msgHash, sig);
     }
@@ -557,8 +550,7 @@ export function aesDecrypt(cipherText: string | Uint8Array, aesKey: string | Uin
  * @returns {Object} {aesKey: Uint8Array, iv: Uint8Array}
  */
 function deriveSecret(sharedKey: Uint8Array): { aesKey: Uint8Array; iv: Uint8Array } {
-  sharedKey = CryptoJS.lib.WordArray.create(sharedKey);
-  const pseudoRandomKey = CryptoJS.SHA256(sharedKey);
+  const pseudoRandomKey = CryptoJS.SHA256(CryptoJS.lib.WordArray.create(sharedKey));
 
   const iv = wordArrayToUint8Array(CryptoJS.HmacSHA256("0", pseudoRandomKey)).subarray(0, 32);
   const aesKey = wordArrayToUint8Array(CryptoJS.HmacSHA256("1", CryptoJS.lib.WordArray.create(iv))).subarray(0, 32);

@@ -330,9 +330,7 @@ function deriveArchethicKeypair(
 }
 
 function deriveServiceSeed(seed: string | Uint8Array, derivationPath: string, index: number, pathSuffix: string = "") {
-  seed = CryptoJS.lib.WordArray.create(maybeHexToUint8Array(seed));
-
-  let hashedPath = "";
+  let hashedPath;
   if (isPathWithIndex(derivationPath)) {
     //Hash the derivation path
     hashedPath = CryptoJS.SHA256(replaceDerivationPathIndex(derivationPath, pathSuffix, index));
@@ -343,7 +341,9 @@ function deriveServiceSeed(seed: string | Uint8Array, derivationPath: string, in
     hashedPath = CryptoJS.SHA256(path.concat([serviceName]).join("/"));
   }
 
-  return wordArrayToUint8Array(CryptoJS.HmacSHA512(hashedPath, seed)).subarray(0, 32);
+  return wordArrayToUint8Array(
+    CryptoJS.HmacSHA512(hashedPath, CryptoJS.lib.WordArray.create(maybeHexToUint8Array(seed)))
+  ).subarray(0, 32);
 }
 
 function isPathWithIndex(path: string) {
@@ -367,23 +367,23 @@ export function keyToJWK(publicKey: Uint8Array, keyID: string) {
       return {
         kty: "OKP",
         crv: "Ed25519",
-        x: base64url(key),
+        x: base64url(key.buffer),
         kid: keyID
       };
     case 1:
       return {
         kty: "EC",
         crv: "P-256",
-        x: base64url(key.subarray(16)),
-        y: base64url(key.subarray(-16)),
+        x: base64url(key.subarray(16).buffer),
+        y: base64url(key.subarray(-16).buffer),
         kid: keyID
       };
     case 2:
       return {
         kty: "EC",
         crv: "secp256k1",
-        x: base64url(key.subarray(16)),
-        y: base64url(key.subarray(-16)),
+        x: base64url(key.subarray(16).buffer),
+        y: base64url(key.subarray(-16).buffer),
         kid: keyID
       };
   }
