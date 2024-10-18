@@ -78,7 +78,7 @@ export default class TransactionSender {
 
   async send(
     tx: TransactionBuilder,
-    endpoint: string,
+    endpoint: string | URL,
     confirmationThreshold: number = 100,
     timeout: number = 60
   ): Promise<TransactionSender> {
