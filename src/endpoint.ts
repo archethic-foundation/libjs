@@ -17,7 +17,6 @@ export class EndpointFactory {
    */
   build(endpoint: string | undefined): Endpoint {
     if (endpoint === undefined) {
-      console.log('Using AWC client');
       return new AWCEndpoint(
         AWCWebBrowserExtension.awc ??
         new ArchethicWalletClient(new AWCWebsocketStreamChannel(`ws://localhost:12345`))
@@ -26,7 +25,6 @@ export class EndpointFactory {
 
     const url: URL = new URL(endpoint);
     if (url.protocol === "http:" || url.protocol === "https:") {
-      console.log('Using direct endpoint');
       return new DirectEndpoint(endpoint);
     }
 

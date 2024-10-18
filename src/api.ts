@@ -9,7 +9,7 @@ import Transaction from "./transaction.js";
  * @param query
  * @param endpoint
  */
-export async function rawGraphQLQuery(query: string, endpoint: string): Promise<any> {
+export async function rawGraphQLQuery(query: string, endpoint: string | URL): Promise<any> {
   const url = new URL("/api", endpoint);
   return fetch(url, {
     method: "POST",
@@ -36,7 +36,7 @@ export async function rawGraphQLQuery(query: string, endpoint: string): Promise<
  * @param endpoint The Archethic API endpoint
  * @returns {Promise<NearestEndpoint[]>} A list of nearest endpoints
  */
-export async function getNearestEndpoints(endpoint: string): Promise<NearestEndpoint[]> {
+export async function getNearestEndpoints(endpoint: string | URL): Promise<NearestEndpoint[]> {
   const url = new URL("/api", endpoint);
   return fetch(url, {
     method: "POST",
@@ -68,7 +68,7 @@ export async function getNearestEndpoints(endpoint: string): Promise<NearestEndp
  * @param address address to get the transaction index
  * @param endpoint The Archethic API endpoint
  */
-export async function getTransactionIndex(address: string | Uint8Array, endpoint: string): Promise<number> {
+export async function getTransactionIndex(address: string | Uint8Array, endpoint: string | URL): Promise<number> {
   address = maybeUint8ArrayToHex(address);
 
   const url = new URL("/api", endpoint);
@@ -101,7 +101,7 @@ export async function getTransactionIndex(address: string | Uint8Array, endpoint
  * @param endpoint The Archethic API endpoint
  * @returns {Promise<string>} The balance of the address
  */
-export async function getStorageNoncePublicKey(endpoint: string): Promise<string> {
+export async function getStorageNoncePublicKey(endpoint: string | URL): Promise<string> {
   const url = new URL("/api", endpoint);
   return fetch(url, {
     method: "POST",
@@ -136,7 +136,7 @@ export async function getStorageNoncePublicKey(endpoint: string): Promise<string
  */
 export async function getTransactionOwnerships(
   address: string | Uint8Array,
-  endpoint: string,
+  endpoint: string | URL,
   last: boolean = false
 ): Promise<Ownership[]> {
   address = maybeUint8ArrayToHex(address);
@@ -180,7 +180,7 @@ export async function getTransactionOwnerships(
  * @param tokenAddress address of the token
  * @param endpoint The Archethic API endpoint
  */
-export async function getToken(tokenAddress: string | Uint8Array, endpoint: string): Promise<{} | Token> {
+export async function getToken(tokenAddress: string | Uint8Array, endpoint: string | URL): Promise<{} | Token> {
   tokenAddress = maybeUint8ArrayToHex(tokenAddress);
 
   const url = new URL("/api", endpoint);
@@ -214,7 +214,7 @@ export async function getToken(tokenAddress: string | Uint8Array, endpoint: stri
  * @param endpoint The Archethic API endpoint
  * @param timestamp The timestamp of the data to get
  */
-export async function getOracleData(endpoint: string, timestamp: undefined | number = undefined): Promise<OracleData> {
+export async function getOracleData(endpoint: string | URL, timestamp: undefined | number = undefined): Promise<OracleData> {
   let query;
 
   if (timestamp === undefined) {
@@ -268,7 +268,7 @@ export async function getOracleData(endpoint: string, timestamp: undefined | num
  * @param endpoint The Archethic API endpoint
  * @param handler The handler to call when a new update is received
  */
-export async function subscribeToOracleUpdates(endpoint: string, handler: Function): Promise<any> {
+export async function subscribeToOracleUpdates(endpoint: string | URL, handler: Function): Promise<any> {
   const { host, protocol } = new URL(endpoint);
   const ws_protocol = protocol == "https:" ? "wss" : "ws";
 
@@ -299,7 +299,7 @@ export async function subscribeToOracleUpdates(endpoint: string, handler: Functi
  * @param endpoint The Archethic API endpoint
  * @param address The address to get the balance of
  */
-export async function getBalance(address: string | Uint8Array, endpoint: string): Promise<Balance> {
+export async function getBalance(address: string | Uint8Array, endpoint: string | URL): Promise<Balance> {
   address = maybeUint8ArrayToHex(address);
 
   const url = new URL("/api", endpoint);
@@ -332,7 +332,7 @@ export async function getBalance(address: string | Uint8Array, endpoint: string)
     });
 }
 
-export async function getContractCode(address: string | Uint8Array, endpoint: string): Promise<string> {
+export async function getContractCode(address: string | Uint8Array, endpoint: string | URL): Promise<string> {
   address = maybeUint8ArrayToHex(address);
 
   const url = new URL("/api", endpoint);

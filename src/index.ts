@@ -26,7 +26,6 @@ export default class Archethic {
   rpcWallet: ArchethicWalletClient | undefined;
   rpcNode: NodeRPCClient | undefined;
   transaction: Transaction;
-  nearestEndpoints: Set<string>;
   account: Account;
   network: Network;
 
@@ -40,7 +39,6 @@ export default class Archethic {
     }
     this.account = new Account(this);
     this.network = new Network(this);
-    this.nearestEndpoints = new Set<string>();
     this.transaction = new Transaction(this);
     this.rpcNode = new NodeRPCClient(this);
   }
@@ -49,32 +47,19 @@ export default class Archethic {
     if (this.endpoint instanceof AWCEndpoint) {
       await this.endpoint.resolve();
     }
-    const nodes = this.endpoint.nodeEndpoint === null ?
-      [] :
-      await Api.getNearestEndpoints(this.endpoint.nodeEndpoint.toString());
-
-    let nearestEndpoints = nodes.map(({ ip, port }) => {
-      return `http://${ip}:${port}`;
-    });
-
-    nearestEndpoints.push(this.endpoint.origin.toString()); // Add the main endpoint as fallback
-
-    this.nearestEndpoints = new Set(nearestEndpoints);
     return this;
   }
 
-  async requestNode(call: (endpoint: string) => Promise<any>): Promise<any> {
-    const node = this.nearestEndpoints.values().next().value;
+  async requestNode(call: (endpoint: URL) => Promise<any>): Promise<any> {
+    if (!this.endpoint.nodeEndpoint) {
+      throw new Error("Archethic node's endpoint is undefined");
+    }
 
     try {
-      return await call(node);
+      return await call(this.endpoint.nodeEndpoint);
     } catch (err) {
-      this.nearestEndpoints.delete(node);
-      if (this.nearestEndpoints.size == 0) {
-        console.log(err);
-        throw new Error("Cannot reach Archethic node");
-      }
-      return this.requestNode(call);
+      console.log(err);
+      throw new Error("Cannot reach Archethic node");
     }
   }
 }
