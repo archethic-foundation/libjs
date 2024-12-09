@@ -384,7 +384,7 @@ window.sendTransaction = async () => {
         if (error.data.data) {
           errMsg += `<p style="padding-left: 20px">(${error.data.data.code}) ${error.data.data.message}</p>`;
         } else {
-          errMsg += `<p style="padding-left: 20px">${error.data.message}</p>`;
+          errMsg += `<p style="padding-left: 20px">${JSON.stringify(error.data.message)}</p>`;
         }
       }
 
