@@ -20,7 +20,7 @@ describe("Account", () => {
     const tx = account.newKeychainTransaction(expectedKeychain, 0);
     expect(tx.type).toBe("keychain");
 
-    expect(new TextDecoder().decode(tx.data.content)).toBe(JSON.stringify(expectedKeychain.toDID()));
+    expect(tx.data.content).toBe(JSON.stringify(expectedKeychain.toDID()));
 
     expect(tx.data.ownerships.length).toBe(1);
 
