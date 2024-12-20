@@ -44,7 +44,7 @@ describe("Transaction builder", () => {
     it("should insert the code into the transaction data", () => {
       const contract = new Contract(new Uint8Array(), { abi: {state: {}, functions: {}}})
       const tx = new TransactionBuilder("transfer").setContract(contract)
-      expect(tx.data.contract?.bytecode).toStrictEqual(contract);
+      expect(tx.data.contract?.bytecode).toStrictEqual(contract.bytecode);
     });
   });
 
@@ -192,6 +192,7 @@ describe("Transaction builder", () => {
         intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
+        intToUint32Array(0), // Default code size
         //Contract bytecode size
         intToUint32Array(contract.bytecode.length),
         contract.bytecode,
@@ -272,6 +273,7 @@ describe("Transaction builder", () => {
         intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
+        intToUint32Array(0), // Default code size
         //Contract size
         intToUint32Array(0),
         //Content size
