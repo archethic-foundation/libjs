@@ -415,6 +415,7 @@ export default class TransactionBuilder {
       intToUint32Array(VERSION),
       this.address,
       Uint8Array.from([getTransactionTypeId(this.type)]),
+      intToUint32Array(0), // Default code size
       bufContract,
       bufContentSize,
       new TextEncoder().encode(this.data.content),
