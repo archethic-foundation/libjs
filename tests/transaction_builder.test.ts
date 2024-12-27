@@ -1,6 +1,6 @@
 import TransactionBuilder, { VERSION } from "../src/transaction_builder";
-import { deriveAddress, deriveKeyPair, sign, verify } from "../src/crypto";
-import { concatUint8Arrays, hexToUint8Array, intToUint32Array, intToUint64Array, parseBigInt } from "../src/utils";
+import { deriveAddress, deriveKeyPair, verify } from "../src/crypto";
+import { concatUint8Arrays, hexToUint8Array, intToUint32Array, intToUint64Array, intToUint8Array, parseBigInt } from "../src/utils";
 import TE from "../src/typed_encoding";
 import { Contract } from "../src/contract";
 import typed_encoding from "../src/typed_encoding";
@@ -42,7 +42,7 @@ describe("Transaction builder", () => {
 
   describe("setContract", () => {
     it("should insert the code into the transaction data", () => {
-      const contract = new Contract(new Uint8Array(), { abi: {state: {}, functions: {}}})
+      const contract = new Contract(new Uint8Array(), { abi: { state: {}, functions: {} } })
       const tx = new TransactionBuilder("transfer").setContract(contract)
       expect(tx.data.contract?.bytecode).toStrictEqual(contract.bytecode);
     });
@@ -123,19 +123,18 @@ describe("Transaction builder", () => {
         .addRecipient(
           "0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646",
           "vote",
-          ["Miles"]
+          { name: "Miles" }
         )
-        .addRecipient("0000ae12908c889ba2728614abc6ae472ed9f1df0b3afefd1faa290473a47ceb42bd", "addHero", { name: "John Doe"})
+        .addRecipient("0000ae12908c889ba2728614abc6ae472ed9f1df0b3afefd1faa290473a47ceb42bd", "addHero", { name: "John Doe" })
 
       expect(tx.data.recipients.length).toBe(2);
       expect(tx.data.recipients[0].action).toBe("vote");
 
-      const listArgs = tx.data.recipients[0].args as string[]
-      expect(listArgs.length).toBe(1);
-      expect(listArgs[0]).toBe("Miles");
+      const objectArg1 = tx.data.recipients[0].args as { name: string }
+      expect(objectArg1.name).toBe("Miles");
 
-      const objectArg = tx.data.recipients[1].args as { name: string }
-      expect(objectArg.name).toBe("John Doe");
+      const objectArg2 = tx.data.recipients[1].args as { name: string }
+      expect(objectArg2.name).toBe("John Doe");
     });
 
     it("should throw if types are incorrect", () => {
@@ -152,7 +151,7 @@ describe("Transaction builder", () => {
     it("should generate binary encoding of the transaction before signing", () => {
       const contract = new Contract(new Uint8Array(5), {
         abi: {
-          state: { "value": "u32"},
+          state: { "value": "u32" },
           functions: {}
         }
       })
@@ -177,8 +176,8 @@ describe("Transaction builder", () => {
         )
         .setContract(contract)
         .setContent(content)
-        .addRecipient("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88")
-        .addRecipient("0000ae12908c889ba2728614abc6ae472ed9f1df0b3afefd1faa290473a47ceb42bd", "addHero", { name: "John Doe"});
+        .addRecipient("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88", "action")
+        .addRecipient("0000ae12908c889ba2728614abc6ae472ed9f1df0b3afefd1faa290473a47ceb42bd", "addHero", { name: "John Doe" });
 
       const keypair = deriveKeyPair("seed", 0);
 
@@ -192,7 +191,8 @@ describe("Transaction builder", () => {
         intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
-        intToUint32Array(0), // Default code size
+        //Contract is filled
+        intToUint8Array(1),
         //Contract bytecode size
         intToUint32Array(contract.bytecode.length),
         contract.bytecode,
@@ -239,17 +239,18 @@ describe("Transaction builder", () => {
         Uint8Array.from([1]),
         // Nb of recipients
         Uint8Array.from([2]),
-        // 0 = unnamed recipient
-        Uint8Array.from([0]),
+        // 0 = named recipient
+        Uint8Array.from([1]),
         hexToUint8Array("0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88"),
+        Uint8Array.from([6]),
+        new TextEncoder().encode("action"),
+        TE.serialize({}),
         // 1 = named recipient
         Uint8Array.from([1]),
         hexToUint8Array("0000ae12908c889ba2728614abc6ae472ed9f1df0b3afefd1faa290473a47ceb42bd"),
         Uint8Array.from([7]),
         new TextEncoder().encode("addHero"),
-        // Nb args
-        Uint8Array.from([1]),
-        TE.serialize({ name: "John Doe"})
+        TE.serialize({ name: "John Doe" })
       );
       expect(payload).toEqual(expected_binary);
     });
@@ -258,7 +259,7 @@ describe("Transaction builder", () => {
       const tx = new TransactionBuilder("transfer").addRecipient(
         "0000501fa2db78bcf8ceca129e6139d7e38bf0d61eb905441056b9ebe6f1d1feaf88",
         "set_geopos",
-        [{ lng: 2, lat: 1 }]
+        { lng: 2, lat: 1 }
       );
 
       const keypair = deriveKeyPair("seed", 0);
@@ -273,9 +274,8 @@ describe("Transaction builder", () => {
         intToUint32Array(VERSION),
         tx.address,
         Uint8Array.from([253]),
-        intToUint32Array(0), // Default code size
-        //Contract size
-        intToUint32Array(0),
+        //No contract
+        intToUint8Array(0),
         //Content size
         intToUint32Array(0),
         // Nb of byte to encode nb of ownerships
@@ -302,8 +302,6 @@ describe("Transaction builder", () => {
         Uint8Array.from([10]),
         // action value
         new TextEncoder().encode("set_geopos"),
-        // args size
-        Uint8Array.from([1]),
         // args value
         TE.serialize({ lng: 2, lat: 1 })
       );

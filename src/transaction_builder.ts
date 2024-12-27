@@ -89,9 +89,9 @@ export default class TransactionBuilder {
     if (!Object.keys(UserTypeTransaction).includes(type)) {
       throw new Error(
         "Transaction type must be one of " +
-          Object.keys(UserTypeTransaction)
-            .map((t) => `'${t}'`)
-            .join(", ")
+        Object.keys(UserTypeTransaction)
+          .map((t) => `'${t}'`)
+          .join(", ")
       );
     }
     this.type = type as UserTypeTransaction;
@@ -199,21 +199,21 @@ export default class TransactionBuilder {
    * Add recipient to the transaction
    * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
    * @param {string} action The named action
-   * @param {any[] | object} args The arguments for the named action
+   * @param {object} args The arguments for the named action
    */
-  addRecipient(to: string | Uint8Array, action?: string, args?: any[] | object) {
+  addRecipient(to: string | Uint8Array, action: string, args?: object) {
     const address = maybeHexToUint8Array(to);
 
-    if (action && typeof action != "string") {
+    if (typeof action != "string") {
       throw new Error("`action` must be a string");
     }
 
-    if (args && typeof(args) !== "object") {
-      throw new Error("`args` must be an object or an array");
+    if (args && typeof args !== "object") {
+      throw new Error("`args` must be an object");
     }
 
-    if (action && !args) {
-      args = [];
+    if (!args) {
+      args = {};
     }
 
     this.data.recipients.push({ address, action, args });
@@ -274,17 +274,17 @@ export default class TransactionBuilder {
     if (!Object.keys(Curve).includes(curve)) {
       throw new Error(
         "Curve must be one of " +
-          Object.keys(Curve)
-            .map((t) => `'${t}'`)
-            .join(", ")
+        Object.keys(Curve)
+          .map((t) => `'${t}'`)
+          .join(", ")
       );
     }
     if (!Object.keys(HashAlgorithm).includes(hashAlgo)) {
       throw new Error(
         "Hash algorithm must be one of " +
-          Object.keys(HashAlgorithm)
-            .map((t) => `'${t}'`)
-            .join(", ")
+        Object.keys(HashAlgorithm)
+          .map((t) => `'${t}'`)
+          .join(", ")
       );
     }
 
@@ -335,14 +335,16 @@ export default class TransactionBuilder {
    * Generate the payload for the previous signature by encoding address,  type and data
    */
   previousSignaturePayload() {
-    let bufContract: Uint8Array = intToUint32Array(0)
+    let bufContract: Uint8Array;
     if (this.data.contract != undefined) {
-      const contract = this.data.contract
       bufContract = concatUint8Arrays(
-        intToUint32Array(contract.bytecode.byteLength),
-        contract.bytecode,
+        intToUint8Array(1),
+        intToUint32Array(this.data.contract.bytecode.byteLength),
+        this.data.contract.bytecode,
         TE.serialize(this.data.contract.manifest)
       )
+    } else {
+      bufContract = intToUint8Array(0)
     }
 
     let contentSize = this.data.content.length;
@@ -364,11 +366,11 @@ export default class TransactionBuilder {
       return concatUint8Arrays(intToUint32Array(secret.byteLength), secret, concatUint8Arrays(...authorizedKeysBuffer));
     });
 
-    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
+    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
       return concatUint8Arrays(transfer.to, intToUint64Array(transfer.amount));
     });
 
-    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
+    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
       const bufTokenId = intToUint8Array(transfer.tokenId);
       return concatUint8Arrays(
         transfer.tokenAddress,
@@ -380,30 +382,19 @@ export default class TransactionBuilder {
     });
 
     const recipientsBuffer = this.data.recipients.map(({ address, action, args }) => {
-      if (action == undefined || args == undefined) {
-        return concatUint8Arrays(
-          // 0 = unnamed action
-          Uint8Array.from([0]),
-          // address
-          address
-        );
-      } else {
-        const serializedArgs = args instanceof Array ? args.map((arg) => TE.serialize(arg)) : [TE.serialize(args)];
+      const serializedArgs = TE.serialize(args);
 
-        return concatUint8Arrays(
-          // 1 = named action
-          Uint8Array.from([1]),
-          // address
-          address,
-          // action
-          Uint8Array.from([action.length]),
-          new TextEncoder().encode(action),
-          // args count
-          Uint8Array.from([serializedArgs.length]),
-          // args
-          ...serializedArgs
-        );
-      }
+      return concatUint8Arrays(
+        // 1 = named action
+        intToUint8Array(1),
+        // address
+        address,
+        // action
+        Uint8Array.from([action.length]),
+        new TextEncoder().encode(action),
+        // args
+        serializedArgs
+      );
     });
 
     const bufOwnershipLength = intToUint8Array(this.data.ownerships.length);
@@ -415,7 +406,6 @@ export default class TransactionBuilder {
       intToUint32Array(VERSION),
       this.address,
       Uint8Array.from([getTransactionTypeId(this.type)]),
-      intToUint32Array(0), // Default code size
       bufContract,
       bufContentSize,
       new TextEncoder().encode(this.data.content),
@@ -447,7 +437,7 @@ export default class TransactionBuilder {
         contract: this.data.contract ? {
           bytecode: uint8ArrayToHex(this.data.contract?.bytecode),
           manifest: this.data.contract?.manifest
-        } : undefined, 
+        } : undefined,
         ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
           return {
             secret: uint8ArrayToHex(secret),
