@@ -375,11 +375,27 @@ Define the transaction type
 
 - `type` is the string defining the type of transaction to generate ("keychain", "keychain_access", "transfer", "hosting", "code_proposal", "code_approval", "token")
 
-#### setCode(code)
+#### setContract(contract)
 
-Add the code in the `data.code` section of the transaction
+Add the contract in the `data.contract` section of the transaction
 
-- `code` is a string defining the smart contract
+- `contract` is an object with following keys:
+  - `bytescode` Uint8Array of the compiled wasm code compressed using zip
+  - `manifest` the manifest of the contrat containing actions and functions spec
+
+```js
+const bytecode = fs.readFileSync("./dist/contract.wasm")
+const manifestFile = fs.readFileSync('./dist/manifest.json', 'utf-8')
+const manifest = JSON.parse(manifestFile)
+
+const contract = new Contract(bytecode, manifest)
+
+const txBuilder = archethic.transaction.new().setType("contract").setContract(contract)
+// or use Contract function
+import { Contract } from "@archethicjs/sdk"
+const archethic = new Archethic("https://testnet.archethic.net")
+const tx = Contract.newContractTransaction(archethic, contract, seed)
+```
 
 #### setGenerateEncryptedSeedSC(flag)
 
@@ -423,8 +439,8 @@ Add a token transfer to the `data.ledger.token.transfers` section of the transac
 Adds a recipient to call the smart contract's "transaction" action.
 
 - `to` is the contract's address in hexadecimal or Uint8Array
-- `action` is the name of the action. This parameter is not mandatory
-- `args` is the list of arguments for the action (must contain only JSON valid data). This parameter is not mandatory
+- `action` is the name of the action
+- `args` is an object containing the parameter for the contract action. This parameter is not mandatory
 
 ```js
 import Archethic from "@archethicjs/sdk";
@@ -433,8 +449,8 @@ const archethic = new Archethic("https://testnet.archethic.net");
 const tx = archethic.transaction
   .new()
   .setType("transfer")
-  .addRecipient("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646")
-  .addRecipient("0000bc96b1a9751d3750edb9381a55b5b4e4fb104c10b0b6c9a00433ec464637bfab", "vote", ["Dr. Who"]);
+  .addRecipient("0000b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646", "increment")
+  .addRecipient("0000bc96b1a9751d3750edb9381a55b5b4e4fb104c10b0b6c9a00433ec464637bfab", "vote", {name: "Dr. Who"});
 ```
 
 #### build(seed, index, curve, hashAlgo)
@@ -827,6 +843,34 @@ await archethic.connect();
 
 const storageNoncePublicKey = await archethic.network.getStorageNoncePublicKey();
 // 00b1d3750edb9381c96b1a975a55b5b4e4fb37bfab104c10b0b6c9a00433ec4646
+```
+
+### getContractCode(address)
+
+Return the contract code
+
+- `address`: string or Uint8Array of the contract address
+
+```js
+import Archethic from "@archethicjs/sdk"
+
+const archethic = new Archethic("https://testnet.archethic.net")
+await archethic.connect()
+
+const res = archethic.network.getContractCode("0001234...")
+console.log(res)
+{
+  code: "...",
+  contract: {
+    bytecode: "00231654",
+    manifest: {
+      abi: {
+        state: ...,
+        functions: []
+      }
+    }
+  }
+}
 ```
 
 ### getOracleData(timestamp)
@@ -1375,15 +1419,31 @@ tx.originSign(originPrivateKey)
 
   <br />
 
-  ### newContractTransaction
+  ### newContractTransaction(archethic, contract, contractSeed, txData?)
 
-  Create a new contract transaction injecting the code and the authorized public key encryption to allow node to emit transaction on your behalf
+  Create a new contract transaction injecting the bytecode, manifest and the authorized public key encryption to allow node to emit transaction on your behalf.  Returned transaction is already signed.
 
   ```js
   import Archethic, { Utils, Contract } from "@archethicjs/sdk"
   const archethic = new Archethic("https://testnet.archethic.net")
 
-  const tx = await Contract.newContractTransaction(archethic, contractCode, contractSeed)
+  const bytecode = fs.readFileSync("./dist/contract.wasm")
+  const manifestFile = fs.readFileSync('./dist/manifest.json', 'utf-8')
+  const manifest = JSON.parse(manifestFile)
+
+  const contract = new Contract(bytecode, manifest)
+
+  // txData is optional
+  const txData = {
+    content: "content",
+    ledger: {
+      uco: {
+        transfers: [{to: "1234", amount: Utils.parseBigInt("10")}]
+      }
+    }
+  }
+  
+  const tx = await Contract.newContractTransaction(archethic, contract, contractSeed, txData)
 
   tx
     .originSign(Utils.originPrivateKey)
@@ -1392,7 +1452,29 @@ tx.originSign(originPrivateKey)
     .send();
   ```
 
+  ### updateContractTransaction(archethic, contractAddress, contract)
 
+  Create a new transaction containing the recipient filled with appropriated function to update a contract code
+
+  ```js
+  import Archethic, { Utils, Contract } from "@archethicjs/sdk"
+  const archethic = new Archethic("https://testnet.archethic.net")
+
+  const bytecode = fs.readFileSync("./dist/contract.wasm")
+  const manifestFile = fs.readFileSync('./dist/manifest.json', 'utf-8')
+  const manifest = JSON.parse(manifestFile)
+
+  const contract = new Contract(bytecode, manifest)
+
+  const tx = await Contract.updateContractTransaction(archethic, contractAddress, contract)
+
+  tx
+    .build(seed, index)
+    .originSign(Utils.originPrivateKey)
+    .on("requiredConfirmation", () => console.log("ok updated"))
+    .on("error", (context, reason) => console.error(reason))
+    .send();
+  ```
 
   </details>
 
