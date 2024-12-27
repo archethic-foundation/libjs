@@ -1,6 +1,6 @@
 {
   "name": "@archethicjs/sdk",
-  "version": "1.21.3",
+  "version": "2.0.0-rc.0",
   "description": "Archethic Javascript SDK",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
