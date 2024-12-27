@@ -110,8 +110,8 @@ type TokenTransfer = {
 
 export type Recipient = {
   address: Uint8Array;
-  action?: string;
-  args?: any[] | object;
+  action: string;
+  args: object;
 };
 
 export type Ownership = {
