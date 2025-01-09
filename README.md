@@ -380,7 +380,7 @@ Define the transaction type
 Add the contract in the `data.contract` section of the transaction
 
 - `contract` is an object with following keys:
-  - `bytescode` Uint8Array of the compiled wasm code compressed using zip
+  - `bytecode` Uint8Array of the compiled wasm code compressed using zip
   - `manifest` the manifest of the contrat containing actions and functions spec
 
 ```js
