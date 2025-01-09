@@ -3,12 +3,6 @@ import { encryptSecret, deriveAddress } from "./crypto.js";
 import { ExtendedTransactionBuilder } from "./transaction.js";
 import Archethic from "./index.js";
 import { deflateRaw } from "pako";
-import TransactionBuilder from "./transaction_builder.js";
-
-export type CodeWithManifest = {
-  bytecode: string;
-  manifest: ContractManifest;
-};
 
 export type ContractManifest = {
   abi: WasmABI;
@@ -111,7 +105,7 @@ export class Contract {
     this.bytecode = compress ? deflateRaw(bytecode) : bytecode;
     this.manifest = manifest;
   }
-  
+
   getActions(): ContractAction[] {
     let actions: ContractAction[] = [];
     for (let name of Object.keys(this.manifest.abi.functions)) {
