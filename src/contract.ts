@@ -16,7 +16,6 @@ export type WasmABI = {
 export type WASMFunctionABI = {
   type: string;
   triggerType?: string;
-  name: string;
   input: Record<string, any>;
 };
 
