@@ -76,10 +76,10 @@ export async function newContractTransaction(
     .addOwnership(encryptedSecret, authorizedKeys);
 
   if (txData) {
-    txData.ledger.uco.transfers.forEach((t) => tx.addUCOTransfer(t.to, t.amount));
-    txData.ledger.token.transfers.forEach((t) => tx.addTokenTransfer(t.to, t.amount, t.tokenAddress, t.tokenId));
-    txData.recipients.forEach((r) => tx.addRecipient(r.address, r.action, r.args));
-    tx.setContent(txData.content);
+    if (txData.ledger && txData.ledger.uco) txData.ledger.uco.transfers.forEach((t) => tx.addUCOTransfer(t.to, t.amount));
+    if (txData.ledger && txData.ledger.token) txData.ledger.token.transfers.forEach((t) => tx.addTokenTransfer(t.to, t.amount, t.tokenAddress, t.tokenId));
+    if (txData.recipients) txData.recipients.forEach((r2) => tx.addRecipient(r2.address, r2.action, r2.args));
+    if (txData.content) tx.setContent(txData.content);
   }
 
   return tx.build(seed, index);
