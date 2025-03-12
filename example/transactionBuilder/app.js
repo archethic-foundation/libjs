@@ -1,6 +1,6 @@
-import Archethic, { Utils, Crypto, Contract } from "@archethicjs/sdk";
-import { ExtendedTransactionBuilder } from "../../dist/transaction";
+import Archethic, { Contract, Crypto, Utils } from "@archethicjs/sdk";
 import { Contract as ContractCode } from "../../dist/contract";
+import { ExtendedTransactionBuilder } from "../../dist/transaction";
 
 const { parseBigInt, formatBigInt } = Utils;
 
@@ -250,7 +250,6 @@ window.onClickAddTokenTransfer = async () => {
   document.querySelector("#token_id").value = "0";
 };
 
-let namedParams = []
 let objectParams = {};
 
 window.onChangeRecipient = async () => {
@@ -273,9 +272,7 @@ window.onChangeRecipient = async () => {
     paramsContainer.setAttribute("style", "display: none");
     paramsContainer.setAttribute("class", "namedActionParams");
 
-    namedParams = new Array(action.parameters.length).fill(null)
-
-    action.parameters.forEach((parameter, index) => {
+    action.parameters.forEach((parameter, _) => {
       const inputId = paramsContainerId + "_param_" + parameter;
       const paramLabel = document.createElement("label");
       paramLabel.innerText = parameter;
@@ -289,26 +286,12 @@ window.onChangeRecipient = async () => {
         try {
           const json = JSON.parse(value);
           if (typeof json === "object") {
-            if (contractContext.contract) {
-              objectParams[parameter] = Contract.parseTypedArgument(json);
-            } else {
-              namedParams[index] = Contract.parseTypedArgument(json);
-            }
+            objectParams[parameter] = Contract.parseTypedArgument(json);
           } else {
-            if (contractContext.contract) {
-              objectParams[parameter] = Contract.parseTypedArgument(value);
-            }
-            else {
-              namedParams[index] = Contract.parseTypedArgument(value);
-            }
-          }
-        } catch (e) {
-          if (contractContext.contract) {
             objectParams[parameter] = Contract.parseTypedArgument(value);
           }
-          else {
-            namedParams[index] = Contract.parseTypedArgument(value);
-          }
+        } catch (e) {
+          objectParams[parameter] = Contract.parseTypedArgument(value);
         }
       });
 
@@ -334,11 +317,11 @@ window.onClickAddRecipient = () => {
   const recipientList = document.querySelector("#recipients");
 
   if (namedAction != "") {
-    recipients.push({ address: recipientAddress, action: namedAction, args: Object.keys(objectParams).length > 0 ? objectParams : namedParams });
+    recipients.push({ address: recipientAddress, action: namedAction, args: Object.keys(objectParams).length > 0 ? objectParams : {} });
     if (recipientList.textContent != "") {
       recipientList.textContent = recipientList.textContent + "\n";
     }
-    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${JSON.stringify(Object.keys(objectParams).length > 0 ? objectParams : namedParams)}`;
+    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${JSON.stringify(Object.keys(objectParams).length > 0 ? objectParams : {})}`;
 
     document.querySelector("#namedActionsContainer").style.display = "none";
     document.querySelector("#namedActions").innerHTML = "<option></option>";
