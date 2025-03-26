@@ -1,3 +1,5 @@
+import { Contract, ContractManifest } from "./contract";
+
 export enum Curve {
   ed25519 = "ed25519",
   P256 = "P256",
@@ -76,16 +78,25 @@ type CrossValidationStamp = {
 };
 
 export type TransactionData = {
-  code: Uint8Array;
-  content: Uint8Array;
+  contract?: Contract;
+  content: string;
   ledger: Ledger;
   ownerships: Ownership[];
   recipients: Recipient[];
 };
 
 type Ledger = {
-  token: TokenLedger;
   uco: UcoLedger;
+  token: TokenLedger;
+};
+
+type UcoLedger = {
+  transfers: Transfer[];
+};
+
+type Transfer = {
+  amount: bigint;
+  to: Uint8Array;
 };
 
 type TokenLedger = {
@@ -93,25 +104,14 @@ type TokenLedger = {
 };
 
 type TokenTransfer = {
-  amount: bigint;
-  to: Uint8Array;
   tokenAddress: Uint8Array;
   tokenId: number;
-};
-
-type UcoLedger = {
-  transfers: UcoTransfer[];
-};
-
-type UcoTransfer = {
-  amount: bigint;
-  to: Uint8Array;
-};
+} & Transfer;
 
 export type Recipient = {
   address: Uint8Array;
-  action?: string;
-  args?: any[];
+  action: string;
+  args: object;
 };
 
 export type Ownership = {
@@ -190,19 +190,17 @@ export type Keypair = {
   privateKey: Uint8Array;
 };
 
-type Transfer = {
+export type TransferRPC = {
   to: string;
   amount: bigint;
 };
 
-type TokenTransferRPC = {
-  to: string;
-  amount: bigint;
+export type TokenTransferRPC = {
   tokenAddress: string;
   tokenId: number;
-};
+} & TransferRPC;
 
-type OwnershipRPC = {
+export type OwnershipRPC = {
   secret: string;
   authorizedKeys: {
     publicKey: string;
@@ -210,11 +208,16 @@ type OwnershipRPC = {
   }[];
 };
 
-type RecipientRPC = {
+export type RecipientRPC = {
   address: string;
   action?: string;
-  args?: any[];
+  args?: any[] | object;
 };
+
+export type ContractRPC = {
+  bytecode: string;
+  manifest: ContractManifest;
+}
 
 export type TransactionRPC = {
   version: number;
@@ -222,11 +225,11 @@ export type TransactionRPC = {
   type: UserTypeTransaction;
   data: {
     content: string;
-    code: string;
+    contract?: ContractRPC;
     ownerships: OwnershipRPC[];
     ledger: {
       uco: {
-        transfers: Transfer[];
+        transfers: TransferRPC[];
       };
       token: {
         transfers: TokenTransferRPC[];

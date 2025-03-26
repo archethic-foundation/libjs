@@ -5,7 +5,7 @@ import {
   HashAlgorithm,
   TransactionData,
   UserTypeTransaction,
-  TransactionRPC
+  TransactionRPC,
 } from "./types.js";
 import {
   concatUint8Arrays,
@@ -18,8 +18,9 @@ import {
 } from "./utils.js";
 import TE from "./typed_encoding.js";
 import { deriveAddress, deriveKeyPair, sign } from "./crypto.js";
+import { Contract } from "./contract.js";
 
-const VERSION = 3;
+export const VERSION = 4;
 
 function getTransactionTypeId(type: UserTypeTransaction): number {
   switch (type) {
@@ -62,9 +63,8 @@ export default class TransactionBuilder {
     this.type = type as UserTypeTransaction;
     this.address = new Uint8Array();
     this.data = {
-      content: new Uint8Array(),
-      code: new Uint8Array(),
       ownerships: [],
+      content: "",
       ledger: {
         uco: {
           transfers: []
@@ -89,9 +89,9 @@ export default class TransactionBuilder {
     if (!Object.keys(UserTypeTransaction).includes(type)) {
       throw new Error(
         "Transaction type must be one of " +
-          Object.keys(UserTypeTransaction)
-            .map((t) => `'${t}'`)
-            .join(", ")
+        Object.keys(UserTypeTransaction)
+          .map((t) => `'${t}'`)
+          .join(", ")
       );
     }
     this.type = type as UserTypeTransaction;
@@ -99,22 +99,19 @@ export default class TransactionBuilder {
   }
 
   /**
-   * Add smart contract code to the transcation
-   * @param {string} code Smart contract code
+   * Add smart contract's definition to the transcation
+   * @param {Contract} code Smart contract code
    */
-  setCode(code: string) {
-    this.data.code = new TextEncoder().encode(code);
+  setContract(contract: Contract) {
+    this.data.contract = contract;
     return this;
   }
 
   /**
    * Add a content to the transaction
-   * @param {String | Uint8Array} content Hosted content
+   * @param {String} content Hosted content
    */
-  setContent(content: string | Uint8Array) {
-    if (typeof content == "string") {
-      content = new TextEncoder().encode(content);
-    }
+  setContent(content: string) {
     this.data.content = content;
     return this;
   }
@@ -202,21 +199,21 @@ export default class TransactionBuilder {
    * Add recipient to the transaction
    * @param {string | Uint8Array} to Recipient address (hexadecimal or binary buffer)
    * @param {string} action The named action
-   * @param {any[]} args The arguments list for the named action (can only contain JSON valid data)
+   * @param {object} args The arguments for the named action
    */
-  addRecipient(to: string | Uint8Array, action?: string, args?: any[]) {
+  addRecipient(to: string | Uint8Array, action: string, args?: object) {
     const address = maybeHexToUint8Array(to);
 
-    if (action && typeof action != "string") {
+    if (typeof action != "string") {
       throw new Error("`action` must be a string");
     }
 
-    if (args && !Array.isArray(args)) {
-      throw new Error("`args` must be an array");
+    if (args && typeof args !== "object") {
+      throw new Error("`args` must be an object");
     }
 
-    if (action && !args) {
-      args = [];
+    if (!args) {
+      args = {};
     }
 
     this.data.recipients.push({ address, action, args });
@@ -277,17 +274,17 @@ export default class TransactionBuilder {
     if (!Object.keys(Curve).includes(curve)) {
       throw new Error(
         "Curve must be one of " +
-          Object.keys(Curve)
-            .map((t) => `'${t}'`)
-            .join(", ")
+        Object.keys(Curve)
+          .map((t) => `'${t}'`)
+          .join(", ")
       );
     }
     if (!Object.keys(HashAlgorithm).includes(hashAlgo)) {
       throw new Error(
         "Hash algorithm must be one of " +
-          Object.keys(HashAlgorithm)
-            .map((t) => `'${t}'`)
-            .join(", ")
+        Object.keys(HashAlgorithm)
+          .map((t) => `'${t}'`)
+          .join(", ")
       );
     }
 
@@ -338,7 +335,17 @@ export default class TransactionBuilder {
    * Generate the payload for the previous signature by encoding address,  type and data
    */
   previousSignaturePayload() {
-    const bufCodeSize = intToUint32Array(this.data.code.length);
+    let bufContract: Uint8Array;
+    if (this.data.contract != undefined) {
+      bufContract = concatUint8Arrays(
+        intToUint8Array(1),
+        intToUint32Array(this.data.contract.bytecode.byteLength),
+        this.data.contract.bytecode,
+        TE.serialize(this.data.contract.manifest)
+      )
+    } else {
+      bufContract = intToUint8Array(0)
+    }
 
     let contentSize = this.data.content.length;
 
@@ -359,11 +366,11 @@ export default class TransactionBuilder {
       return concatUint8Arrays(intToUint32Array(secret.byteLength), secret, concatUint8Arrays(...authorizedKeysBuffer));
     });
 
-    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function (transfer) {
+    const ucoTransfersBuffers = this.data.ledger.uco.transfers.map(function(transfer) {
       return concatUint8Arrays(transfer.to, intToUint64Array(transfer.amount));
     });
 
-    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function (transfer) {
+    const tokenTransfersBuffers = this.data.ledger.token.transfers.map(function(transfer) {
       const bufTokenId = intToUint8Array(transfer.tokenId);
       return concatUint8Arrays(
         transfer.tokenAddress,
@@ -375,30 +382,19 @@ export default class TransactionBuilder {
     });
 
     const recipientsBuffer = this.data.recipients.map(({ address, action, args }) => {
-      if (action == undefined || args == undefined) {
-        return concatUint8Arrays(
-          // 0 = unnamed action
-          Uint8Array.from([0]),
-          // address
-          address
-        );
-      } else {
-        const serializedArgs = args.map((arg) => TE.serialize(arg));
+      const serializedArgs = TE.serialize(args);
 
-        return concatUint8Arrays(
-          // 1 = named action
-          Uint8Array.from([1]),
-          // address
-          address,
-          // action
-          Uint8Array.from([action.length]),
-          new TextEncoder().encode(action),
-          // args count
-          Uint8Array.from([serializedArgs.length]),
-          // args
-          ...serializedArgs
-        );
-      }
+      return concatUint8Arrays(
+        // 1 = named action
+        intToUint8Array(1),
+        // address
+        address,
+        // action
+        Uint8Array.from([action.length]),
+        new TextEncoder().encode(action),
+        // args
+        serializedArgs
+      );
     });
 
     const bufOwnershipLength = intToUint8Array(this.data.ownerships.length);
@@ -410,10 +406,9 @@ export default class TransactionBuilder {
       intToUint32Array(VERSION),
       this.address,
       Uint8Array.from([getTransactionTypeId(this.type)]),
-      bufCodeSize,
-      this.data.code,
+      bufContract,
       bufContentSize,
-      this.data.content,
+      new TextEncoder().encode(this.data.content),
       Uint8Array.from([bufOwnershipLength.length]),
       bufOwnershipLength,
       ...ownershipsBuffer,
@@ -432,14 +427,17 @@ export default class TransactionBuilder {
   /**
    * JSON RPC API SEND_TRANSACTION
    */
-  toNodeRPC(): TransactionRPC {
+  async toNodeRPC(): Promise<TransactionRPC> {
     return {
       version: this.version,
       address: uint8ArrayToHex(this.address),
       type: this.type,
       data: {
-        content: new TextDecoder().decode(this.data.content),
-        code: new TextDecoder().decode(this.data.code),
+        content: this.data.content,
+        contract: this.data.contract ? {
+          bytecode: uint8ArrayToHex(this.data.contract?.bytecode),
+          manifest: this.data.contract?.manifest
+        } : undefined,
         ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
           return {
             secret: uint8ArrayToHex(secret),
@@ -496,8 +494,8 @@ export default class TransactionBuilder {
       version: this.version,
       type: this.type,
       data: {
-        content: new TextDecoder().decode(this.data.content),
-        code: new TextDecoder().decode(this.data.code),
+        content: this.data.content,
+        contract: this.data.contract,
         ownerships: this.data.ownerships.map(({ secret, authorizedPublicKeys }) => {
           return {
             secret: uint8ArrayToHex(secret),
