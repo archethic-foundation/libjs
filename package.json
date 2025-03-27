@@ -24,7 +24,7 @@
     "blockchain"
   ],
   "author": "Archethic Foundation <dev@archethic.net>",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/archethic-foundation/libjs/issues"
   },
