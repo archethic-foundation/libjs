@@ -162,8 +162,8 @@ export default class TransactionBuilder {
   addUCOTransfer(to: string | Uint8Array, amount: bigint) {
     to = maybeHexToUint8Array(to);
 
-    if (amount <= 0) {
-      throw new Error("UCO transfer amount must be a positive number");
+    if (amount < 0) {
+      throw new Error("UCO transfer amount cannot be negative");
     }
 
     this.data.ledger.uco.transfers.push({ to, amount });
