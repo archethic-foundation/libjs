@@ -60,14 +60,21 @@
               <option value="token">Token</option>
               <option value="data">Data</option>
               <option value="contract">Contract</option>
-              <option value="code_proposal">Code Proposal</option>
-              <option value="code_approval">Code Approval</option>
+            <!--  <option value="code_proposal">Code Proposal</option>
+              <option value="code_approval">Code Approval</option> -->
             </select>
           </div>
           <div class="box">
-            <label for="code">Enter your smart contract code</label>
-            <br />
-            <textarea id="code" cols="40" rows="5" class="textarea" placeholder="Smart contract code"></textarea>
+            <div class="columns">
+              <div class="column">
+                <label for="bytecode_upload">Choose your WASM smart contract bytecode</label>
+                <input type="file" id="bytecode_upload" />
+              </div>
+              <div class="column">
+                <label for="manifest_upload">Choose the manifest associated</label>
+                <input type="file" id="manifest_upload" />
+              </div>
+            </div>
           </div>
           <div class="box">
             <label for="code">Enter your content</label>

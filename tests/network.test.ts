@@ -103,7 +103,7 @@ describe("Network", () => {
     const tx = archethic.transaction.new();
     tx.setType("data");
     tx.setContent("content");
-    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065");
+    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065", "action");
 
     nock("http://127.0.0.1:4000", {
       reqheaders: {
@@ -116,7 +116,7 @@ describe("Network", () => {
         id: 1,
         method: "estimate_transaction_fee",
         params: {
-          transaction: tx.toNodeRPC()
+          transaction: await tx.toNodeRPC()
         }
       })
       // @ts-ignore
@@ -142,7 +142,7 @@ describe("Network", () => {
     const tx = archethic.transaction.new();
     tx.setType("data");
     tx.setContent("content");
-    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065");
+    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065", "action");
 
     nock("http://127.0.0.1:4000", {
       reqheaders: {
@@ -155,7 +155,7 @@ describe("Network", () => {
         id: 1,
         method: "send_transaction",
         params: {
-          transaction: tx.toNodeRPC()
+          transaction: await tx.toNodeRPC()
         }
       })
       // @ts-ignore
@@ -177,8 +177,8 @@ describe("Network", () => {
     const tx = archethic.transaction.new();
     tx.setType("data");
     tx.setContent("content");
-    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065");
-    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064");
+    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5065", "action");
+    tx.addRecipient("0000EE9DDC5229EBFFE197277058F11A41E22252D86A904C8CBCF38C1EFC42AB5064", "action");
 
     nock("http://127.0.0.1:4000", {
       reqheaders: {
@@ -191,7 +191,7 @@ describe("Network", () => {
         id: 1,
         method: "simulate_contract_execution",
         params: {
-          transaction: tx.toNodeRPC()
+          transaction: await tx.toNodeRPC()
         }
       })
       // @ts-ignore

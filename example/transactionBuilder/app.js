@@ -1,9 +1,12 @@
 import Archethic, { Utils, Crypto, Contract } from "@archethicjs/sdk";
 import { ExtendedTransactionBuilder } from "../../dist/transaction";
+import { Contract as ContractCode } from "../../dist/contract";
 
 const { parseBigInt, formatBigInt } = Utils;
 
-let file_content = "";
+let file_content = ""
+let bytecode = new Uint8Array();
+let manifest = {};
 
 let ucoTransfers = [];
 let tokenTransfers = [];
@@ -80,8 +83,7 @@ window.generate_transaction = async () => {
 
   const seed = document.querySelector("#seed").value;
 
-  const code = document.querySelector("#code").value;
-  if (code != "") {
+  if (bytecode.byteLength > 0) {
     const ownershipIndex = ownerships.findIndex(function (ownership) {
       return ownership.secret == seed;
     });
@@ -113,8 +115,11 @@ window.generate_transaction = async () => {
   txBuilder = archethic.transaction
     .new()
     .setType(document.querySelector("#type").value)
-    .setCode(document.querySelector("#code").value)
-    .setContent(content);
+    .setContent(content)
+
+  if (bytecode.byteLength > 0) {
+    txBuilder.setContract(new ContractCode(bytecode, manifest))
+  }
 
   ownerships.forEach(function (ownership) {
     const secretKey = Crypto.randomSecretKey();
@@ -245,18 +250,17 @@ window.onClickAddTokenTransfer = async () => {
   document.querySelector("#token_id").value = "0";
 };
 
-let namedParams = [];
+let namedParams = []
+let objectParams = {};
 
 window.onChangeRecipient = async () => {
   const address = document.querySelector("#recipient").value;
-  const contractCode = await archethic.network.getContractCode(address);
-  if (contractCode == "") {
-    return;
-  }
+  const contractContext = await archethic.network.getContractCode(address);
 
   document.querySelector("#namedActionsContainer").style.display = "block";
 
-  Contract.extractActionsFromContract(contractCode).forEach((action) => {
+  const actions = contractContext.contract ? contractContext.contract.getActions() : Contract.extractActionsFromContract(contractContext.code);
+  actions.forEach((action) => {
     const option = document.createElement("option");
     option.text = action.name;
     option.value = action.name;
@@ -269,6 +273,8 @@ window.onChangeRecipient = async () => {
     paramsContainer.setAttribute("style", "display: none");
     paramsContainer.setAttribute("class", "namedActionParams");
 
+    namedParams = new Array(action.parameters.length).fill(null)
+
     action.parameters.forEach((parameter, index) => {
       const inputId = paramsContainerId + "_param_" + parameter;
       const paramLabel = document.createElement("label");
@@ -280,7 +286,30 @@ window.onChangeRecipient = async () => {
       paramInput.setAttribute("class", "input");
       paramInput.addEventListener("change", function (e) {
         const value = e.target.value;
-        namedParams[index] = Contract.parseTypedArgument(value);
+        try {
+          const json = JSON.parse(value);
+          if (typeof json === "object") {
+            if (contractContext.contract) {
+              objectParams[parameter] = Contract.parseTypedArgument(json);
+            } else {
+              namedParams[index] = Contract.parseTypedArgument(json);
+            }
+          } else {
+            if (contractContext.contract) {
+              objectParams[parameter] = Contract.parseTypedArgument(value);
+            }
+            else {
+              namedParams[index] = Contract.parseTypedArgument(value);
+            }
+          }
+        } catch (e) {
+          if (contractContext.contract) {
+            objectParams[parameter] = Contract.parseTypedArgument(value);
+          }
+          else {
+            namedParams[index] = Contract.parseTypedArgument(value);
+          }
+        }
       });
 
       paramsContainer.appendChild(paramLabel);
@@ -305,11 +334,11 @@ window.onClickAddRecipient = () => {
   const recipientList = document.querySelector("#recipients");
 
   if (namedAction != "") {
-    recipients.push({ address: recipientAddress, action: namedAction, args: namedParams });
+    recipients.push({ address: recipientAddress, action: namedAction, args: Object.keys(objectParams).length > 0 ? objectParams : namedParams });
     if (recipientList.textContent != "") {
       recipientList.textContent = recipientList.textContent + "\n";
     }
-    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${namedParams}`;
+    recipientList.textContent += `${recipientAddress} - ${namedAction} - ${JSON.stringify(Object.keys(objectParams).length > 0 ? objectParams : namedParams)}`;
 
     document.querySelector("#namedActionsContainer").style.display = "none";
     document.querySelector("#namedActions").innerHTML = "<option></option>";
@@ -355,7 +384,7 @@ window.sendTransaction = async () => {
         if (error.data.data) {
           errMsg += `<p style="padding-left: 20px">(${error.data.data.code}) ${error.data.data.message}</p>`;
         } else {
-          errMsg += `<p style="padding-left: 20px">${error.data.message}</p>`;
+          errMsg += `<p style="padding-left: 20px">${JSON.stringify(error.data.message)}</p>`;
         }
       }
 
@@ -386,6 +415,26 @@ document.querySelector("#content_upload").addEventListener("change", (event) => 
   const fr = new FileReader();
   fr.onload = function (e) {
     file_content = new Uint8Array(e.target.result);
+  };
+  fr.readAsArrayBuffer(fileList[0]);
+});
+
+document.querySelector("#bytecode_upload").addEventListener("change", (event) => {
+  const fileList = event.target.files;
+
+  const fr = new FileReader();
+  fr.onload = function (e) {
+    bytecode = new Uint8Array(e.target.result);
+  };
+  fr.readAsArrayBuffer(fileList[0]);
+});
+
+document.querySelector("#manifest_upload").addEventListener("change", (event) => {
+  const fileList = event.target.files;
+
+  const fr = new FileReader();
+  fr.onload = function (e) {
+    manifest = JSON.parse(new TextDecoder().decode(e.target.result))
   };
   fr.readAsArrayBuffer(fileList[0]);
 });
