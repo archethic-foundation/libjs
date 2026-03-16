@@ -7,7 +7,10 @@ import * as Crypto from "./crypto.js";
 import { AWCEndpoint, Endpoint, EndpointFactory } from "./endpoint.js";
 import Network from "./network.js";
 import Transaction from "./transaction.js";
+import TokenManager from "./token.js";
+import NFTManager from "./nft.js";
 import * as Contract from "./contract.js";
+import ContractManager from "./contract_manager.js";
 import * as Utils from "./utils.js";
 
 export {
@@ -18,7 +21,9 @@ export {
   Crypto,
   Keychain,
   Utils,
-  Contract
+  Contract,
+  TokenManager,
+  NFTManager
 };
 
 export default class Archethic {
@@ -28,6 +33,9 @@ export default class Archethic {
   transaction: Transaction;
   account: Account;
   network: Network;
+  contract: ContractManager;
+  token: TokenManager;
+  nft: NFTManager;
 
   /**
    * @param endpoint if undefined, endpoint will be resolved using ArchethicWalletClient.
@@ -40,6 +48,9 @@ export default class Archethic {
     this.account = new Account(this);
     this.network = new Network(this);
     this.transaction = new Transaction(this);
+    this.contract = new ContractManager(this);
+    this.token = new TokenManager(this);
+    this.nft = new NFTManager(this);
     this.rpcNode = new NodeRPCClient(this);
   }
 

@@ -76,7 +76,7 @@ export async function newContractTransaction(
     .addOwnership(encryptedSecret, authorizedKeys);
 
   if (txData) {
-    if (txData.ledger && txData.ledger.uco) txData.ledger.uco.transfers.forEach((t) => tx.addUCOTransfer(t.to, t.amount));
+    if (txData.ledger && txData.ledger.nug) txData.ledger.nug.transfers.forEach((t) => tx.addNUGTransfer(t.to, t.amount));
     if (txData.ledger && txData.ledger.token) txData.ledger.token.transfers.forEach((t) => tx.addTokenTransfer(t.to, t.amount, t.tokenAddress, t.tokenId));
     if (txData.recipients) txData.recipients.forEach((r2) => tx.addRecipient(r2.address, r2.action, r2.args));
     if (txData.content) tx.setContent(txData.content);
@@ -90,10 +90,18 @@ export function updateContractTransaction(
   contractAddress: string,
   contract: Contract
 ): ExtendedTransactionBuilder {
+  // Convert bytecode Uint8Array to hex string for the upgrade action
+  const bytecodeHex = Array.from(contract.bytecode)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
   return archethic.transaction
     .new()
     .setType("transfer")
-    .addRecipient(contractAddress, "upgrade", contract);
+    .addRecipient(contractAddress, "upgrade", {
+      bytecode: bytecodeHex,
+      manifest: contract.manifest
+    });
 }
 
 export class Contract {
