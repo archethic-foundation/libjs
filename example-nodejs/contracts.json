@@ -1,0 +1,81 @@
+{
+  "contract": {
+    "seed": "alice",
+    "genesisAddress": "0000d45b87d5a6b4b7a7d19e2cb4b85677784e58d8c37ea0c4d723ef8c8616484185",
+    "txAddress": "00005c36c10ae1342b1df74513af6bedbc124ed514f950e4e847c17d0459f6c05efe",
+    "manifest": {
+      "abi": {
+        "state": {
+          "counter": "i32"
+        },
+        "functions": {
+          "inc": {
+            "type": "action",
+            "triggerType": "transaction",
+            "input": {
+              "value": "u32"
+            }
+          }
+        }
+      }
+    },
+    "deployedAt": "2026-03-15T17:58:20.821Z"
+  },
+  "counterv2": {
+    "seed": "bob",
+    "genesisAddress": "0000e2f5813f82dafd1aaa8cdf53c7e5925d78b89a9876a96f1ea2328e8edec4428c",
+    "txAddress": "00008e37951e9500c5520b7935e37a82f10e5060ebf4eb0005f291c1ae337fa96b6c",
+    "manifest": {
+      "abi": {
+        "state": {
+          "counter": "i32"
+        },
+        "functions": {
+          "inc": {
+            "type": "action",
+            "triggerType": "transaction",
+            "input": {
+              "value": "u32"
+            }
+          },
+          "getCounter": {
+            "type": "publicFunction",
+            "input": "null",
+            "output": "i32"
+          }
+        }
+      }
+    },
+    "deployedAt": "2026-03-15T19:59:16.333Z"
+  },
+  "counterv3": {
+    "seed": "charlie",
+    "genesisAddress": "0000bfe2cbda76933c027da7485e87169b14f69367a4dfa9a48daa8b9f5825f1ba12",
+    "txAddress": "0000706199622215e2b6dddbd9c309c26fa13841d0f811a64d458d47aeb971fd89f3",
+    "manifest": {
+      "upgradeOpts": {
+        "from": "0000bfe2cbda76933c027da7485e87169b14f69367a4dfa9a48daa8b9f5825f1ba12"
+      },
+      "abi": {
+        "state": {
+          "counter": "i32"
+        },
+        "functions": {
+          "inc": {
+            "type": "action",
+            "triggerType": "transaction",
+            "input": {
+              "value": "u32"
+            }
+          },
+          "getCounter": {
+            "type": "publicFunction",
+            "input": "null",
+            "output": "i32"
+          }
+        }
+      }
+    },
+    "deployedAt": "2026-03-16T08:43:36.235Z"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "Alice": {
+    "seed": "alice",
+    "index": 0,
+    "curve": "ed25519",
+    "hash": "sha256",
+    "address": "0000d45b87d5a6b4b7a7d19e2cb4b85677784e58d8c37ea0c4d723ef8c8616484185",
+    "publicKey": "0001a86bd7ed1a3a6df57dd08092a7122cfce0082ec027de7ec5e4233f0251c8ab67"
+  },
+  "Bob": {
+    "seed": "bob",
+    "index": 0,
+    "curve": "ed25519",
+    "hash": "sha256",
+    "address": "0000e2f5813f82dafd1aaa8cdf53c7e5925d78b89a9876a96f1ea2328e8edec4428c",
+    "publicKey": "0001cde62ab3289bc855cf9efeee0ce46be854a7ffd1f0a78bb0ba01477305215500"
+  },
+  "Charlie": {
+    "seed": "charlie",
+    "index": 0,
+    "curve": "ed25519",
+    "hash": "sha256",
+    "address": "0000bfe2cbda76933c027da7485e87169b14f69367a4dfa9a48daa8b9f5825f1ba12",
+    "publicKey": "00016398be3106898e41dd76e0b7f7ed598f59fd6f1ea58494a9793b70d168c10324"
+  }
+}
